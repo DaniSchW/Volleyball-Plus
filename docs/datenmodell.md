@@ -1,6 +1,6 @@
 # Datenmodell – Volleyball Plus
 
-MySQL 8 / MariaDB ≥ 10.6, InnoDB, `utf8mb4_unicode_ci` (E-Mail-Vergleiche damit automatisch ohne Groß-/Kleinschreibung). Laravel-Migrationen. Konventionen:
+MySQL 8, InnoDB, `utf8mb4_unicode_ci` (E-Mail-Vergleiche damit automatisch ohne Groß-/Kleinschreibung). Laravel-Migrationen. Konventionen:
 
 - Primärschlüssel `id` als **ULID** (`CHAR(26)`, zeitlich sortierbar, nicht erratbar in URLs).
 - **Jede Mandantentabelle** hat `tenant_id CHAR(26) NOT NULL` und einen Unique-Index `(tenant_id, id)`. Fremdschlüssel innerhalb eines Mandanten sind **zusammengesetzt**: `(tenant_id, x_id) → x(tenant_id, id)` – InnoDB verhindert damit mandantenübergreifende Verweise. In der Anwendung filtert zusätzlich ein globaler Eloquent-Scope jede Abfrage auf den aktuellen Mandanten (MySQL hat keine Row-Level-Security).
@@ -92,9 +92,26 @@ Trennung zwischen **Account** (wer sich einloggt) und **Person** (Spielerprofil 
 | person_id | → person | |
 | tenant_member_id | → tenant_member | |
 | relation | enum `self`, `guardian` | `guardian` = Eltern-Account |
-| can_edit_profile | bool | bei Kind mit Eltern: nur `guardian` = true (alleinige Befugnis) |
+| ended_at | datetime null | Ende der Elternverknüpfung (automatisch zum 18. Geburtstag) |
 
 Unique `(person_id, tenant_member_id)`. Ein Account hat höchstens eine `self`-Person pro Abteilung, kann aber mehrere Kinder (`guardian`) haben. Die Startseite zeigt Termine aller verknüpften Personen.
+
+### 🏢 `minor_permission` – was das Kind selbst darf (von den Eltern festgelegt)
+| Feld | Typ | Hinweis |
+|---|---|---|
+| person_id | → person (unique) | das minderjährige Kind |
+| own_login | bool | Kind darf einen eigenen Account (`relation = self`) haben |
+| can_rsvp | bool | eigene Zu-/Absagen |
+| can_chat | bool | Chat lesen/schreiben |
+| can_take_tasks | bool | Aufgaben/Helferdienste übernehmen |
+| can_vote_polls | bool | an Umfragen teilnehmen |
+| editable_profile_fields | JSON | Liste der Profilfelder, die das Kind selbst ändern darf (z. B. `["avatar","phone"]`) |
+| updated_by | → tenant_member | Elternteil |
+
+Regeln:
+- Eine Person gilt als minderjährig, solange eine aktive `guardian`-Verknüpfung besteht; dafür ist das Geburtsdatum Pflicht.
+- Ohne Freigabe in `minor_permission` darf nur das Elternteil handeln; die Eltern haben immer die alleinige Entscheidung über das Profil.
+- **Zum 18. Geburtstag** setzt ein täglicher Job `ended_at` an allen `guardian`-Verknüpfungen, löscht `minor_permission` und schickt Kind und Eltern eine Mail. Hat das Kind noch keinen eigenen Login, erhält es eine Einladung per Mail (sofern eine Adresse hinterlegt ist).
 
 ### 🏢 `referee_license` – Schiedsrichter-Lizenz
 `person_id`, `level` (text, z. B. „D“, „C“, „BK“), `license_number` null, `valid_until` date. Wird Trainern im Kader angezeigt, inkl. Hinweis bei Ablauf < 60 Tage.
@@ -126,6 +143,9 @@ Vorlage beim Anlegen eines Mandanten: Standard-Ligabaum (1. BL … Kreisliga), f
 | default_max_participants | smallint null | Vorgabe für neue Trainings |
 | cross_nomination_mode | enum `immediately`, `hours_before_start`, `after_rsvp_deadline` | **Team-Einstellung (Trainer):** ab wann Quernominierte standardmäßig zusagen dürfen |
 | cross_nomination_hours | smallint null | bei `hours_before_start`, z. B. 24 |
+| decline_reason_required | bool | **Team-Einstellung (Trainer):** Absagegrund ist Pflicht (gilt für `no`; optional auch für `maybe`) |
+| maybe_reason_required | bool | Begründung auch bei „Vielleicht“ Pflicht |
+| reasons_visible_to_teammates | bool | Mitspieler sehen Absagegründe; Trainer/Admin sehen sie immer |
 | color | text | Akzentfarbe in der UI |
 | archived_at | datetime null | |
 
@@ -150,15 +170,16 @@ Unique `(team_id, person_id, role)`. Ein Spieler (auch Erwachsene) kann so mehre
 | role | enum `player`, `trainer`, `organizer`, `guardian` | Rolle nach Beitritt; `guardian` = Elternteil wird mit `person_id` verknüpft |
 | person_id | → person null | bei `personal`: vorhandenes Profil (z. B. Kind), mit dem verknüpft wird |
 | email | varchar null | bei `personal` |
-| requires_approval | bool | Beitritt erst nach Freigabe durch Trainer/Betreuer |
 | max_uses | smallint null | null = unbegrenzt |
 | use_count | smallint | |
 | expires_at | datetime null | |
 | revoked_at | datetime null | |
 | created_by | → tenant_member | |
 
-### 🏢 `team_join_request` – Beitritte über Links
-`team_invitation_id`, `team_id`, `tenant_member_id`, `person_id`, `status` enum `pending`, `approved`, `rejected`, `decided_by`, `decided_at`. Bei `requires_approval = false` sofort `approved`.
+Wer den Link nutzt, ist **sofort Mitglied** im Team (keine Freigabe). Trainer können Mitglieder jederzeit wieder entfernen und den Link widerrufen.
+
+### 🏢 `team_invitation_use` – Protokoll der Beitritte
+`team_invitation_id`, `tenant_member_id`, `person_id`, `created_at` – wer ist über welchen Link beigetreten.
 
 ### 🏢 `cross_nomination` – Quernominierung (dauerhaft)
 | Feld | Typ | Hinweis |
@@ -220,9 +241,9 @@ Wird beim Erzeugen des Termins aus Teams/Gruppen/Quernominierungen befüllt und 
 | Feld | Typ | Hinweis |
 |---|---|---|
 | event_id, person_id | | unique |
-| status | enum `yes`, `no`, `maybe` | `maybe` optional (offene Frage 5) |
+| status | enum `yes`, `no`, `maybe` | Zusage / Absage / Vielleicht (zählt nicht als Zusage für Limit und Mindestteilnehmer) |
 | as_position | enum `position` null | Position, für die zugesagt wurde (Positions-Soll) |
-| comment | text null | Absagegrund |
+| reason | text null | Absage-/Vielleicht-Grund; Pflicht laut Team-Einstellung, Sichtbarkeit für Mitspieler laut `team.reasons_visible_to_teammates` |
 | responded_by | → tenant_member | wer geklickt hat (Spieler selbst oder Elternteil) |
 | responded_at | datetime | |
 
@@ -349,7 +370,8 @@ erDiagram
   person ||--o{ team_membership : spielt_in
   team ||--o{ team_membership : hat
   team ||--o{ team_invitation : einladungslinks
-  team_invitation ||--o{ team_join_request : beitritte
+  team_invitation ||--o{ team_invitation_use : beitritte
+  person ||--o| minor_permission : rechte_kind
   league ||--o{ team : spielklasse
   league ||--o{ league : unterliga
   team ||--o{ cross_nomination : laedt_ein

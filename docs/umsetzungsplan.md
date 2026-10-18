@@ -23,7 +23,7 @@ Status: **Vorschlag zur Freigabe** – Rahmenbedingung: Hosting mit **PHP und SQ
  │     Frist-Erinnerungen, SSL-Selbstprüfung          │
  └───────┬───────────────────────┬────────────────────┘
          ▼                       ▼
-   MySQL 8 / MariaDB ≥ 10.6   storage/ (außerhalb Document Root)
+   MySQL 8                    storage/ (außerhalb Document Root)
                               Logos, Profilbilder
          │
          └── Mail: PHP mail() (Standard) oder SMTP (optional)
@@ -36,8 +36,8 @@ Gebaut wird in GitHub Actions (Composer-Install, Frontend-Build, Tests). Das fer
 
 | Bereich | Wahl | Begründung |
 |---|---|---|
-| Backend | **PHP ≥ 8.2, Laravel 12** (nur als API) | läuft auf Standard-Webhosting; Migrationen, Policies, Mail, Queue, Scheduler, Übersetzungen eingebaut |
-| Datenbank | MySQL 8 oder MariaDB ≥ 10.6, InnoDB, `utf8mb4` | auf praktisch jedem Hosting verfügbar |
+| Backend | **PHP 8.5, Laravel 13** (nur als API) | läuft auf Standard-Webhosting; Migrationen, Policies, Mail, Queue, Scheduler, Übersetzungen eingebaut |
+| Datenbank | MySQL 8, InnoDB, `utf8mb4` | Vorgabe Hosting |
 | Warteschlange | Laravel-Queue mit `database`-Treiber, abgearbeitet per Cron (`schedule:run` → `queue:work --stop-when-empty`) | kein Redis, keine dauerhaft laufenden Prozesse nötig |
 | Mail | Laravel-Mailer: Standard **`sendmail`/PHP-`mail()`**, umschaltbar auf **SMTP** in den Einstellungen | Vorgabe Abteilung |
 | Push | `minishlink/web-push` (VAPID) | kostenlos; Android/Desktop und iOS ≥ 16.4 als installierte PWA |
@@ -50,7 +50,7 @@ Gebaut wird in GitHub Actions (Composer-Install, Frontend-Build, Tests). Das fer
 | Kalender | ICS-Feed pro Person (Token-URL) | kostenloser Kalender-Sync |
 | Tests | PHPUnit/Pest (API, Mandantentrennung, Rechte), Vitest, Playwright (Mobile) | |
 
-**Mindestanforderungen an das Hosting** (bitte prüfen, siehe Abschnitt 9): PHP ≥ 8.2 mit `openssl`, `pdo_mysql`, `mbstring`, `gd` oder `imagick`, `gmp` oder `bcmath` (für Web-Push), `curl`; frei wählbarer Document Root (auf `public/`); Cronjob im Minutentakt; SSL-Zertifikat.
+**Anforderungen an das Hosting:** PHP 8.5 mit `openssl`, `pdo_mysql`, `mbstring`, `gd` oder `imagick`, `gmp` oder `bcmath` (für Web-Push), `curl`; SSL-Zertifikat. Bevorzugt: Document Root auf `backend/public/` und Cronjob im Minutentakt. **Ausweichlösungen**, falls das nicht geht: (a) eine `.htaccess` im Hauptverzeichnis leitet alle Anfragen nach `public/` um und sperrt den Rest; (b) ohne Cron ruft ein externer Cron-Dienst eine geheime URL `/cron/<token>` auf, notfalls werden fällige Jobs am Ende normaler Seitenaufrufe abgearbeitet.
 
 ## 3. Mandantenfähigkeit (Multi-Tenant)
 
@@ -88,7 +88,7 @@ MySQL kennt keine Row-Level-Security. Die Trennung wird deshalb so umgesetzt:
 | Trainer | Team (mehrere möglich) | Termine, Team-Einstellungen (inkl. Quernominierung), Einladungslinks, Trainingsgruppen, Quoten & Statistik, Info-Notizen, Teamkasse |
 | Betreuer/Organisator | Team | Termine & Aufgaben organisieren, Teamkasse, Umfragen, Einladungslinks – **keine** Quoten/Statistik |
 | Spieler | Team | eigene Zu-/Absagen, eigene Quote, Chat, Aufgaben, Umfragen |
-| Elternteil | an Kind-Profil gekoppelt | handelt stellvertretend für das Kind (Zu-/Absage, Aufgaben, Chat), alleinige Befugnis über das Kinderprofil |
+| Elternteil | an Kind-Profil gekoppelt | handelt stellvertretend für das Kind (Zu-/Absage, Aufgaben, Chat), alleinige Befugnis über das Kinderprofil, legt fest, was das Kind selbst darf; endet automatisch mit dem 18. Geburtstag |
 
 Rollen sind kombinierbar (Trainer in Herren 1, Spieler in Herren 2). Ein Erwachsener kann mehreren Teams angehören.
 
@@ -97,13 +97,15 @@ Rollen sind kombinierbar (Trainer in Herren 1, Spieler in Herren 2). Ein Erwachs
 - **Startseite:** anstehende Termine aller eigenen Teams (bzw. der Kinder), Infobereich darüber, direkte Zu-/Absage-Buttons. Cursor-Pagination über `(starts_at, id)`, nachgeladen per `IntersectionObserver` (kein „Weiter“-Button).
 - **Navigation:** Kopfzeile mit Abteilungslogo, Ausklappmenü oben rechts, keine Tab-Leiste.
 - **Serientermine:** Serie mit Wiederholungsregel (RRULE, PHP-Bibliothek `rlanvin/php-rrule`); der Cron erzeugt Einzeltermine für ein rollierendes Fenster von 6 Monaten. Einzeltermine sind einzeln änderbar/absagbar.
-- **Einladungslinks zum Team:** Trainer/Betreuer/Admin erzeugen einen Link (`https://<domain>/<slug>/join/<token>`), optional mit Ablaufdatum, maximaler Nutzungszahl, vorgegebener Rolle und „Freigabe durch Trainer erforderlich“. Ablauf: Link öffnen → Name + E-Mail eingeben (oder bestehendes Konto) → Magic Link → Profil vervollständigen → Mitglied im Team (oder Anfrage in der Freigabeliste). Zusätzlich persönliche Einladungen an eine bestimmte E-Mail, z. B. damit ein Elternteil mit dem Profil des Kindes verknüpft wird. Links sind jederzeit widerrufbar, als QR-Code anzeigbar und per Messenger teilbar.
+- **Einladungslinks zum Team:** Trainer/Betreuer/Admin erzeugen einen Link (`https://<domain>/<slug>/join/<token>`), optional mit Ablaufdatum, maximaler Nutzungszahl und vorgegebener Rolle. Ablauf: Link öffnen → Name + E-Mail eingeben (oder bestehendes Konto) → Magic Link → Profil vervollständigen → **automatisch Mitglied im Team** (keine Freigabe nötig). Zusätzlich persönliche Einladungen an eine bestimmte E-Mail, z. B. damit ein Elternteil mit dem Profil des Kindes verknüpft wird. Links sind jederzeit widerrufbar, als QR-Code anzeigbar und per Messenger teilbar.
 - **Quernominierung:**
   - Nur zwischen **Erwachsenenteams**, nur von unten nach oben in der Hierarchie, nur passend zum Team-Geschlecht (Herren ↔ männlich, Damen ↔ weiblich, Mixed ↔ beide). Jugendteams sind von der Hierarchie und der Spielerauswahl ausgenommen; maßgeblich ist, in welchen Teams der Spieler eingeteilt ist, nicht sein Alter.
   - Pro Spieler vom Trainer aktivierbar.
   - **Team-Einstellung** (Trainer): Standard, ab wann Quernominierte zusagen dürfen – z. B. „sofort“, „X Stunden vor Trainingsbeginn“ oder „nach Ablauf der Rückmeldefrist der Stammspieler“.
   - **Im einzelnen Termin überschreibbar** (eigener Zeitpunkt).
   - Keine Warteliste: Ist das Maximum erreicht, ist die Zusage geschlossen; sagt jemand ab, wird der Platz wieder frei.
+- **Zu-/Absage:** Zusage, Absage oder Vielleicht. „Vielleicht“ zählt nicht für Teilnehmermaximum und Mindestteilnehmer. In den **Team-Einstellungen** legt der Trainer fest, ob ein Grund bei Absage (und optional bei Vielleicht) Pflicht ist und ob Mitspieler die Gründe sehen; Trainer und Admin sehen sie immer, Betreuer nur, wenn die Gründe für Mitspieler freigegeben sind.
+- **Minderjährige:** Eltern legen pro Kind fest, was es selbst darf (eigener Login, Zu-/Absage, Chat, Aufgaben, Umfragen, einzelne Profilfelder). Alles andere erledigt das Elternteil. Zum 18. Geburtstag löst ein täglicher Job die Verknüpfung automatisch, das Kind erhält volle Rechte über sein Profil; beide werden per Mail informiert.
 - **Zusage-Prüfung** (in einer DB-Transaktion mit `SELECT … FOR UPDATE` auf den Termin, damit das Limit nicht überbucht wird): Frist → Freigabezeitpunkt für Quernominierte → Teilnehmermaximum → (Ausbaustufe) Positions-Soll.
 - **Mindestteilnehmerzahl:** pro Team einstellbar; Termin wird gelb markiert, solange die Zusagen darunter liegen.
 - **Hierarchie:** Rang aus Liga (Ligabaum, vom Admin pflegbar) und Reihenfolge innerhalb derselben Liga.
@@ -149,7 +151,7 @@ volleyball-plus/
 ## 9. Entscheidungen & offene Punkte
 
 **Entschieden:**
-- Hosting PHP + SQL → Laravel + MySQL/MariaDB, Cron statt Hintergrundprozessen, Chat per Polling.
+- Hosting PHP 8.5 + MySQL → Laravel 13 + MySQL 8, Cron statt Hintergrundprozessen, Chat per Polling.
 - Jugendteams sind von Hierarchie/Spielerauswahl ausgenommen; Alter bzw. Geburtsdatum ist optional; maßgeblich ist die Team-Einteilung.
 - Erwachsene können mehreren Teams angehören.
 - Quernominierung: Standard-Zeitpunkt in den Team-Einstellungen, im Termin überschreibbar, keine Warteliste.
@@ -158,10 +160,11 @@ volleyball-plus/
 - Statistik-Zeitraum frei eingrenzbar.
 - Einladungslinks für Spieler zum Team.
 - Mail standardmäßig über PHP `mail()`, optional SMTP.
+- Zu-/Absage mit „Vielleicht“; Pflicht-Grund und Sichtbarkeit der Gründe für Mitspieler stellt der Trainer pro Team ein.
+- Kinder werden mit 18 automatisch vom Elternkonto gelöst; Eltern bestimmen, was das Kind selbst einstellen darf.
+- Über einen Einladungslink ist man automatisch im Team.
 - Entwicklung auf `main`.
 
-**Noch offen:**
-1. **Hosting-Details:** Anbieter/Tarif? PHP-Version, MySQL oder MariaDB (Version)? Lässt sich der Document Root auf einen Unterordner setzen? Gibt es Cronjobs (minütlich) und SSH-Zugang? Davon hängt die Deploy-Variante ab.
-2. **Zu-/Absage-Status:** nur Zu-/Absage, oder auch „Vielleicht“? Absagegrund Pflicht, optional oder gar nicht?
-3. **Kinder-Login:** Dürfen Minderjährige einen eigenen Login haben (Chat, eigene Zusagen), während die Eltern über das Profil entscheiden? Automatische Ablösung vom Elternkonto mit 18?
-4. **Beitritt per Einladungslink:** standardmäßig sofort Mitglied, oder standardmäßig Freigabe durch den Trainer?
+**Noch offen (blockiert nicht, Ausweichlösung siehe Abschnitt 2):**
+1. Lässt sich beim Hosting der Document Root auf einen Unterordner setzen?
+2. Gibt es Cronjobs im Minutentakt und SSH-Zugang (für das Hochladen per `rsync` statt FTP)?

@@ -9,6 +9,6 @@ Mandantenfähig, zweisprachig (DE/EN), Login per Magic Link.
 - [Technischer Umsetzungsplan](docs/umsetzungsplan.md) – Architektur, Stack, Phasen, offene Fragen
 - [Datenmodell](docs/datenmodell.md) – Tabellen, Mandantentrennung, Indizes
 
-Technik: PHP 8.2+ (Laravel, API) · MySQL/MariaDB · React-PWA. Läuft auf klassischem Webhosting.
+Technik: PHP 8.5 (Laravel 13, API) · MySQL 8 · React-PWA. Läuft auf klassischem Webhosting.
 
 Status: Planungsphase – Implementierung startet nach Freigabe des Plans.

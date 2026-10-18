@@ -143,11 +143,12 @@ volleyball-plus/
 | **2 – Termine & Zu-/Absage (MVP)** ✅ | Terminarten, Serien, Fristen, Startseite mit Infinite Scroll, Info-Termine, abteilungsweite Termine, drei Logo-Ebenen, Wegbeschreibung, Infobereich, ICS-Feed | **erste produktiv nutzbare Version** |
 | **3 – Benachrichtigungen** ✅ | Web-Push, iOS-Installationshinweis, Frist-Erinnerungen, Einstellungen pro Kategorie | |
 | **4 – Training** ✅ | Teilnehmermaximum, Mindestteilnehmer (gelb), Trainingsgruppen, Ligabaum, Hierarchie, Geschlechtsregel, Quernominierung mit Team-Standard & Termin-Override, SR-Lizenz, Positionsanzeige | |
-| **5 – Statistik** | Quoten mit Sichtbarkeitsregeln, frei wählbarer Zeitraum, Balkendiagramm, Helfer-Statistik | |
-| **6 – Aufgaben, Helferdienste, Umfragen** | Aufgaben zu Terminen, Helfertermine, Umfragen pro Team und teamübergreifend | |
-| **7 – Chat** | Teamchats, Admin-Chats mit freier Auswahl, Themen/Unterkanäle, Polling + Push | |
-| **8 – Kasse & Hallen** | Teamkassen, Abteilungskasse, Admin-Gesamtübersicht; Hallen, Zeiten, Belegungsplan mit Konfliktwarnung | |
-| **9 – Ausbau** | positionsbasierte Nominierung, Datenexport, Feinschliff | |
+| **5 – Spielplan-Import** | Spieltage je Mannschaft aus Kalenderdatei importieren: **.ics** (iCalendar) und **CSV** (z. B. Spielplan-Export des Verbands/SAMS); Vorschau mit Auswahl, Gegner automatisch anlegen, Heim/Auswärts und Halle erkennen, erneuter Import aktualisiert statt doppelt anzulegen | Saison-Spielplan in Minuten statt Handarbeit |
+| **6 – Statistik** | Quoten mit Sichtbarkeitsregeln, frei wählbarer Zeitraum, Balkendiagramm, Helfer-Statistik | |
+| **7 – Aufgaben, Helferdienste, Umfragen** | Aufgaben zu Terminen, Helfertermine, Umfragen pro Team und teamübergreifend | |
+| **8 – Chat** | Teamchats, Admin-Chats mit freier Auswahl, Themen/Unterkanäle, Polling + Push | |
+| **9 – Kasse & Hallen** | Teamkassen, Abteilungskasse, Admin-Gesamtübersicht; Hallen, Zeiten, Belegungsplan mit Konfliktwarnung | |
+| **10 – Ausbau** | positionsbasierte Nominierung, Datenexport, Feinschliff | |
 
 ## 9. Entscheidungen & offene Punkte
 
@@ -179,4 +180,5 @@ volleyball-plus/
 - Quernominierte Gäste: nur zu Team-Trainings (nicht Spiele/Gruppentrainings), Absage jederzeit, Zusage ab Freigabe; bei Freigabe „ab Rückmeldefrist“ bis Trainingsbeginn. Trainer/Admins verwalten die Gäste, Betreuer sehen sie.
 - Trainingsgruppen: Gruppentrainings laden nur die Gruppe plus Trainer und Betreuer ein.
 - Schiedsrichter-Lizenz: trägt die Person selbst (Kinder: Eltern) oder ein Admin ein; Trainer sehen sie im Kader mit Ablaufhinweis (60 Tage).
+- Spielplan-Import (Phase 5, nachträglich aufgenommen): je Mannschaft, durch Trainer, Betreuer und Admins. Formate .ics und CSV. Ablauf: Datei hochladen → Vorschau aller erkannten Spiele (Datum/Uhrzeit, Gegner, Heim/Auswärts, Halle/Adresse) → Spiele abwählen oder korrigieren → importieren. Gegner werden über den Namen zugeordnet oder neu angelegt. Jedes importierte Spiel merkt sich seine Herkunft (UID aus der .ics bzw. Spielnummer/Datum+Gegner aus der CSV); ein erneuter Import der aktualisierten Datei ändert Zeit und Ort bestehender Spiele (mit Benachrichtigung „Termin geändert“) statt sie doppelt anzulegen. Spiele, die in der neuen Datei fehlen, werden nur angezeigt, nicht automatisch abgesagt. Der Import läuft im Webaufruf (kleine Dateien, max. 1 MB), ohne Hintergrundprozess.
 - Benachrichtigungen (Phase 3): Kategorien neue Termine, Änderungen/Absagen, Erinnerung, neue Infos. Standard: Push für alles, E-Mail nur bei Änderungen/Absagen; pro Kategorie und Abteilung im Profil einstellbar. Erinnerung einmal 24 h vor der Frist (sonst vor Beginn) an alle ohne Antwort. Eine neue Trainingsreihe wird einmal gemeldet, nicht je Termin. Versand über die Warteschlange im Cron-Lauf, also bis zu einer Cron-Runde verzögert.

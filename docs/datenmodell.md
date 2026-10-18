@@ -225,7 +225,7 @@ Ein täglicher Job (`app:generate-series`) erzeugt daraus Einzeltermine rolliere
 ### 🏢 `events` ✅
 | Feld | Typ | Hinweis |
 |---|---|---|
-| type | enum `training`, `match`, `extra`, `helper` | Training / Spieltag (Pokal-Icon) / Zusatztermin / Helferdienst (Phase 6) |
+| type | enum `training`, `match`, `extra`, `helper` | Training / Spieltag (Pokal-Icon) / Zusatztermin / Helferdienst (Phase 7) |
 | response_mode | enum `rsvp`, `info` | `info` = reine Informationsnotiz ohne Rückmeldung |
 | title | text | |
 | description | text null | |
@@ -239,6 +239,7 @@ Ein täglicher Job (`app:generate-series`) erzeugt daraus Einzeltermine rolliere
 | series_exception | bool | Einzeltermin wurde abweichend bearbeitet |
 | training_group_id | → training_groups null | ✅ nur Trainings eines Teams |
 | opponent_id | → opponent null | nur `match` |
+| import_key | text null | *(Phase 5)* Herkunft eines importierten Spiels (UID aus .ics bzw. Spielnummer aus CSV); unique je Team, damit ein erneuter Import aktualisiert statt doppelt anlegt |
 | is_home | bool null | Heim-/Auswärtsspiel |
 | scope | enum `team`, `tenant` | `tenant` = vom Admin für alle Teams |
 | status | enum `scheduled`, `cancelled` | |

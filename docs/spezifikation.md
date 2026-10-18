@@ -61,6 +61,12 @@ Jede Terminart ist optisch unterschieden, z. B. durch Farbe oder ein Icon (Pokal
 - Der Administrator kann zusätzlich ein globales Logo für die gesamte Abteilung hochladen.
 - Es gibt also drei Logo-Ebenen: global (Abteilung), pro Team, und pro Gegner (je Spieltag).
 
+**Spielplan-Import (nachträglich ergänzt):**
+
+- Spieltage können je Mannschaft aus einer Kalenderdatei importiert werden: .ics (iCalendar) und CSV (z. B. Spielplan-Export des Verbands).
+- Vor dem Import zeigt die App eine Vorschau der erkannten Spiele; einzelne Spiele lassen sich abwählen.
+- Gegner werden automatisch zugeordnet oder angelegt; ein erneuter Import der aktualisierten Datei aktualisiert bestehende Spiele, statt sie doppelt anzulegen.
+
 ## Wegbeschreibung (Google Maps)
 
 Für den Terminort reicht ein einfacher Button "Wegbeschreibung starten", der über einen simplen Link auf Google Maps verweist:

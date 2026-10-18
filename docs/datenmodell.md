@@ -335,20 +335,20 @@ Admin-Gesamtübersicht = Aggregation über alle `cash_book` des Mandanten. Keine
 
 ## 9. Chat
 
-### 🏢 `chat`
-`kind` enum `team`, `custom`, `team_id` null (bei `team` automatisch angelegt), `name`, `mode` enum `flat`, `topics`, `created_by`.
+### 🏢 `chats` ✅
+`kind` enum `team`, `custom`, `team_id` null (bei `team` automatisch angelegt; unique), `name` (nur `custom`), `mode` enum `flat`, `topics`, `created_by`.
 
-### 🏢 `chat_member` – nur für `custom`-Chats (Teamchat leitet Mitglieder aus `team_membership` + Eltern ab)
+### 🏢 `chat_members` ✅ – nur für `custom`-Chats (Teamchat leitet Mitglieder aus `team_membership` + Eltern ab)
 `chat_id`, `tenant_member_id`, `role` enum `member`, `moderator`.
 
-### 🏢 `chat_topic` – Unterkanäle (Telegram-Stil)
+### 🏢 `chat_topics` ✅ – Unterkanäle (Telegram-Stil)
 `chat_id`, `name`, `sort_order`, `archived_at`. Bei `mode = topics` gibt es ein Standard-Thema „Allgemein“.
 
-### 🏢 `chat_message`
-`chat_id`, `topic_id` null, `author_id` → tenant_member, `acting_for_person_id` null (Elternteil schreibt für Kind), `body` text, `reply_to_id` null, `edited_at`, `deleted_at`, `created_at`. Index `(chat_id, topic_id, id)` – Polling lädt „alle Nachrichten nach ID x“ (ULIDs sind zeitlich sortiert).
+### 🏢 `chat_messages` ✅
+`chat_id`, `topic_id` null, `author_id` → tenant_member (Eltern schreiben als sie selbst; die Anzeige ergänzt den Namen des Kindes), `body` text (leer, wenn gelöscht), `reply_to_id` null, `edited_at`, `deleted_at`, `created_at`. Index `(chat_id, topic_id, id)` – Polling lädt „alle Nachrichten nach ID x“ (ULIDs sind zeitlich sortiert).
 
-### 🏢 `chat_attachment` – `message_id`, `file_id`
-### 🏢 `chat_read_state` – `chat_id`, `topic_id`, `tenant_member_id`, `last_read_message_id`
+### 🏢 `chat_attachment` – `message_id`, `file_id` *(später)*
+### 🏢 `chat_read_states` ✅ – `chat_id`, `tenant_member_id`, `topic_key` ('' ohne Themen, sonst Themen-ID), `last_read_message_id`, `last_seen_at` (wer den Chat gerade offen hat, bekommt keinen Push); unique (`chat_id`, `tenant_member_id`, `topic_key`)
 
 ---
 
@@ -377,7 +377,7 @@ Rechte: lesen = Trainer + Admin, schreiben = nur Admin.
 Laravel-Warteschlange (Treiber `database`) für Mails, Push und Erinnerungen; abgearbeitet per Cron.
 
 ### 🏢 `notification_preferences` ✅
-`tenant_member_id`, `category` enum `event_new`, `event_changed`, `reminder`, `notice` (später `chat`, `poll`, `task`), `push` bool, `email` bool; unique (`tenant_member_id`, `category`).
+`tenant_member_id`, `category` enum `event_new`, `event_changed`, `reminder`, `notice`, `poll`, `chat` (später `task`), `push` bool, `email` bool; unique (`tenant_member_id`, `category`).
 Gespeichert werden nur Abweichungen vom Standard: Push für alles an, E-Mail nur bei `event_changed` (Änderungen und Absagen).
 
 **Wer bekommt was:** Benachrichtigt werden die Logins hinter den eingeladenen Personen – der eigene Login (bei Kindern nur mit Freigabe „eigener Login“) und die Eltern; jeder Login einmal, in seiner Sprache. Wer die Änderung gemacht hat, bekommt keine Nachricht. Vergangene Termine bleiben stumm.

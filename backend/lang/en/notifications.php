@@ -6,6 +6,7 @@ return [
         'event_new' => 'New events',
         'event_changed' => 'Changes and cancellations',
         'reminder' => 'Reminder for missing replies',
+        'chat' => 'Chat messages',
         'poll' => 'New polls',
         'notice' => 'New notices',
     ],

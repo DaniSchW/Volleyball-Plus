@@ -6,6 +6,7 @@ return [
         'event_new' => 'Neue Termine',
         'event_changed' => 'Änderungen und Absagen',
         'reminder' => 'Erinnerung an offene Antworten',
+        'chat' => 'Chat-Nachrichten',
         'poll' => 'Neue Umfragen',
         'notice' => 'Neue Infos',
     ],

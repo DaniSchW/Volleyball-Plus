@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CalendarController;
+use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\CrossNominationController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\FileController;
@@ -114,6 +115,18 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
         Route::post('events/{event}/cancel', [EventController::class, 'cancel']);
         Route::post('events/{event}/end-series', [EventController::class, 'endSeries']);
         Route::post('events/{event}/responses', [EventController::class, 'respond']);
+
+        Route::get('chats', [ChatController::class, 'index']);
+        Route::post('chats', [ChatController::class, 'store']);
+        Route::get('chats/{chat}', [ChatController::class, 'show']);
+        Route::patch('chats/{chat}', [ChatController::class, 'update']);
+        Route::delete('chats/{chat}', [ChatController::class, 'destroy']);
+        Route::post('chats/{chat}/topics', [ChatController::class, 'storeTopic']);
+        Route::patch('chat-topics/{topic}', [ChatController::class, 'updateTopic']);
+        Route::get('chats/{chat}/messages', [ChatController::class, 'messages'])->middleware('throttle:120,1');
+        Route::post('chats/{chat}/messages', [ChatController::class, 'send'])->middleware('throttle:30,1');
+        Route::patch('chat-messages/{message}', [ChatController::class, 'updateMessage']);
+        Route::delete('chat-messages/{message}', [ChatController::class, 'destroyMessage']);
 
         Route::get('polls', [PollController::class, 'index']);
         Route::post('polls', [PollController::class, 'store']);

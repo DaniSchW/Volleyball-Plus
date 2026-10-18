@@ -460,3 +460,41 @@ export interface Poll {
   free_texts: { text: string; name: string | null }[];
   my: { person_id: string; name: string; is_self: boolean; option_ids: string[]; free_text: string | null; can_vote: boolean }[];
 }
+
+// ---- chat ----
+
+export interface ChatSummary {
+  id: string;
+  kind: 'team' | 'custom';
+  name: string;
+  team_id: string | null;
+  mode: 'flat' | 'topics';
+  can_moderate: boolean;
+  unread: number;
+  last_message: { author: string | null; body: string | null; created_at: string } | null;
+}
+
+export interface ChatDetail extends Omit<ChatSummary, 'unread' | 'last_message'> {
+  topics: { id: string; name: string; unread: number }[];
+  members: { id: string; name: string }[];
+}
+
+export interface ChatMessage {
+  id: string;
+  topic_id: string | null;
+  author: { id: string | null; name: string };
+  is_mine: boolean;
+  body: string | null;
+  deleted: boolean;
+  edited: boolean;
+  reply_to: { id: string; author: string; body: string | null } | null;
+  can_delete: boolean;
+  created_at: string;
+}
+
+export interface ChatMessagesPage {
+  data: ChatMessage[];
+  changed: ChatMessage[];
+  has_more: boolean;
+  server_time: string;
+}

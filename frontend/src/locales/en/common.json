@@ -378,7 +378,8 @@
       "event_changed": "Changes and cancellations",
       "reminder": "Reminder if you have not replied yet",
       "notice": "New notices",
-      "poll": "New polls"
+      "poll": "New polls",
+      "chat": "Chat messages"
     }
   },
   "leagues": {
@@ -562,5 +563,37 @@
     "publish": "Publish",
     "pending_one": "{{count}} open poll – vote now",
     "pending_other": "{{count}} open polls – vote now"
+  },
+  "chat": {
+    "create": "Create chat",
+    "none": "No chats yet.",
+    "empty": "No messages yet.",
+    "deleted": "Message deleted",
+    "unread_one": "{{count}} unread message",
+    "unread_other": "{{count}} unread messages",
+    "name": "Name",
+    "namePlaceholder": "e.g. board",
+    "mode": "Type",
+    "modes": {
+      "flat": "Group chat",
+      "topics": "With topics"
+    },
+    "members_one": "{{count}} person selected",
+    "members_other": "{{count}} people selected",
+    "back": "Back to chats",
+    "settings": "Settings",
+    "topics": "Topics",
+    "older": "Load older messages",
+    "deleteConfirm": "Delete message?",
+    "edited": "edited",
+    "reply": "Reply",
+    "edit": "Edit",
+    "delete": "Delete",
+    "editing": "Edit message",
+    "replyingTo": "Reply to {{name}}",
+    "placeholder": "Write a message",
+    "send": "Send",
+    "newTopic": "New topic",
+    "membersList": "Members: {{names}}"
   }
 }

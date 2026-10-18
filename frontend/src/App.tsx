@@ -10,6 +10,8 @@ import { LoginConfirmPage } from './pages/LoginConfirmPage';
 import { LoginPage } from './pages/LoginPage';
 import { LeaguesPage } from './pages/LeaguesPage';
 import { MatchImportPage } from './pages/MatchImportPage';
+import { ChatListPage } from './pages/ChatListPage';
+import { ChatPage } from './pages/ChatPage';
 import { MembersPage } from './pages/MembersPage';
 import { PollsPage } from './pages/PollsPage';
 import { StatsPage } from './pages/StatsPage';
@@ -44,6 +46,8 @@ export const routes: RouteObject[] = [
       { path: 'profile', element: <ProfilePage /> },
       { path: 'members', element: <MembersPage /> },
       { path: 'leagues', element: <LeaguesPage /> },
+      { path: 'chat', element: <ChatListPage /> },
+      { path: 'chat/:chatId', element: <ChatPage /> },
       { path: 'polls', element: <PollsPage /> },
       { path: 'tasks', element: <TasksPage /> },
       { path: 'stats', element: <StatsPage /> },

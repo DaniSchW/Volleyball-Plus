@@ -378,7 +378,8 @@
       "event_changed": "Änderungen und Absagen",
       "reminder": "Erinnerung, wenn du noch nicht geantwortet hast",
       "notice": "Neue Infos",
-      "poll": "Neue Umfragen"
+      "poll": "Neue Umfragen",
+      "chat": "Chat-Nachrichten"
     }
   },
   "leagues": {
@@ -562,5 +563,37 @@
     "publish": "Veröffentlichen",
     "pending_one": "{{count}} offene Umfrage – jetzt abstimmen",
     "pending_other": "{{count}} offene Umfragen – jetzt abstimmen"
+  },
+  "chat": {
+    "create": "Chat erstellen",
+    "none": "Noch keine Chats.",
+    "empty": "Noch keine Nachrichten.",
+    "deleted": "Nachricht gelöscht",
+    "unread_one": "{{count}} ungelesene Nachricht",
+    "unread_other": "{{count}} ungelesene Nachrichten",
+    "name": "Name",
+    "namePlaceholder": "z. B. Abteilungsleitung",
+    "mode": "Art",
+    "modes": {
+      "flat": "Gruppenchat",
+      "topics": "Mit Themen"
+    },
+    "members_one": "{{count}} Person ausgewählt",
+    "members_other": "{{count}} Personen ausgewählt",
+    "back": "Zurück zu den Chats",
+    "settings": "Einstellungen",
+    "topics": "Themen",
+    "older": "Ältere Nachrichten laden",
+    "deleteConfirm": "Nachricht löschen?",
+    "edited": "bearbeitet",
+    "reply": "Antworten",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "editing": "Nachricht bearbeiten",
+    "replyingTo": "Antwort an {{name}}",
+    "placeholder": "Nachricht schreiben",
+    "send": "Senden",
+    "newTopic": "Neues Thema",
+    "membersList": "Mitglieder: {{names}}"
   }
 }

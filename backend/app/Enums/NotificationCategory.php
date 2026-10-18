@@ -13,6 +13,7 @@ enum NotificationCategory: string
     case Reminder = 'reminder';
     case Notice = 'notice';
     case Poll = 'poll';
+    case Chat = 'chat';
 
     /** Push for everything; e-mail only for changes and cancellations. */
     public function defaultPush(): bool

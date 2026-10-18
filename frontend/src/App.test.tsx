@@ -471,3 +471,33 @@ describe('tasks and polls', () => {
     expect(screen.getByText('Max Muster')).toBeInTheDocument();
   });
 });
+
+describe('chat', () => {
+  it('shows messages and sends a reply', async () => {
+    let sent: Record<string, unknown> = {};
+    const msg = (id: string, body: string, mine = false) => ({
+      id, topic_id: null, author: { id: mine ? 'm1' : 'm2', name: mine ? 'Max Muster' : 'Tom Trainer' }, is_mine: mine, body,
+      deleted: false, edited: false, reply_to: null, can_delete: mine, created_at: '2026-10-19T08:00:00Z',
+    });
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/chats/c1': { body: { data: { id: 'c1', kind: 'team', name: 'Herren 1', team_id: 't1', mode: 'flat', can_moderate: false, topics: [], members: [] } } },
+      'GET /t/ssv-ulm/chats/c1/messages': { body: { data: [msg('01a', 'Training fällt aus')], changed: [], has_more: false, server_time: '2026-10-19T10:00:00Z' } },
+      'GET /t/ssv-ulm/chats': { body: { data: [] } },
+      'POST /t/ssv-ulm/chats/c1/messages': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { status: 201, body: { data: { ...msg('01b', 'Schade!', true), reply_to: { id: '01a', author: 'Tom Trainer', body: 'Training fällt aus' } } } };
+      },
+    });
+    renderAt('/ssv-ulm/chat/c1');
+
+    fireEvent.click(await screen.findByRole('button', { name: /^Training fällt aus/ }));
+    fireEvent.click(screen.getByRole('button', { name: 'Antworten' }));
+    expect(screen.getByText('Antwort an Tom Trainer: Training fällt aus')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Nachricht schreiben'), { target: { value: 'Schade!' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Senden' }));
+
+    await waitFor(() => expect(sent).toEqual({ body: 'Schade!', topic_id: null, reply_to_id: '01a' }));
+    expect(await screen.findByRole('button', { name: /Schade!/ })).toBeInTheDocument();
+  });
+});

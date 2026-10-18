@@ -267,7 +267,8 @@
     "types": {
       "training": "Training",
       "match": "Spieltag",
-      "extra": "Zusatztermin"
+      "extra": "Zusatztermin",
+      "helper": "Helferdienst"
     },
     "modes": {
       "rsvp": "Mit Zu-/Absage",
@@ -354,7 +355,8 @@
     "trainingGroup": "Für",
     "wholeTeam": "ganzes Team",
     "guestsFrom": "Gäste dürfen zusagen ab",
-    "guestsFromHint": "Leer = Standard aus den Team-Einstellungen (Quernominierung)."
+    "guestsFromHint": "Leer = Standard aus den Team-Einstellungen (Quernominierung).",
+    "helperHint": "Z. B. Vereinsfest oder Heimspieltag. Unten im Termin legst du danach die Aufgaben mit Plätzen an, für die sich Helfer eintragen."
   },
   "notifications": {
     "title": "Benachrichtigungen",
@@ -375,7 +377,8 @@
       "event_new": "Neue Termine",
       "event_changed": "Änderungen und Absagen",
       "reminder": "Erinnerung, wenn du noch nicht geantwortet hast",
-      "notice": "Neue Infos"
+      "notice": "Neue Infos",
+      "poll": "Neue Umfragen"
     }
   },
   "leagues": {
@@ -464,7 +467,12 @@
     "former": "nicht mehr im Team",
     "answeredAt": "geantwortet {{date}}",
     "noAnswer": "keine Antwort",
-    "afterDeadline": "nach der Frist"
+    "afterDeadline": "nach der Frist",
+    "tasksAll": "Übernommene Aufgaben",
+    "tasksOwn": "Deine übernommenen Aufgaben",
+    "tasksNone": "Im Zeitraum wurden keine Aufgaben übernommen.",
+    "tasksCount": "{{helper}} Helferdienst · {{other}} sonstige",
+    "pageHint": "Zusagequoten und übernommene Aufgaben findest du je Team. Trainer sehen alle Spieler, Spieler nur sich selbst."
   },
   "import": {
     "open": "Spielplan importieren",
@@ -499,5 +507,60 @@
       "is_home": "Heim/Auswärts",
       "opponent_id": "Gegner"
     }
+  },
+  "tasks": {
+    "title": "Aufgaben",
+    "none": "Noch keine Aufgaben.",
+    "places": "{{taken}}/{{slots}} besetzt",
+    "take": "Übernehmen",
+    "takeFor": "Für {{name}} übernehmen",
+    "release": "{{name}} von „{{title}}“ austragen",
+    "remove": "Aufgabe löschen",
+    "removeConfirm": "Aufgabe „{{title}}“ löschen?",
+    "newTask": "Neue Aufgabe",
+    "placeholder": "z. B. Fahrer, Kuchen, Kasse",
+    "slots": "Plätze",
+    "summary_one": "{{count}} Aufgabe · {{taken}}/{{slots}} Plätze besetzt",
+    "summary_other": "{{count}} Aufgaben · {{taken}}/{{slots}} Plätze besetzt",
+    "mine": "Meine Aufgaben",
+    "mineNone": "Du hast gerade keine Aufgaben übernommen.",
+    "helpWanted": "Helfer gesucht",
+    "helpWantedNone": "Aktuell keine Helferdienste mit freien Plätzen.",
+    "freePlaces_one": "{{count}} Platz frei",
+    "freePlaces_other": "{{count}} Plätze frei"
+  },
+  "polls": {
+    "create": "Umfrage erstellen",
+    "none": "Keine offenen Umfragen.",
+    "closedPolls": "Beendete Umfragen",
+    "allTeams": "Alle Teams",
+    "multiple": "Mehrfachauswahl",
+    "anonymous": "anonym",
+    "anonymousLabel": "Anonym (keine Namen bei den Ergebnissen)",
+    "allowFreeText": "Eigene Antwort als Text erlauben",
+    "closed": "beendet",
+    "until": "bis {{date}}",
+    "resultsAfterVote": "Das Ergebnis siehst du, sobald du abgestimmt hast.",
+    "close": "Jetzt beenden",
+    "delete": "Löschen",
+    "deleteConfirm": "Umfrage mit allen Stimmen löschen?",
+    "askParents": "Für {{name}} stimmen die Eltern ab.",
+    "youVoted": "Deine Antwort: {{answer}}",
+    "change": "ändern",
+    "voteFor": "Antwort für {{name}}",
+    "yourVote": "Deine Antwort",
+    "freeText": "Eigene Antwort (optional)",
+    "send": "Abstimmen",
+    "participation": "{{count}} von {{total}} haben abgestimmt",
+    "freeTexts": "Eigene Antworten",
+    "question": "Frage",
+    "description": "Beschreibung (optional)",
+    "options": "Antworten",
+    "optionN": "Antwort {{n}}",
+    "addOption": "+ Weitere Antwort",
+    "closesAt": "Abstimmen bis",
+    "publish": "Veröffentlichen",
+    "pending_one": "{{count}} offene Umfrage – jetzt abstimmen",
+    "pending_other": "{{count}} offene Umfragen – jetzt abstimmen"
   }
 }

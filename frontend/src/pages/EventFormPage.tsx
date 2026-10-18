@@ -100,7 +100,7 @@ export function EventFormPage() {
         location_name: form.location_name || null,
         address: form.address || null,
         max_participants: form.max_participants ? Number(form.max_participants) : null,
-        response_mode: form.type === 'extra' ? form.response_mode : 'rsvp',
+        response_mode: form.type === 'extra' ? form.response_mode : form.type === 'helper' ? 'info' : 'rsvp',
       };
       if (form.type === 'training') {
         body.training_group_id = form.training_group_id || null;
@@ -146,12 +146,12 @@ export function EventFormPage() {
       <Card>
         <div className="space-y-3">
           <Select label={t('events.type')} value={form.type} disabled={!!eventId && editSeries} onChange={(e) => set('type', e.target.value as EventType)}>
-            {(['training', 'match', 'extra'] as const).map((type) => <option key={type} value={type}>{t(`events.types.${type}`)}</option>)}
+            {(['training', 'match', 'extra', 'helper'] as const).map((type) => <option key={type} value={type}>{t(`events.types.${type}`)}</option>)}
           </Select>
           <Field
             label={t('events.title')}
-            hint={form.type === 'extra' ? undefined : t('events.titleHint')}
-            required={form.type === 'extra'}
+            hint={form.type === 'helper' ? t('events.helperHint') : form.type === 'extra' ? undefined : t('events.titleHint')}
+            required={form.type === 'extra' || form.type === 'helper'}
             maxLength={120}
             value={form.title}
             onChange={(e) => set('title', e.target.value)}

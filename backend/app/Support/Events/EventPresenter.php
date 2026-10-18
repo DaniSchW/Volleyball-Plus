@@ -10,6 +10,8 @@ use App\Models\Event;
 use App\Models\EventInvitee;
 use App\Models\EventResponse;
 use App\Models\Person;
+use App\Models\Task;
+use App\Models\TaskAssignment;
 use App\Models\Team;
 use App\Models\TeamMembership;
 use App\Models\TenantMember;
@@ -51,11 +53,15 @@ class EventPresenter
         $invited = EventInvitee::query()->whereIn('event_id', $ids)
             ->selectRaw('event_id, count(*) as n')->groupBy('event_id')->toBase()->pluck('n', 'event_id');
 
+        $taskSlots = Task::query()->whereIn('event_id', $ids)->selectRaw('event_id, sum(slots) as slots, count(*) as n')->groupBy('event_id')->toBase()->get()->keyBy('event_id');
+        $taskTaken = TaskAssignment::query()->join('tasks', 'tasks.id', '=', 'task_assignments.task_id')
+            ->whereIn('tasks.event_id', $ids)->selectRaw('tasks.event_id as event_id, count(*) as n')->groupBy('tasks.event_id')->toBase()->pluck('n', 'event_id');
+
         $acting = $this->actingPersons($viewer);
         $myInvites = EventInvitee::query()->whereIn('event_id', $ids)->whereIn('person_id', $acting->keys())->get()->groupBy('event_id');
         $myResponses = EventResponse::query()->whereIn('event_id', $ids)->whereIn('person_id', $acting->keys())->get()->groupBy('event_id');
 
-        return $events->map(fn (Event $event) => $this->summary(
+        return $events->map(fn (Event $event) => [...$this->summary(
             $event,
             $viewer,
             $counts->get($event->id, collect())->pluck('n', 'status')->map(fn ($n) => (int) $n)->all(),
@@ -63,7 +69,11 @@ class EventPresenter
             $acting,
             $myInvites->get($event->id, collect()),
             $myResponses->get($event->id, collect()),
-        ))->values()->all();
+        ), 'task_summary' => isset($taskSlots[$event->id]) ? [
+            'count' => (int) $taskSlots[$event->id]->n,
+            'slots' => (int) $taskSlots[$event->id]->slots,
+            'taken' => (int) ($taskTaken[$event->id] ?? 0),
+        ] : null])->values()->all();
     }
 
     /**
@@ -92,6 +102,7 @@ class EventPresenter
         $data['guests_open_at'] = $this->guests->opensAt($event)?->toIso8601ZuluString();
         $data['responses'] = null;
         $data['positions'] = null;
+        $data['tasks'] = $this->tasks($event, $viewer, $canManage);
 
         if ($showNames) {
             $invitees = EventInvitee::query()->where('event_id', $event->id)->pluck('source', 'person_id');
@@ -205,6 +216,40 @@ class EventPresenter
                 ];
             })->values()->all(),
         ];
+    }
+
+    /**
+     * Tasks with who took them (names are visible to everybody invited –
+     * that is the point of "who drives?") and what the viewer can do.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function tasks(Event $event, TenantMember $viewer, bool $canManage): array
+    {
+        $tasks = $event->tasks()->with('assignments.person')->get();
+        if ($tasks->isEmpty()) {
+            return [];
+        }
+        $acting = $this->actingPersons($viewer);
+        $invited = EventInvitee::query()->where('event_id', $event->id)->whereIn('person_id', $acting->keys())->pluck('person_id');
+        $open = ! $event->isCancelled() && $event->starts_at->isFuture();
+
+        return $tasks->map(fn (Task $task) => [
+            'id' => $task->id,
+            'title' => $task->title,
+            'description' => $task->description,
+            'slots' => $task->slots,
+            'assignees' => $task->assignments->map(fn (TaskAssignment $a) => [
+                'person_id' => $a->person_id,
+                'name' => $a->person ? $a->person->first_name.' '.$a->person->last_name : '–',
+                'mine' => $acting->has($a->person_id),
+            ])->values()->all(),
+            // Whom the viewer can put on this task (self, children).
+            'can_take_for' => ($open || $canManage) ? $invited
+                ->filter(fn ($id) => $canManage || $this->permissions->canTakeTasksFor($viewer, $acting[$id]))
+                ->map(fn ($id) => ['person_id' => $id, 'name' => $acting[$id]->first_name])
+                ->values()->all() : [],
+        ])->values()->all();
     }
 
     private function namesVisible(Event $event): bool

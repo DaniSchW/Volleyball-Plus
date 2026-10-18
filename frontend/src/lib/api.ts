@@ -225,7 +225,7 @@ export interface MemberRow {
 
 // ---- events ----
 
-export type EventType = 'training' | 'match' | 'extra';
+export type EventType = 'training' | 'match' | 'extra' | 'helper';
 export type RsvpStatus = 'yes' | 'no' | 'maybe';
 
 export interface MyReply {
@@ -268,6 +268,7 @@ export interface EventSummary {
   can_manage: boolean;
   reason_required: { no: boolean; maybe: boolean };
   training_group: { id: string; name: string } | null;
+  task_summary: { count: number; slots: number; taken: number } | null;
   my: MyReply[];
 }
 
@@ -287,6 +288,7 @@ export interface EventDetail extends EventSummary {
   cross_nomination_opens_at: string | null;
   guests_open_at: string | null;
   responses: ResponseRow[] | null;
+  tasks: EventTask[];
   /** Accepted players per position – only for people managing the event. */
   positions: Partial<Record<Position | 'unknown', number>> | null;
 }
@@ -412,4 +414,49 @@ export interface ImportPreview {
   rows: ImportRow[];
   missing: { id: string; title: string; starts_at: string }[];
   skipped: number;
+}
+
+// ---- tasks & polls ----
+
+export interface EventTask {
+  id: string;
+  title: string;
+  description: string | null;
+  slots: number;
+  assignees: { person_id: string; name: string; mine: boolean }[];
+  can_take_for: { person_id: string; name: string }[];
+}
+
+export interface MyTasksRow {
+  event: { id: string; type: EventType; title: string; starts_at: string; teams: string[] };
+  mine: { id: string; title: string; slots: number; taken: number; mine: string[] }[];
+  open_slots: number;
+}
+
+export interface TaskStatsRow {
+  person: { id: string; name: string };
+  helper: number;
+  other: number;
+  total: number;
+}
+
+export interface Poll {
+  id: string;
+  title: string;
+  description: string | null;
+  scope: 'team' | 'tenant';
+  teams: { id: string; name: string }[];
+  multiple_choice: boolean;
+  anonymous: boolean;
+  allow_free_text: boolean;
+  closes_at: string | null;
+  is_closed: boolean;
+  created_at: string;
+  can_manage: boolean;
+  results_visible: boolean;
+  voter_count: number | null;
+  eligible_count: number;
+  options: { id: string; label: string; count: number | null; voters: string[] | null }[];
+  free_texts: { text: string; name: string | null }[];
+  my: { person_id: string; name: string; is_self: boolean; option_ids: string[]; free_text: string | null; can_vote: boolean }[];
 }

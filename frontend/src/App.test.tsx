@@ -334,7 +334,7 @@ describe('statistics', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Letzte 4 Wochen' }));
     await waitFor(() => expect(screen.getByText(/27\.09\.2026 – 25\.10\.2026/)).toBeInTheDocument());
-    expect(fetchMock.mock.calls.filter(([url]) => String(url).includes('/statistics')).length).toBe(2);
+    expect(fetchMock.mock.calls.filter(([url]) => /\/statistics\?/.test(String(url))).length).toBe(2);
   });
 });
 
@@ -408,5 +408,66 @@ describe('schedule import', () => {
     expect(sent!.getAll('keys[]')).toEqual(['uid:a']);
     expect(sent!.get('own_name')).toBe('SSV Ulm 1846');
     expect(await screen.findByText('Fertig: 1 neu, 0 aktualisiert.')).toBeInTheDocument();
+  });
+});
+
+describe('tasks and polls', () => {
+  it('lets invited people take a task of an event', async () => {
+    let sent: Record<string, unknown> = {};
+    const detail = {
+      ...EVENT, type: 'helper', response_mode: 'info', title: 'Vereinsfest', description: null, names_visible: true, series_id: null, series: null,
+      team_ids: ['t1'], cross_nomination_opens_at: null, guests_open_at: null, responses: [], positions: null, my: [], task_summary: { count: 1, slots: 2, taken: 1 },
+      tasks: [{ id: 'k1', title: 'Kasse', description: null, slots: 2, assignees: [{ person_id: 'p9', name: 'Mia Mit', mine: false }], can_take_for: [{ person_id: 'p1', name: 'Max' }] }],
+    };
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/events/e1': { body: { data: detail } },
+      'POST /t/ssv-ulm/tasks/k1/assignments': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { body: { data: { ...detail, tasks: [{ ...detail.tasks[0], assignees: [...detail.tasks[0].assignees, { person_id: 'p1', name: 'Max Muster', mine: true }] }] } } };
+      },
+    });
+    renderAt('/ssv-ulm/events/e1');
+
+    expect(await screen.findByText('1/2 besetzt')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Übernehmen' }));
+    await waitFor(() => expect(sent).toEqual({ person_id: 'p1' }));
+    expect(await screen.findByText('2/2 besetzt')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Max Muster von „Kasse“ austragen' })).toBeInTheDocument();
+  });
+
+  it('votes in a poll and shows the result afterwards', async () => {
+    let sent: Record<string, unknown> = {};
+    const poll = {
+      id: 'q1', title: 'Wann grillen wir?', description: null, scope: 'team', teams: [{ id: 't1', name: 'Herren 1' }], multiple_choice: false,
+      anonymous: false, allow_free_text: false, closes_at: null, is_closed: false, created_at: '2026-10-19T10:00:00Z', can_manage: false,
+      results_visible: false, voter_count: null, eligible_count: 5,
+      options: [{ id: 'o1', label: 'Samstag', count: null, voters: null }, { id: 'o2', label: 'Sonntag', count: null, voters: null }],
+      free_texts: [], my: [{ person_id: 'p1', name: 'Max', is_self: true, option_ids: [], free_text: null, can_vote: true }],
+    };
+    const voted = { ...poll, results_visible: true, voter_count: 1,
+      options: [{ id: 'o1', label: 'Samstag', count: 0, voters: [] }, { id: 'o2', label: 'Sonntag', count: 1, voters: ['Max Muster'] }],
+      my: [{ ...poll.my[0], option_ids: ['o2'] }] };
+    let current: Record<string, unknown> = poll;
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/teams': { body: { data: [] } },
+      'GET /t/ssv-ulm/polls': () => ({ body: { data: [current] } }),
+      'POST /t/ssv-ulm/polls/q1/votes': (init) => {
+        sent = JSON.parse(String(init.body));
+        current = voted;
+        return { body: { data: voted } };
+      },
+    });
+    renderAt('/ssv-ulm/polls');
+
+    expect(await screen.findByText('Das Ergebnis siehst du, sobald du abgestimmt hast.')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Sonntag'));
+    fireEvent.click(screen.getByRole('button', { name: 'Abstimmen' }));
+
+    await waitFor(() => expect(sent).toEqual({ person_id: 'p1', option_ids: ['o2'], free_text: null }));
+    expect(await screen.findByText('Deine Antwort: Sonntag')).toBeInTheDocument();
+    expect(screen.getByText('1 von 5 haben abgestimmt')).toBeInTheDocument();
+    expect(screen.getByText('Max Muster')).toBeInTheDocument();
   });
 });

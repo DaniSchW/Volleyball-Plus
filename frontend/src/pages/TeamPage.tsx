@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link, useParams } from 'react-router';
+import { Link, useParams, useSearchParams } from 'react-router';
 import {
   api, del, errorText, patch, post,
   type Invitation, type RosterRow, type Team, type TeamRole, type TeamSettings,
@@ -25,7 +25,8 @@ export function TeamPage() {
   const tp = useTenantPath();
   const slug = useTenantSlug();
   const me = useTenantMe();
-  const [tab, setTab] = useState<Tab>('roster');
+  const [params] = useSearchParams();
+  const [tab, setTab] = useState<Tab>((params.get('tab') as Tab | null) ?? 'roster');
   const queryClient = useQueryClient();
 
   const team = useQuery({ queryKey: ['team', teamId], queryFn: async () => (await api<{ data: Team }>(tp(`teams/${teamId}`))).data });

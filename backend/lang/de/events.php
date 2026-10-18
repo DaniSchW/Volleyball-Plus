@@ -16,5 +16,6 @@ return [
         'match' => 'Spieltag',
         'match_vs' => 'Spiel gegen :opponent',
         'extra' => 'Termin',
+        'helper' => 'Helferdienst',
     ],
 ];

@@ -87,7 +87,7 @@ class StatisticsTest extends TestCase
     {
         $data = $this->stats($this->trainer);
 
-        $this->assertSame(['from' => '2026-07-01', 'to' => '2026-10-25'], $data['period']);
+        $this->assertSame(['from' => '2026-07-01', 'to' => '2027-06-30'], $data['period']);
         $this->assertSame(['from' => '2026-09-27', 'to' => '2026-10-25'], $data['presets']['last_4_weeks']);
         $this->assertTrue($data['can_see_all']);
         $this->assertSame(3, $data['event_count']);

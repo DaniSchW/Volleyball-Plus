@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { EventFeed } from '../components/events/EventFeed';
 import { NoticesArea } from '../components/NoticesArea';
+import { OpenPolls } from '../components/polls/OpenPolls';
 import { canCreateEvents } from '../lib/permissions';
 import { useTenantMe, useTenantSlug } from '../lib/queries';
 
@@ -14,6 +15,7 @@ export function HomePage() {
   return (
     <div className="space-y-6">
       <NoticesArea />
+      <OpenPolls />
       <section aria-labelledby="upcoming-heading">
         <div className="mb-3 flex items-center justify-between gap-3">
           <h2 id="upcoming-heading" className="text-lg font-semibold">{t('home.upcoming')}</h2>

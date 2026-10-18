@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
-import { api, type EventType, type HistoryRow, type Period, type StatisticsRow, type Team, type TeamStatistics as Stats } from '../../lib/api';
+import { api, type EventType, type HistoryRow, type Period, type StatisticsRow, type TaskStatsRow, type Team, type TeamStatistics as Stats } from '../../lib/api';
 import { formatDate, formatDateTime, formatDay } from '../../lib/dates';
 import { useTenantPath, useTenantSlug } from '../../lib/queries';
 import { Card, Field, Loading, Notice } from '../ui';
@@ -79,6 +79,7 @@ export function TeamStatistics({ team }: { team: Team }) {
       {stats.isPending && <Loading />}
       {stats.isError && <Notice tone="error">{t('errors.generic')}</Notice>}
       {stats.data && <Result team={team} stats={stats.data} qs={qs} />}
+      {stats.data && <TaskStats team={team} qs={query(stats.data.period, [])} />}
     </div>
   );
 }
@@ -156,6 +157,32 @@ function RateBar({ row }: { row: StatisticsRow }) {
       </span>
       <span className="mt-0.5 block text-xs text-slate-500">{details}</span>
     </span>
+  );
+}
+
+/** Tasks and helper services taken per person (same visibility as the rates). */
+function TaskStats({ team, qs }: { team: Team; qs: string }) {
+  const { t } = useTranslation();
+  const tp = useTenantPath();
+  const stats = useQuery({
+    queryKey: ['task-statistics', team.id, qs],
+    queryFn: async () => (await api<{ data: { can_see_all: boolean; rows: TaskStatsRow[] } }>(tp(`teams/${team.id}/statistics/tasks?${qs}`))).data,
+  });
+
+  if (!stats.data || (stats.data.rows.length === 0 && !stats.data.can_see_all)) return null;
+
+  return (
+    <Card title={stats.data.can_see_all ? t('stats.tasksAll') : t('stats.tasksOwn')}>
+      {stats.data.rows.length === 0 && <p className="text-sm text-slate-500">{t('stats.tasksNone')}</p>}
+      <ul className="divide-y divide-slate-100">
+        {stats.data.rows.map((row) => (
+          <li key={row.person.id} className="flex items-baseline justify-between gap-3 py-2 text-sm">
+            <span className="min-w-0 truncate">{row.person.name}</span>
+            <span className="shrink-0 text-slate-700">{t('stats.tasksCount', { helper: row.helper, other: row.other })}</span>
+          </li>
+        ))}
+      </ul>
+    </Card>
   );
 }
 

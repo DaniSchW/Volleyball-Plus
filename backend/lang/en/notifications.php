@@ -6,6 +6,7 @@ return [
         'event_new' => 'New events',
         'event_changed' => 'Changes and cancellations',
         'reminder' => 'Reminder for missing replies',
+        'poll' => 'New polls',
         'notice' => 'New notices',
     ],
     'event_new' => ['title' => 'New event: :title', 'body' => ':when'],
@@ -21,6 +22,7 @@ return [
         'body_deadline' => ':when – please reply by :deadline.',
     ],
     'imported' => ['title' => '{1} :team: 1 new date in the schedule|[2,*] :team: :count new dates in the schedule', 'body' => 'Next: :title, :when'],
+    'poll' => ['title' => 'New poll: :title'],
     'notice' => ['title' => 'New notice: :title'],
     'adult' => [
         'guardian_title' => ':name now manages the profile',

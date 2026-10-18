@@ -21,8 +21,14 @@ use App\Models\NotificationPreference;
 use App\Models\Opponent;
 use App\Models\Person;
 use App\Models\PersonAccount;
+use App\Models\Poll;
+use App\Models\PollOption;
+use App\Models\PollTeam;
+use App\Models\PollVote;
 use App\Models\RefereeLicense;
 use App\Models\StoredFile;
+use App\Models\Task;
+use App\Models\TaskAssignment;
 use App\Models\Team;
 use App\Models\TeamMembership;
 use App\Models\TenantMember;
@@ -46,7 +52,7 @@ class ModelIsolationTest extends TestCase
         Event::class, EventSeries::class, EventTeam::class, EventInvitee::class, EventResponse::class,
         EventResponseLog::class, Opponent::class, Notice::class, CalendarFeed::class,
         NotificationPreference::class, League::class, CrossNomination::class, TrainingGroup::class, TrainingGroupMember::class,
-        RefereeLicense::class,
+        RefereeLicense::class, Task::class, TaskAssignment::class, Poll::class, PollTeam::class, PollOption::class, PollVote::class,
     ];
 
     public function test_every_tenant_model_is_listed_here(): void
@@ -99,6 +105,12 @@ class ModelIsolationTest extends TestCase
             $group = TrainingGroup::create(['team_id' => $team->id, 'name' => 'Zuspiel']);
             TrainingGroupMember::create(['training_group_id' => $group->id, 'person_id' => $person->id]);
             RefereeLicense::create(['person_id' => $person->id, 'level' => 'D', 'valid_until' => '2027-06-30']);
+            $task = Task::create(['event_id' => $event->id, 'title' => 'Fahrer', 'slots' => 2]);
+            TaskAssignment::create(['task_id' => $task->id, 'person_id' => $person->id]);
+            $poll = Poll::create(['title' => 'Grillfest?']);
+            PollTeam::create(['poll_id' => $poll->id, 'team_id' => $team->id]);
+            $option = PollOption::create(['poll_id' => $poll->id, 'label' => 'Ja']);
+            PollVote::create(['poll_id' => $poll->id, 'option_id' => $option->id, 'person_id' => $person->id]);
             NotificationPreference::create(['tenant_member_id' => $member->id, 'category' => 'notice', 'push' => false, 'email' => false]);
         });
 

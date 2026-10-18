@@ -6,8 +6,8 @@ import { patch } from '../lib/api';
 import { changeLanguage, LANGUAGES, type Language } from '../i18n';
 
 /** Sections that follow in later phases (shown with a placeholder). */
-export const PLACEHOLDER_SECTIONS = ['chat', 'polls', 'tasks', 'stats', 'cash', 'halls'] as const;
-export type MenuSection = (typeof PLACEHOLDER_SECTIONS)[number] | 'events' | 'teams' | 'profile' | 'members';
+export const PLACEHOLDER_SECTIONS = ['chat', 'cash', 'halls'] as const;
+export type MenuSection = (typeof PLACEHOLDER_SECTIONS)[number] | 'events' | 'teams' | 'polls' | 'tasks' | 'stats' | 'profile' | 'members';
 
 const MENU: MenuSection[] = ['events', 'teams', 'chat', 'polls', 'tasks', 'stats', 'cash', 'halls', 'profile'];
 

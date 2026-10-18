@@ -227,7 +227,10 @@ class EventService
         }
 
         $type = EventType::tryFrom((string) ($attributes['type'] ?? $existing?->type?->value));
-        if ($type !== EventType::Extra) {
+        // Helper services take part via their tasks, not via accept/decline.
+        if ($type === EventType::Helper) {
+            $attributes['response_mode'] = 'info';
+        } elseif ($type !== EventType::Extra) {
             $attributes['response_mode'] = 'rsvp';
         }
         // Guests and training groups only exist for trainings.

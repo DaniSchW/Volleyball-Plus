@@ -11,7 +11,7 @@ export function TypeIcon({ type }: { type: EventSummary['type'] }) {
   if (type === 'training') return null;
   return (
     <span role="img" aria-label={t(`events.types.${type}`)} className="text-base">
-      {type === 'match' ? '🏆' : '📅'}
+      {{ match: '🏆', extra: '📅', helper: '🤝' }[type]}
     </span>
   );
 }
@@ -56,7 +56,12 @@ export function EventCard({ event }: { event: EventSummary }) {
         </div>
 
         {cancelled && <p className="mt-1 text-sm font-medium text-red-700">{t('events.cancelled')}</p>}
-        {event.response_mode === 'info' && !cancelled && <p className="mt-1 text-sm text-slate-600">{t('events.infoOnly')}</p>}
+        {event.response_mode === 'info' && !cancelled && event.type !== 'helper' && <p className="mt-1 text-sm text-slate-600">{t('events.infoOnly')}</p>}
+        {event.task_summary && !cancelled && (
+          <p className="mt-1 text-xs text-slate-600">
+            {t('tasks.summary', { count: event.task_summary.count, taken: event.task_summary.taken, slots: event.task_summary.slots })}
+          </p>
+        )}
 
         {event.response_mode === 'rsvp' && !cancelled && (
           <p className="mt-2 text-xs text-slate-600">

@@ -67,6 +67,14 @@ class Event extends Model
     }
 
     /**
+     * @return HasMany<Task, $this>
+     */
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class)->orderBy('sort_order')->orderBy('created_at');
+    }
+
+    /**
      * @return HasMany<EventResponse, $this>
      */
     public function responses(): HasMany

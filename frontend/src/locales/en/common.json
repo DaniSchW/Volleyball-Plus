@@ -267,7 +267,8 @@
     "types": {
       "training": "Training",
       "match": "Match day",
-      "extra": "Other event"
+      "extra": "Other event",
+      "helper": "Helper service"
     },
     "modes": {
       "rsvp": "With replies",
@@ -354,7 +355,8 @@
     "trainingGroup": "For",
     "wholeTeam": "whole team",
     "guestsFrom": "Guests may accept from",
-    "guestsFromHint": "Empty = default from the team settings (cross-nomination)."
+    "guestsFromHint": "Empty = default from the team settings (cross-nomination).",
+    "helperHint": "E.g. club party or home match day. Afterwards add the tasks with places in the event for helpers to sign up."
   },
   "notifications": {
     "title": "Notifications",
@@ -375,7 +377,8 @@
       "event_new": "New events",
       "event_changed": "Changes and cancellations",
       "reminder": "Reminder if you have not replied yet",
-      "notice": "New notices"
+      "notice": "New notices",
+      "poll": "New polls"
     }
   },
   "leagues": {
@@ -464,7 +467,12 @@
     "former": "no longer in the team",
     "answeredAt": "answered {{date}}",
     "noAnswer": "no answer",
-    "afterDeadline": "after the deadline"
+    "afterDeadline": "after the deadline",
+    "tasksAll": "Tasks taken",
+    "tasksOwn": "Your tasks taken",
+    "tasksNone": "No tasks taken in this period.",
+    "tasksCount": "{{helper}} helper service · {{other}} other",
+    "pageHint": "Acceptance rates and tasks taken are shown per team. Trainers see all players, players only themselves."
   },
   "import": {
     "open": "Import schedule",
@@ -499,5 +507,60 @@
       "is_home": "home/away",
       "opponent_id": "opponent"
     }
+  },
+  "tasks": {
+    "title": "Tasks",
+    "none": "No tasks yet.",
+    "places": "{{taken}}/{{slots}} taken",
+    "take": "Take on",
+    "takeFor": "Take on for {{name}}",
+    "release": "Remove {{name}} from “{{title}}”",
+    "remove": "Delete task",
+    "removeConfirm": "Delete task “{{title}}”?",
+    "newTask": "New task",
+    "placeholder": "e.g. driver, cake, cash desk",
+    "slots": "Places",
+    "summary_one": "{{count}} task · {{taken}}/{{slots}} places taken",
+    "summary_other": "{{count}} tasks · {{taken}}/{{slots}} places taken",
+    "mine": "My tasks",
+    "mineNone": "You have not taken any tasks right now.",
+    "helpWanted": "Helpers wanted",
+    "helpWantedNone": "No helper services with free places right now.",
+    "freePlaces_one": "{{count}} place free",
+    "freePlaces_other": "{{count}} places free"
+  },
+  "polls": {
+    "create": "Create poll",
+    "none": "No open polls.",
+    "closedPolls": "Finished polls",
+    "allTeams": "All teams",
+    "multiple": "Multiple choice",
+    "anonymous": "anonymous",
+    "anonymousLabel": "Anonymous (no names in the results)",
+    "allowFreeText": "Allow an own answer as text",
+    "closed": "finished",
+    "until": "until {{date}}",
+    "resultsAfterVote": "You see the result once you have voted.",
+    "close": "End now",
+    "delete": "Delete",
+    "deleteConfirm": "Delete the poll with all votes?",
+    "askParents": "The parents vote for {{name}}.",
+    "youVoted": "Your answer: {{answer}}",
+    "change": "change",
+    "voteFor": "Answer for {{name}}",
+    "yourVote": "Your answer",
+    "freeText": "Own answer (optional)",
+    "send": "Vote",
+    "participation": "{{count}} of {{total}} have voted",
+    "freeTexts": "Own answers",
+    "question": "Question",
+    "description": "Description (optional)",
+    "options": "Answers",
+    "optionN": "Answer {{n}}",
+    "addOption": "+ Another answer",
+    "closesAt": "Vote until",
+    "publish": "Publish",
+    "pending_one": "{{count}} open poll – vote now",
+    "pending_other": "{{count}} open polls – vote now"
   }
 }

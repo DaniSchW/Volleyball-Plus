@@ -283,23 +283,23 @@ Append-only: `event_id`, `person_id`, `old_status`, `new_status`, `responded_by`
 
 ## 5. Aufgaben & Helferdienste
 
-### 🏢 `task` – Aufgabe zu einem Termin
+### 🏢 `tasks` – Aufgabe zu einem Termin ✅
 `event_id`, `title` („Fahrer“, „Kuchen mitbringen“), `description`, `slots` smallint (benötigte Anzahl), `sort_order`.
 
-### 🏢 `task_assignment`
+### 🏢 `task_assignments` ✅
 `task_id`, `person_id`, `assigned_by`, `created_at`. Unique `(task_id, person_id)`.
-Helferdienste = `event.type = helper` mit Aufgaben → Helfer-Statistik aus `task_assignment` (Anzahl übernommener Aufgaben pro Person und Zeitraum).
+Helferdienste = `event.type = helper` (`response_mode = info`) mit Aufgaben → Helfer-Statistik aus `task_assignments` (Anzahl übernommener Aufgaben pro Person und Zeitraum, Helferdienste und sonstige getrennt).
 
 ---
 
 ## 6. Umfragen
 
-### 🏢 `poll`
-`title`, `description`, `scope` enum `team`, `tenant`, `multiple_choice` bool, `anonymous` bool, `allow_free_text` bool, `closes_at` null, `created_by`.
+### 🏢 `polls` ✅
+`title`, `description`, `scope` enum `team`, `tenant`, `multiple_choice` bool, `anonymous` bool, `allow_free_text` bool, `closes_at` null (Ende; „jetzt beenden“ setzt es), `created_by`.
 
-### 🏢 `poll_team` – `poll_id`, `team_id` (bei `scope = tenant` alle Teams)
-### 🏢 `poll_option` – `poll_id`, `label`, `sort_order`
-### 🏢 `poll_vote` – `poll_id`, `option_id`, `person_id`, `voted_by`, `free_text` null
+### 🏢 `poll_teams` ✅ – `poll_id`, `team_id` (bei `scope = tenant` alle Teams)
+### 🏢 `poll_options` ✅ – `poll_id`, `label`, `sort_order`
+### 🏢 `poll_votes` ✅ – `poll_id`, `option_id` null, `person_id`, `voted_by`, `free_text` null – eine Zeile je gewählter Option, eine Textantwort ist eine Zeile ohne Option; eine neue Stimme ersetzt alle Zeilen der Person.
 
 ---
 

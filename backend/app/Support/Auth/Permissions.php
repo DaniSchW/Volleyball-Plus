@@ -288,4 +288,28 @@ class Permissions
 
         return (bool) $person->minorPermission?->can_rsvp;
     }
+
+    /** Taking tasks: parents for their child, the child itself only if allowed. */
+    public function canTakeTasksFor(TenantMember $member, Person $person): bool
+    {
+        return $this->actsForWith($member, $person, 'can_take_tasks');
+    }
+
+    /** Voting in polls: parents for their child, the child itself only if allowed. */
+    public function canVoteFor(TenantMember $member, Person $person): bool
+    {
+        return $this->actsForWith($member, $person, 'can_vote_polls');
+    }
+
+    private function actsForWith(TenantMember $member, Person $person, string $flag): bool
+    {
+        if (! $this->actsFor($member, $person)) {
+            return false;
+        }
+        if ($this->isGuardianOf($member, $person) || ! $person->hasGuardians()) {
+            return true;
+        }
+
+        return (bool) $person->minorPermission?->{$flag};
+    }
 }

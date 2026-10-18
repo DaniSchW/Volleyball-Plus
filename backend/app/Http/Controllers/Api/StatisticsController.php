@@ -42,6 +42,20 @@ class StatisticsController extends Controller
         ]]);
     }
 
+    /** Who took how many tasks / helper services – same visibility as the rates. */
+    public function tasks(Request $request, Team $team): JsonResponse
+    {
+        $member = $this->current->get();
+        abort_unless($this->mayOpen($member, $team), 403);
+        [$from, $to] = $this->period($request);
+        $all = $this->canSeeAll($member, $team);
+
+        return response()->json(['data' => [
+            'can_see_all' => $all,
+            'rows' => $this->statistics->taskRows($team, $from, $to, $all ? null : $this->permissions->actingPersonIds($member)),
+        ]]);
+    }
+
     /** Event by event for one person: trainers/admins, or the person (parents). */
     public function person(Request $request, Team $team, Person $person): JsonResponse
     {

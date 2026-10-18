@@ -5,6 +5,7 @@ import { api, errorText, post, POSITIONS, type EventDetail, type ResponseRow, ty
 import { formatDateTime, formatLongDay, formatTime } from '../lib/dates';
 import { useTenantPath, useTenantSlug } from '../lib/queries';
 import { RsvpControl } from '../components/events/RsvpControl';
+import { TasksCard } from '../components/events/TasksCard';
 import { TypeIcon } from '../components/events/EventCard';
 import { Avatar, Button, Card, Loading, Notice } from '../components/ui';
 
@@ -100,6 +101,8 @@ export function EventPage() {
           </div>
         </Card>
       )}
+
+      {!cancelled && <TasksCard event={e} />}
 
       {e.positions && <Positions positions={e.positions} />}
 

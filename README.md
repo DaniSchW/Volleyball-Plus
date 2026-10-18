@@ -49,4 +49,5 @@ Phase 3 (Benachrichtigungen) umgesetzt: Web-Push (Android, Desktop, iOS ab 16.4 
 Phase 4 (Training) umgesetzt: admin-pflegbarer Ligabaum mit Vorlage, Team-Hierarchie aus der Liga, Quernominierung von unten nach oben mit Geschlechtsregel und Freigabezeitpunkt (Team-Standard, im Termin änderbar), Trainingsgruppen mit eigenen Trainings, Schiedsrichter-Lizenz mit Ablaufhinweis, Zusagen nach Position für Trainer.
 Phase 6 (Statistik) umgesetzt: Zusagequoten je Team mit frei wählbarem Zeitraum (Schnellwahl 4 Wochen/Saison), Filter nach Terminart, Balkendiagramm für Trainer und Admins, Einzeltermine mit Antwortzeitpunkt; Spieler sehen nur die eigene Quote, Betreuer keine.
 Phase 5 (Spielplan-Import) umgesetzt: Spieltage je Mannschaft aus .ics/.ical oder SAMS-CSV mit Vorschau, Heim/Auswärts, Halle, Schiedsgericht-Terminen und Abgleich beim erneuten Import.
-Nächster Schritt: Phase 7 – Aufgaben, Helferdienste, Umfragen.
+Phase 7 (Aufgaben, Helferdienste, Umfragen) umgesetzt: Aufgaben mit Plätzen zu jedem Termin, Terminart Helferdienst mit Helfer-Statistik, Seite „Meine Aufgaben“, Umfragen pro Team und abteilungsweit (Mehrfachauswahl, anonym, Textantwort, Frist) mit Push und Hinweis auf der Startseite.
+Nächster Schritt: Phase 8 – Chat.

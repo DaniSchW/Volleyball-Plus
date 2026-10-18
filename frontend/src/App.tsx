@@ -11,6 +11,9 @@ import { LoginPage } from './pages/LoginPage';
 import { LeaguesPage } from './pages/LeaguesPage';
 import { MatchImportPage } from './pages/MatchImportPage';
 import { MembersPage } from './pages/MembersPage';
+import { PollsPage } from './pages/PollsPage';
+import { StatsPage } from './pages/StatsPage';
+import { TasksPage } from './pages/TasksPage';
 import { NoTenantPage } from './pages/NoTenantPage';
 import { PersonPage } from './pages/PersonPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
@@ -41,6 +44,9 @@ export const routes: RouteObject[] = [
       { path: 'profile', element: <ProfilePage /> },
       { path: 'members', element: <MembersPage /> },
       { path: 'leagues', element: <LeaguesPage /> },
+      { path: 'polls', element: <PollsPage /> },
+      { path: 'tasks', element: <TasksPage /> },
+      { path: 'stats', element: <StatsPage /> },
       ...PLACEHOLDER_SECTIONS.map((section) => ({ path: section, element: <PlaceholderPage section={section} /> })),
     ],
   },

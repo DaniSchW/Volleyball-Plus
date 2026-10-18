@@ -15,8 +15,10 @@ use App\Http\Controllers\Api\MemberController;
 use App\Http\Controllers\Api\NoticeController;
 use App\Http\Controllers\Api\NotificationPreferenceController;
 use App\Http\Controllers\Api\PersonController;
+use App\Http\Controllers\Api\PollController;
 use App\Http\Controllers\Api\PushController;
 use App\Http\Controllers\Api\StatisticsController;
+use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Api\TenantMeController;
@@ -81,6 +83,7 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
         Route::post('teams/{team}/match-import', [MatchImportController::class, 'store']);
 
         Route::get('teams/{team}/statistics', [StatisticsController::class, 'team']);
+        Route::get('teams/{team}/statistics/tasks', [StatisticsController::class, 'tasks']);
         Route::get('teams/{team}/statistics/persons/{person}', [StatisticsController::class, 'person']);
 
         Route::get('teams/{team}/training-groups', [TrainingGroupController::class, 'index']);
@@ -111,6 +114,21 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
         Route::post('events/{event}/cancel', [EventController::class, 'cancel']);
         Route::post('events/{event}/end-series', [EventController::class, 'endSeries']);
         Route::post('events/{event}/responses', [EventController::class, 'respond']);
+
+        Route::get('polls', [PollController::class, 'index']);
+        Route::post('polls', [PollController::class, 'store']);
+        Route::get('polls/{poll}', [PollController::class, 'show']);
+        Route::post('polls/{poll}/votes', [PollController::class, 'vote']);
+        Route::delete('polls/{poll}/votes/{person}', [PollController::class, 'withdraw']);
+        Route::post('polls/{poll}/close', [PollController::class, 'close']);
+        Route::delete('polls/{poll}', [PollController::class, 'destroy']);
+
+        Route::get('tasks', [TaskController::class, 'index']);
+        Route::post('events/{event}/tasks', [TaskController::class, 'store']);
+        Route::patch('tasks/{task}', [TaskController::class, 'update']);
+        Route::delete('tasks/{task}', [TaskController::class, 'destroy']);
+        Route::post('tasks/{task}/assignments', [TaskController::class, 'take']);
+        Route::delete('tasks/{task}/assignments/{person}', [TaskController::class, 'release']);
 
         Route::get('notices', [NoticeController::class, 'index']);
         Route::post('notices', [NoticeController::class, 'store']);

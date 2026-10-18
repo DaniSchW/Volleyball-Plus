@@ -10,6 +10,7 @@ use App\Models\EventInvitee;
 use App\Models\EventResponse;
 use App\Models\EventResponseLog;
 use App\Models\Person;
+use App\Models\TaskAssignment;
 use App\Models\Team;
 use App\Models\TeamMembership;
 use App\Support\Tenancy\TenantContext;
@@ -34,7 +35,8 @@ class AttendanceStatistics
 
     /**
      * Default periods in the department's time zone: last 4 weeks and the
-     * current season (from the 1st of the season's start month).
+     * current season (from the 1st of the season's start month to its end –
+     * rates only count past events anyway, tasks also upcoming ones).
      *
      * @return array{last_4_weeks: array{from: string, to: string}, season: array{from: string, to: string}}
      */
@@ -49,7 +51,7 @@ class AttendanceStatistics
 
         return [
             'last_4_weeks' => ['from' => $today->subWeeks(4)->toDateString(), 'to' => $today->toDateString()],
-            'season' => ['from' => $season->toDateString(), 'to' => $today->toDateString()],
+            'season' => ['from' => $season->toDateString(), 'to' => $season->addYear()->subDay()->toDateString()],
         ];
     }
 
@@ -122,6 +124,40 @@ class AttendanceStatistics
         })
             ->sortBy([['rate', 'desc'], ['invited', 'desc'], fn ($a, $b) => strcmp(mb_strtolower($a['person']['name']), mb_strtolower($b['person']['name']))])
             ->values()->all();
+    }
+
+    /**
+     * Tasks taken per person on the team's events in the period (helper
+     * services counted separately). Upcoming events count too – what
+     * matters is who offered to help.
+     *
+     * @param  list<string>|null  $onlyPersons
+     * @return list<array<string, mixed>>
+     */
+    public function taskRows(Team $team, string $from, string $to, ?array $onlyPersons = null): array
+    {
+        $tz = $this->tenants->get()->timezone;
+        $rows = TaskAssignment::query()
+            ->join('tasks', 'tasks.id', '=', 'task_assignments.task_id')
+            ->join('events', 'events.id', '=', 'tasks.event_id')
+            ->where('task_assignments.tenant_id', $this->tenants->id())
+            ->whereIn('events.id', fn ($q) => $q->select('event_id')->from('event_teams')->where('team_id', $team->id))
+            ->where('events.status', EventStatus::Scheduled->value)
+            ->where('events.starts_at', '>=', CarbonImmutable::parse($from, $tz)->startOfDay()->utc())
+            ->where('events.starts_at', '<=', CarbonImmutable::parse($to, $tz)->endOfDay()->utc())
+            ->when($onlyPersons !== null, fn ($q) => $q->whereIn('task_assignments.person_id', $onlyPersons))
+            ->selectRaw("task_assignments.person_id as person_id, sum(case when events.type = 'helper' then 1 else 0 end) as helper, count(*) as total")
+            ->groupBy('task_assignments.person_id')
+            ->toBase()->get();
+
+        $persons = Person::withTrashed()->whereIn('id', $rows->pluck('person_id'))->get()->keyBy('id');
+
+        return $rows->map(fn ($row) => [
+            'person' => ['id' => $row->person_id, 'name' => ($p = $persons->get($row->person_id)) ? $p->first_name.' '.$p->last_name : '–'],
+            'helper' => (int) $row->helper,
+            'other' => (int) $row->total - (int) $row->helper,
+            'total' => (int) $row->total,
+        ])->sortBy([['total', 'desc'], fn ($a, $b) => strcmp($a['person']['name'], $b['person']['name'])])->values()->all();
     }
 
     /**

@@ -241,7 +241,7 @@ class EventController extends Controller
         $required = $creating ? 'required' : 'sometimes';
 
         return [
-            'type' => [$required, Rule::in(['training', 'match', 'extra'])],
+            'type' => [$required, Rule::in(['training', 'match', 'extra', 'helper'])],
             'response_mode' => ['sometimes', Rule::in(['rsvp', 'info'])],
             'scope' => ['sometimes', Rule::enum(EventScope::class)],
             'team_ids' => ['sometimes', 'array', 'max:50'],

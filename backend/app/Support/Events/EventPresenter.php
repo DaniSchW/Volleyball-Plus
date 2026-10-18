@@ -79,11 +79,12 @@ class EventPresenter
 
         $data['description'] = $event->description;
         $data['names_visible'] = $showNames;
-        $data['reason_required'] = [
-            'no' => $this->rsvp->reasonRequired($event, RsvpStatus::No),
-            'maybe' => $this->rsvp->reasonRequired($event, RsvpStatus::Maybe),
-        ];
         $data['series_id'] = $event->series_id;
+        $data['series'] = $event->series ? [
+            'weekdays' => array_map('intval', $event->series->weekdays),
+            'interval_weeks' => $event->series->interval_weeks,
+            'ends_on' => $event->series->ends_on?->toDateString(),
+        ] : null;
         $data['team_ids'] = $event->teams->pluck('id')->all();
         $data['responses'] = null;
 
@@ -163,6 +164,10 @@ class EventPresenter
             'min_participants' => $minimum,
             'below_minimum' => $minimum !== null && $event->expectsResponses() && $yes < $minimum,
             'can_manage' => $canManage,
+            'reason_required' => [
+                'no' => $this->rsvp->reasonRequired($event, RsvpStatus::No),
+                'maybe' => $this->rsvp->reasonRequired($event, RsvpStatus::Maybe),
+            ],
             'my' => $myInvites->map(function (EventInvitee $invite) use ($acting, $myResponses, $viewer, $event, $deadlinePassed, $canManage) {
                 $person = $acting[$invite->person_id];
                 $response = $myResponses->firstWhere('person_id', $invite->person_id);

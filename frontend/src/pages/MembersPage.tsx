@@ -1,7 +1,9 @@
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api, errorText, patch, type MemberRow } from '../lib/api';
-import { useTenantPath, useTenantSlug } from '../lib/queries';
+import { useTenant, useTenantPath, useTenantSlug } from '../lib/queries';
+import { LogoUpload } from '../components/LogoUpload';
 import { Card, Loading, Notice, PageTitle, Toggle } from '../components/ui';
 
 /** Admins: who has a login and who is admin. */
@@ -10,6 +12,8 @@ export function MembersPage() {
   const slug = useTenantSlug();
   const tp = useTenantPath();
   const queryClient = useQueryClient();
+  const tenant = useTenant();
+  const [logoVersion, setLogoVersion] = useState(0);
   const members = useQuery({ queryKey: ['members', slug], queryFn: async () => (await api<{ data: MemberRow[] }>(tp('members'))).data });
 
   const update = useMutation({
@@ -23,6 +27,15 @@ export function MembersPage() {
   return (
     <div className="space-y-4">
       <PageTitle>{t('menu.members')}</PageTitle>
+      <LogoUpload
+        title={t('members.tenantLogo')}
+        path={tp('logo')}
+        currentUrl={tenant.data?.logo_url ? `${tenant.data.logo_url}?v=${logoVersion}` : null}
+        onUploaded={() => {
+          setLogoVersion((v) => v + 1);
+          void queryClient.invalidateQueries({ queryKey: ['tenant', slug] });
+        }}
+      />
       {update.isError && <Notice tone="error">{errorText(update.error, t('errors.generic'))}</Notice>}
       <Card>
         <ul className="divide-y divide-slate-100">

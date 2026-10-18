@@ -210,16 +210,17 @@ Prüfung beim Anlegen (Server): Host- und Stammteam sind keine Jugendteams, Rang
 
 ## 4. Termine & Zu-/Absagen
 
-### 🏢 `event_series` – Serientermin (Training)
-`team_id`, `training_group_id` null, `title`, `rrule` (RFC 5545), `duration_min`, `location_name`, `address`, `hall_slot_id` null, `rsvp_deadline_offset_min` (z. B. 120 = 2 h vor Beginn), `max_participants` null, `until` date null. Ein Job erzeugt daraus konkrete `event`-Zeilen (rollierend 6 Monate).
+### 🏢 `event_series` – Serientermin (Training) ✅
+`team_id`, `title`, `description`, `weekdays` (JSON, ISO 1 = Mo … 7 = So), `interval_weeks` (1 = jede Woche, 2 = 14-tägig), `starts_on`, `ends_on` null, `start_time`, `end_time` (Ortszeit der Abteilung), `location_name`, `address`, `rsvp_deadline_minutes` (vor Beginn), `max_participants`, `generated_until`, `created_by`. *(Später: `training_group_id`, `hall_booking_id`.)*
+Ein täglicher Job (`app:generate-series`) erzeugt daraus Einzeltermine rollierend ~6 Monate voraus; 19:30 bleibt über die Zeitumstellung 19:30. Serie ändern wirkt auf kommende, nicht einzeln bearbeitete Termine (`series_exception`); nicht mehr passende Termine werden abgesagt, nicht gelöscht. Serie beenden sagt alle kommenden Termine ab.
 
-### 🏢 `opponent` – wiederverwendbare Gegner
+### 🏢 `opponents` – wiederverwendbare Gegner ✅
 `name`, `logo_file_id` null. Logo-Ebene 3 (pro Gegner, am Spieltag ausgewählt bzw. neu hochgeladen).
 
-### 🏢 `event`
+### 🏢 `events` ✅
 | Feld | Typ | Hinweis |
 |---|---|---|
-| type | enum `training`, `match`, `extra`, `helper` | Training / Spieltag / Zusatztermin / Helferdienst |
+| type | enum `training`, `match`, `extra`, `helper` | Training / Spieltag (Pokal-Icon) / Zusatztermin / Helferdienst (Phase 6) |
 | response_mode | enum `rsvp`, `info` | `info` = reine Informationsnotiz ohne Rückmeldung |
 | title | text | |
 | description | text null | |
@@ -228,38 +229,44 @@ Prüfung beim Anlegen (Server): Host- und Stammteam sind keine Jugendteams, Rang
 | location_name, address | text null | Adresse → Google-Maps-Link |
 | rsvp_deadline | datetime null | Frist |
 | max_participants | smallint null | Teilnehmermaximum |
-| cross_nomination_opens_at | datetime null | Override: ab wann Quernominierte zusagen dürfen; null = Team-Standard |
+| cross_nomination_opens_at | datetime null | *(Phase 4)* Override: ab wann Quernominierte zusagen dürfen; null = Team-Standard |
 | series_id | → event_series null | |
 | series_exception | bool | Einzeltermin wurde abweichend bearbeitet |
-| training_group_id | → training_group null | |
+| training_group_id | → training_group null | *(Phase 4)* |
 | opponent_id | → opponent null | nur `match` |
 | is_home | bool null | Heim-/Auswärtsspiel |
 | scope | enum `team`, `tenant` | `tenant` = vom Admin für alle Teams |
 | status | enum `scheduled`, `cancelled` | |
 | created_by | → tenant_member | |
 
-### 🏢 `event_team` – zu welchen Teams gehört der Termin
+### 🏢 `event_teams` – zu welchen Teams gehört der Termin ✅
 `event_id`, `team_id`. Bei `scope = tenant` werden alle (aktiven) Teams eingetragen; ein Termin kann damit auch mehreren ausgewählten Teams gehören.
 
-### 🏢 `event_invitee` – eingeladene Personen (materialisiert)
-`event_id`, `person_id`, `source` enum `team`, `group`, `cross_nomination`, `manual`.
-Wird beim Erzeugen des Termins aus Teams/Gruppen/Quernominierungen befüllt und bei Kaderänderungen für zukünftige Termine nachgezogen. Basis für Statistik („war eingeladen“) und Startseite.
+### 🏢 `event_invitees` – eingeladene Personen (materialisiert) ✅
+`event_id`, `person_id`, `source` enum `team` (später `group`, `cross_nomination`, `manual`).
+Eingeladen sind alle Personen der Termin-Teams (Spieler, Trainer, Betreuer). Kaderänderungen aktualisieren automatisch alle kommenden Termine des Teams; vergangene bleiben unverändert (Statistik). Basis für Statistik („war eingeladen“) und Startseite.
 
 ### 🏢 `event_position_quota` – Positions-Soll (Ausbaustufe)
 `event_id` (oder `event_series_id`), `position`, `max_count`.
 
-### 🏢 `event_response` – aktuelle Zu-/Absage
+### 🏢 `event_responses` – aktuelle Zu-/Absage ✅
 | Feld | Typ | Hinweis |
 |---|---|---|
 | event_id, person_id | | unique |
 | status | enum `yes`, `no`, `maybe` | Zusage / Absage / Vielleicht (zählt nicht als Zusage für Limit und Mindestteilnehmer) |
-| as_position | enum `position` null | Position, für die zugesagt wurde (Positions-Soll) |
+| as_position | enum `position` null | *(Ausbaustufe)* Position, für die zugesagt wurde (Positions-Soll) |
 | reason | text null | Absage-/Vielleicht-Grund; Pflicht laut Team-Einstellung, Sichtbarkeit für Mitspieler laut `team.reasons_visible_to_teammates` |
 | responded_by | → tenant_member | wer geklickt hat (Spieler selbst oder Elternteil) |
 | responded_at | datetime | |
 
-### 🏢 `event_response_log` – Historie „wer wann“
+### 🏢 `event_response_logs` – Historie „wer wann“ ✅
 Append-only: `event_id`, `person_id`, `old_status`, `new_status`, `responded_by`, `created_at`, `after_deadline` bool.
+
+**Rückmelde-Regeln:** nur Eingeladene und Termine mit `response_mode = rsvp`; bis zur Frist (ohne Frist: bis Beginn) – Trainer, Betreuer und Admins können danach noch eintragen; Grund Pflicht laut Team-Einstellung (bei mehreren Teams gilt die strengere); Eltern antworten für ihre Kinder, Kinder selbst nur mit `can_rsvp`.
+
+**Sichtbarkeit:** Trainer, Betreuer, Admins sehen immer Namen; Mitspieler Namen oder nur Anzahl laut `team.rsvp_visibility` (mehrere Teams: strenger). Gründe sehen Trainer/Admins immer, andere nur, wenn alle Teams sie freigeben.
+
+**Mindestteilnehmer:** Trainings mit weniger Zusagen als `team.min_participants` werden gelb markiert.
 
 **Kapazitätsprüfung:** Zusage läuft in einer Transaktion mit `SELECT … FROM event WHERE id = ? FOR UPDATE`, prüft Frist und (bei Quernominierten) Freigabezeitpunkt, zählt `yes`-Antworten (gesamt und je `as_position`) und lehnt bei vollem Limit ab. Keine Warteliste – bei einer Absage wird der Platz einfach wieder frei.
 
@@ -289,8 +296,8 @@ Helferdienste = `event.type = helper` mit Aufgaben → Helfer-Statistik aus `tas
 
 ## 7. Infobereich
 
-### 🏢 `notice`
-`scope` enum `team`, `tenant`, `team_id` null, `title`, `body`, `visible_from`, `visible_until`, `created_by`, `pinned` bool.
+### 🏢 `notices` ✅
+`scope` enum `team`, `tenant`, `team_id` null, `title`, `body`, `visible_from`, `visible_until`, `created_by`.
 Trainer: `scope = team` für eigene Teams; Admin: zusätzlich `tenant`.
 
 ---
@@ -362,7 +369,7 @@ Laravel-Warteschlange (Treiber `database`) für Mails, Push und Erinnerungen; ab
 ### 🏢 `notification_preference`
 `tenant_member_id`, `channel` enum `push`, `email`, `category` enum `new_event`, `event_changed`, `deadline_reminder`, `chat`, `poll`, `task`, `enabled` bool.
 
-### 🏢 `calendar_feed`
+### 🏢 `calendar_feeds` ✅
 `tenant_member_id`, `token_hash`, `created_at`, `revoked_at` – ICS-Abo-URL ohne Login.
 
 ### 🏢 `audit_log`

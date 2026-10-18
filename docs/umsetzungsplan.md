@@ -140,7 +140,7 @@ volleyball-plus/
 |---|---|---|
 | **0 – Fundament** ✅ | Laravel + React-Gerüst, CI, Mandanten-Scope & Tests, i18n-Grundgerüst, HTTPS-Erzwingung & SSL-Selbstprüfung, Mail per `mail()`/SMTP, Cron-Ersatz-URL, Deploy-Paket, **Einrichtungsassistent im Browser** (ohne SSH), automatische DB-Updates per Cron | lauffähiges Gerüst auf dem Hosting |
 | **1 – Login & Struktur** ✅ | Erstes Admin-Konto, Magic Link (mail()/SMTP), gleitende 90-Tage-Session, Abteilung, Teams, Personen, Rollen, **Einladungslinks**, Eltern-Verknüpfung, Profil inkl. Bild, Sprachwahl | Spieler können per Link beitreten |
-| **2 – Termine & Zu-/Absage (MVP)** | Terminarten, Serien, Fristen, Startseite mit Infinite Scroll, Info-Termine, abteilungsweite Termine, drei Logo-Ebenen, Wegbeschreibung, Infobereich, ICS-Feed | **erste produktiv nutzbare Version** |
+| **2 – Termine & Zu-/Absage (MVP)** ✅ | Terminarten, Serien, Fristen, Startseite mit Infinite Scroll, Info-Termine, abteilungsweite Termine, drei Logo-Ebenen, Wegbeschreibung, Infobereich, ICS-Feed | **erste produktiv nutzbare Version** |
 | **3 – Benachrichtigungen** | Web-Push, iOS-Installationshinweis, Frist-Erinnerungen, Einstellungen pro Kategorie | |
 | **4 – Training** | Teilnehmermaximum, Mindestteilnehmer (gelb), Trainingsgruppen, Ligabaum, Hierarchie, Geschlechtsregel, Quernominierung mit Team-Standard & Termin-Override, SR-Lizenz, Positionsanzeige | |
 | **5 – Statistik** | Quoten mit Sichtbarkeitsregeln, frei wählbarer Zeitraum, Balkendiagramm, Helfer-Statistik | |
@@ -166,6 +166,10 @@ volleyball-plus/
 - Über einen Einladungslink ist man automatisch im Team.
 - Kein SSH: Einrichtung per Browser-Assistent (geschützt durch Einrichtungscode aus einer Datei, die nur per FTP lesbar ist), Updates per FTP-Upload, Datenbank-Migrationen automatisch per Cron.
 - Hosting bei **ALL-INKL**: Cronjobs rufen dort eine Webadresse auf → Hauptweg ist `/cron/{token}`, Intervall jede Minute. Geplante Aufgaben dürfen daher nicht von einer exakten Minute abhängen und müssen in das Zeitlimit eines Webaufrufs passen.
+- Kontaktdaten: Betreuer sehen Details nur per Freigabe (wie Mitspieler); Trainer und Admins immer.
+- Termine anlegen: Trainer, Betreuer, Admins; abteilungsweite Termine nur Admins. Eingeladen ist das ganze Team (Spieler, Trainer, Betreuer).
+- Serientermine wöchentlich an Wochentagen (jede oder jede zweite Woche), sechs Monate rollierend voraus.
+- Gemeinsame Termine mehrerer Teams: es gilt jeweils die strengere Team-Einstellung (Pflicht-Grund, Namen/Anzahl, Sichtbarkeit der Gründe).
 - Entwicklung auf `main`.
 
 - Registrierung ausschließlich über Einladungslinks; Login-Links gehen nur an bestehende Mitglieder.

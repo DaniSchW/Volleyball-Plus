@@ -91,6 +91,62 @@ describe('app shell', () => {
   });
 });
 
+const EVENT = {
+  id: 'e1', type: 'training', response_mode: 'rsvp', scope: 'team', status: 'scheduled', title: 'Hallentraining',
+  starts_at: '2026-10-20T17:30:00Z', ends_at: '2026-10-20T19:30:00Z', meet_at: null, rsvp_deadline: null, deadline_passed: false,
+  location_name: 'Kuhberghalle', address: null, directions_url: null, teams: [{ id: 't1', name: 'Herren 1', color: null }],
+  opponent: null, is_home: null, own_logo_url: null, opponent_logo_url: null, counts: { yes: 3, no: 1, maybe: 0, open: 6 },
+  max_participants: null, is_full: false, min_participants: 6, below_minimum: true, can_manage: false,
+  reason_required: { no: true, maybe: false },
+  my: [{ person_id: 'p1', name: 'Max', is_self: true, status: null, reason: null, can_respond: true }],
+};
+
+describe('start page', () => {
+  it('shows upcoming events and asks for a reason when declining', async () => {
+    let sent: Record<string, unknown> = {};
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/notices': { body: { data: [{ id: 'n1', scope: 'team', team: { id: 't1', name: 'Herren 1' }, title: 'Halle zu in den Ferien', body: null, visible_from: '2026-10-19T00:00:00Z', visible_until: '2026-10-31T00:00:00Z', can_delete: false }] } },
+      'GET /t/ssv-ulm/events?': { body: { data: [EVENT], next_cursor: null } },
+      'POST /t/ssv-ulm/events/e1/responses': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { body: { data: { ...EVENT, my: [{ ...EVENT.my[0], status: 'no', reason: 'Arbeit' }], responses: null, names_visible: false, description: null, series_id: null, series: null, team_ids: ['t1'] } } };
+      },
+    });
+    renderAt('/ssv-ulm');
+
+    expect(await screen.findByText('Halle zu in den Ferien')).toBeInTheDocument();
+    const card = await screen.findByRole('article', { name: 'Hallentraining' });
+    expect(card).toHaveTextContent('Mindestens 6 Zusagen nötig');
+    expect(card.className).toContain('amber');
+
+    fireEvent.click(screen.getByRole('button', { name: /Absage/ }));
+    const reason = screen.getByLabelText('Grund');
+    expect(reason).toBeRequired();
+    fireEvent.change(reason, { target: { value: 'Arbeit' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Senden' }));
+
+    await waitFor(() => expect(sent).toEqual({ person_id: 'p1', status: 'no', reason: 'Arbeit' }));
+  });
+
+  it('accepts with one tap', async () => {
+    let sent: Record<string, unknown> = {};
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/notices': { body: { data: [] } },
+      'GET /t/ssv-ulm/events?': { body: { data: [EVENT], next_cursor: null } },
+      'POST /t/ssv-ulm/events/e1/responses': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { body: { data: { ...EVENT, responses: null } } };
+      },
+    });
+    renderAt('/ssv-ulm');
+
+    fireEvent.click(await screen.findByRole('button', { name: /Zusage/ }));
+    await waitFor(() => expect(sent).toEqual({ person_id: 'p1', status: 'yes' }));
+  });
+});
+
 describe('login', () => {
   it('requests a link with the CSRF header', async () => {
     const fetchMock = mockApi({

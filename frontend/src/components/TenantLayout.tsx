@@ -40,7 +40,7 @@ export function TenantLayout() {
 
   return (
     <div className="min-h-dvh">
-      <AppHeader tenantSlug={slug} tenantName={tenant.data.name} isAdmin={me.data.is_admin} />
+      <AppHeader tenantSlug={slug} tenantName={tenant.data.name} logoUrl={tenant.data.logo_url} isAdmin={me.data.is_admin} />
       <main className="mx-auto max-w-3xl px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
         <Outlet />
       </main>

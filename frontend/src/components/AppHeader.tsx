@@ -6,14 +6,15 @@ import { patch } from '../lib/api';
 import { changeLanguage, LANGUAGES, type Language } from '../i18n';
 
 /** Sections that follow in later phases (shown with a placeholder). */
-export const PLACEHOLDER_SECTIONS = ['events', 'chat', 'polls', 'tasks', 'stats', 'cash', 'halls'] as const;
-export type MenuSection = (typeof PLACEHOLDER_SECTIONS)[number] | 'teams' | 'profile' | 'members';
+export const PLACEHOLDER_SECTIONS = ['chat', 'polls', 'tasks', 'stats', 'cash', 'halls'] as const;
+export type MenuSection = (typeof PLACEHOLDER_SECTIONS)[number] | 'events' | 'teams' | 'profile' | 'members';
 
 const MENU: MenuSection[] = ['events', 'teams', 'chat', 'polls', 'tasks', 'stats', 'cash', 'halls', 'profile'];
 
 interface Props {
   tenantSlug: string;
   tenantName: string;
+  logoUrl: string | null;
   isAdmin: boolean;
 }
 
@@ -21,7 +22,7 @@ interface Props {
  * Top bar with the department name and a drop-down menu at the top right –
  * deliberately no bottom tab bar, so the content keeps the screen space.
  */
-export function AppHeader({ tenantSlug, tenantName, isAdmin }: Props) {
+export function AppHeader({ tenantSlug, tenantName, logoUrl, isAdmin }: Props) {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -49,8 +50,9 @@ export function AppHeader({ tenantSlug, tenantName, isAdmin }: Props) {
   return (
     <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 pt-[env(safe-area-inset-top)] backdrop-blur">
       <div ref={containerRef} className="relative mx-auto flex h-14 max-w-3xl items-center justify-between px-4">
-        <NavLink to={`/${tenantSlug}`} className="truncate text-base font-semibold text-slate-900">
-          {tenantName}
+        <NavLink to={`/${tenantSlug}`} className="flex min-w-0 items-center gap-2 text-base font-semibold text-slate-900">
+          {logoUrl && <img src={logoUrl} alt="" className="size-8 shrink-0 object-contain" />}
+          <span className="truncate">{tenantName}</span>
         </NavLink>
 
         <button

@@ -44,4 +44,5 @@ Tests: `cd backend && php artisan test` und `cd frontend && npm test`.
 
 Phase 0 (Fundament) umgesetzt: Mandantentrennung, HTTPS-Erzwingung und SSL-Selbstprüfung, Mailversand per PHP `mail()`/SMTP, Cron/Queue, i18n DE/EN, App-Gerüst mit Menü oben rechts, CI und Upload-Paket, Einrichtungsassistent im Browser (kein SSH nötig).
 Phase 1 (Login & Struktur) umgesetzt: Login per Magic Link mit 90-Tage-Sitzung, Teams mit Einstellungen, Rollen (Admin, Trainer, Betreuer, Spieler, Eltern), Einladungslinks (auch Kinder-Anmeldung durch Eltern), Profile mit Freigaben und Profilbild, Kinderrechte und Ablösung mit 18.
-Nächster Schritt: Phase 2 – Termine und Zu-/Absagen.
+Phase 2 (Termine & Zu-/Absagen) umgesetzt: Trainings als Serie, Spieltage mit Gegner und Logos, Zusatztermine (auch als reine Info), abteilungsweite Termine, Zu-/Absage/Vielleicht mit Frist, Pflicht-Grund und Teilnehmermaximum, Startseite mit Infobereich und Infinite Scroll, Wegbeschreibung, Kalender-Abo.
+Nächster Schritt: Phase 3 – Push-Benachrichtigungen und Erinnerungen.

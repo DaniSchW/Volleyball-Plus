@@ -153,6 +153,7 @@ class TeamController extends Controller
     {
         return $this->summary($team, $this->current->get()) + [
             'rank_in_league' => $team->rank_in_league,
+            'logo_url' => $team->logo_file_id ? '/api/v1/t/'.$this->current->get()->tenant->slug.'/files/'.$team->logo_file_id : null,
             'settings' => [
                 'min_participants' => $team->min_participants,
                 'default_max_participants' => $team->default_max_participants,

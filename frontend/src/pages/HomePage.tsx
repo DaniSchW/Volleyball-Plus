@@ -1,28 +1,29 @@
 import { useTranslation } from 'react-i18next';
+import { Link } from 'react-router';
+import { EventFeed } from '../components/events/EventFeed';
+import { NoticesArea } from '../components/NoticesArea';
+import { canCreateEvents } from '../lib/permissions';
+import { useTenantMe, useTenantSlug } from '../lib/queries';
 
-/**
- * Start page: notice area on top, then the list of upcoming events with
- * accept/decline. The event list (with infinite scroll) follows in phase 2.
- */
+/** Start page: notice area on top, then the reply list of upcoming events. */
 export function HomePage() {
   const { t } = useTranslation();
+  const slug = useTenantSlug();
+  const me = useTenantMe();
 
   return (
     <div className="space-y-6">
-      <section aria-labelledby="notices-heading" className="rounded-xl border border-slate-200 bg-white p-4">
-        <h2 id="notices-heading" className="text-sm font-semibold uppercase tracking-wide text-slate-500">
-          {t('home.infoArea')}
-        </h2>
-        <p className="mt-2 text-sm text-slate-600">{t('home.noNotices')}</p>
-      </section>
-
+      <NoticesArea />
       <section aria-labelledby="upcoming-heading">
-        <h2 id="upcoming-heading" className="mb-3 text-lg font-semibold">
-          {t('home.upcoming')}
-        </h2>
-        <p className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500">
-          {t('home.noEvents')}
-        </p>
+        <div className="mb-3 flex items-center justify-between gap-3">
+          <h2 id="upcoming-heading" className="text-lg font-semibold">{t('home.upcoming')}</h2>
+          {canCreateEvents(me.data) && (
+            <Link to={`/${slug}/events/new`} className="rounded-lg bg-brand-700 px-3 py-2 text-sm font-medium text-white">
+              {t('events.create')}
+            </Link>
+          )}
+        </div>
+        <EventFeed />
       </section>
     </div>
   );

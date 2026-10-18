@@ -43,7 +43,8 @@
     "save": "Save",
     "saved": "Saved.",
     "create": "Create",
-    "add": "Add"
+    "add": "Add",
+    "cancel": "Cancel"
   },
   "genders": {
     "male": "male",
@@ -119,7 +120,8 @@
     "removeFromTeam": "Remove {{name}} from the team",
     "removeConfirm": "Really remove {{name}} from the team?",
     "addPerson": "Create profile without login",
-    "addPersonHint": "E.g. for a child: create the profile, then invite the parents by link on the profile page."
+    "addPersonHint": "E.g. for a child: create the profile, then invite the parents by link on the profile page.",
+    "logo": "Team logo"
   },
   "invitations": {
     "active": "Active invitation links",
@@ -223,6 +225,113 @@
   },
   "members": {
     "admin": "Admin",
-    "active": "Active"
+    "active": "Active",
+    "tenantLogo": "Department logo"
+  },
+  "calendar": {
+    "title": "Calendar subscription",
+    "hint": "Add this secret address as a subscription in Google Calendar, Apple Calendar or Outlook – your events (and your children's) then appear there automatically.",
+    "subscribe": "Subscribe directly in your calendar",
+    "reset": "Create a new address",
+    "resetConfirm": "The previous address will stop working. Continue?"
+  },
+  "notices": {
+    "add": "Add notice",
+    "allTeams": "All teams",
+    "body": "Text",
+    "for": "For",
+    "from": "Visible from",
+    "to": "Visible until",
+    "publish": "Publish",
+    "remove": "Remove",
+    "title": "Heading",
+    "until": "until {{date}}"
+  },
+  "events": {
+    "create": "New event",
+    "upcoming": "Upcoming",
+    "past": "Past",
+    "noPast": "No past events.",
+    "types": {
+      "training": "Training",
+      "match": "Match day",
+      "extra": "Other event"
+    },
+    "modes": {
+      "rsvp": "With replies",
+      "info": "Information only (no reply)"
+    },
+    "status": {
+      "yes": "Yes",
+      "maybe": "Maybe",
+      "no": "No"
+    },
+    "type": "Type",
+    "title": "Title",
+    "titleHint": "Leave empty for “Training” or “Match against …”",
+    "responseMode": "Replies",
+    "teams": "Teams",
+    "allTeams": "For all teams of the department",
+    "when": "When",
+    "start": "Start",
+    "end": "End",
+    "meetAt": "Meeting time",
+    "deadline": "Reply deadline",
+    "deadlineHint": "empty = until the event starts",
+    "repeat": "Repeat weekly (series)",
+    "weekdays": "Weekdays",
+    "interval": "Rhythm",
+    "everyWeek": "every week",
+    "everySecondWeek": "every two weeks",
+    "repeatUntil": "Until (inclusive)",
+    "repeatUntilHint": "empty = ongoing (about 6 months are always created ahead)",
+    "weekdayShort": {
+      "1": "Mon",
+      "2": "Tue",
+      "3": "Wed",
+      "4": "Thu",
+      "5": "Fri",
+      "6": "Sat",
+      "7": "Sun"
+    },
+    "where": "Where",
+    "locationName": "Place / hall",
+    "address": "Address",
+    "addressHint": "Used for the “Start directions” button (Google Maps).",
+    "maxParticipants": "Maximum participants",
+    "description": "Description",
+    "opponent": "Opponent",
+    "newOpponent": "New opponent (club name)",
+    "uploadLogo": "Upload logo",
+    "changeLogo": "Change logo",
+    "homeAway": "Home / away",
+    "home": "Home match",
+    "away": "Away match",
+    "versus": "vs",
+    "cancelled": "Cancelled",
+    "infoOnly": "Information – no reply needed",
+    "open_one": "{{count}} open",
+    "open_other": "{{count}} open",
+    "belowMinimum": "At least {{min}} acceptances needed",
+    "full": "full",
+    "deadlineUntil": "Reply until {{date}}",
+    "deadlinePassed": "The reply deadline has passed.",
+    "askParents": "Your parents reply for you.",
+    "replyFor": "Reply for {{name}}",
+    "reason": "Reason",
+    "reasonRequired": "Reason (required)",
+    "reasonOptional": "Reason (optional)",
+    "send": "Send",
+    "directions": "Start directions",
+    "yourReply": "Your reply",
+    "replies": "Replies",
+    "notAnswered": "No reply yet",
+    "manage": "Manage",
+    "edit": "Edit event",
+    "editSeries": "Edit whole series",
+    "cancel": "Cancel event",
+    "restore": "Undo cancellation",
+    "endSeries": "End series",
+    "endSeriesConfirm": "All upcoming events of this series will be cancelled. Continue?"
   }
 }

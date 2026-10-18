@@ -1,6 +1,9 @@
 import { createBrowserRouter, RouterProvider, type RouteObject } from 'react-router';
 import { PLACEHOLDER_SECTIONS } from './components/AppHeader';
 import { TenantLayout } from './components/TenantLayout';
+import { EventFormPage } from './pages/EventFormPage';
+import { EventPage } from './pages/EventPage';
+import { EventsPage } from './pages/EventsPage';
 import { HomePage } from './pages/HomePage';
 import { JoinPage } from './pages/JoinPage';
 import { LoginConfirmPage } from './pages/LoginConfirmPage';
@@ -25,6 +28,10 @@ export const routes: RouteObject[] = [
     element: <TenantLayout />,
     children: [
       { index: true, element: <HomePage /> },
+      { path: 'events', element: <EventsPage /> },
+      { path: 'events/new', element: <EventFormPage /> },
+      { path: 'events/:eventId', element: <EventPage /> },
+      { path: 'events/:eventId/edit', element: <EventFormPage /> },
       { path: 'teams', element: <TeamsPage /> },
       { path: 'teams/:teamId', element: <TeamPage /> },
       { path: 'persons/:personId', element: <PersonPage /> },

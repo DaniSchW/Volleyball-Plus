@@ -8,21 +8,24 @@ import {
 } from '../lib/api';
 import { useTenantPath, useTenantSlug } from '../lib/queries';
 import { Avatar, Button, Card, Field, Loading, Notice, PageTitle, Select, Toggle } from '../components/ui';
+import { EventFeed } from '../components/events/EventFeed';
+import { LogoUpload } from '../components/LogoUpload';
 
-type Tab = 'roster' | 'invitations' | 'settings';
+type Tab = 'roster' | 'events' | 'invitations' | 'settings';
 
 export function TeamPage() {
   const { t } = useTranslation();
   const { teamId = '' } = useParams();
   const tp = useTenantPath();
   const [tab, setTab] = useState<Tab>('roster');
+  const queryClient = useQueryClient();
 
   const team = useQuery({ queryKey: ['team', teamId], queryFn: async () => (await api<{ data: Team }>(tp(`teams/${teamId}`))).data });
 
   if (team.isPending) return <Loading />;
   if (team.isError) return <Notice tone="error">{errorText(team.error, t('errors.generic'))}</Notice>;
 
-  const tabs: Tab[] = ['roster', ...(team.data.can_invite ? (['invitations'] as Tab[]) : []), ...(team.data.can_manage ? (['settings'] as Tab[]) : [])];
+  const tabs: Tab[] = ['roster', 'events', ...(team.data.can_invite ? (['invitations'] as Tab[]) : []), ...(team.data.can_manage ? (['settings'] as Tab[]) : [])];
 
   return (
     <div className="space-y-4">
@@ -45,7 +48,18 @@ export function TeamPage() {
       )}
       {tab === 'roster' && <Roster team={team.data} />}
       {tab === 'invitations' && <Invitations team={team.data} />}
-      {tab === 'settings' && team.data.settings && <Settings team={team.data} settings={team.data.settings} />}
+      {tab === 'settings' && team.data.settings && (
+        <>
+          <LogoUpload
+            title={t('team.logo')}
+            path={tp(`teams/${team.data.id}/logo`)}
+            currentUrl={team.data.logo_url ?? null}
+            onUploaded={() => void queryClient.invalidateQueries({ queryKey: ['team', teamId] })}
+          />
+          <Settings team={team.data} settings={team.data.settings} />
+        </>
+      )}
+      {tab === 'events' && <EventFeed teamId={team.data.id} />}
     </div>
   );
 }

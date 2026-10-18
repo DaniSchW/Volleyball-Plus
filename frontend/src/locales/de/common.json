@@ -43,7 +43,8 @@
     "save": "Speichern",
     "saved": "Gespeichert.",
     "create": "Anlegen",
-    "add": "Hinzufügen"
+    "add": "Hinzufügen",
+    "cancel": "Abbrechen"
   },
   "genders": {
     "male": "männlich",
@@ -119,7 +120,8 @@
     "removeFromTeam": "{{name}} aus dem Team entfernen",
     "removeConfirm": "{{name}} wirklich aus dem Team entfernen?",
     "addPerson": "Profil ohne Login anlegen",
-    "addPersonHint": "Z. B. für ein Kind: Lege das Profil an und lade danach auf der Profilseite die Eltern per Link ein."
+    "addPersonHint": "Z. B. für ein Kind: Lege das Profil an und lade danach auf der Profilseite die Eltern per Link ein.",
+    "logo": "Team-Logo"
   },
   "invitations": {
     "active": "Aktive Einladungslinks",
@@ -223,6 +225,113 @@
   },
   "members": {
     "admin": "Admin",
-    "active": "Aktiv"
+    "active": "Aktiv",
+    "tenantLogo": "Logo der Abteilung"
+  },
+  "calendar": {
+    "title": "Kalender-Abo",
+    "hint": "Diese geheime Adresse in Google Kalender, Apple Kalender oder Outlook als Abo eintragen – deine Termine (und die deiner Kinder) erscheinen dann automatisch dort.",
+    "subscribe": "Direkt im Kalender abonnieren",
+    "reset": "Neue Adresse erzeugen",
+    "resetConfirm": "Die bisherige Adresse funktioniert danach nicht mehr. Fortfahren?"
+  },
+  "notices": {
+    "add": "Info hinzufügen",
+    "allTeams": "Alle Teams",
+    "body": "Text",
+    "for": "Für",
+    "from": "Sichtbar ab",
+    "to": "Sichtbar bis",
+    "publish": "Veröffentlichen",
+    "remove": "Entfernen",
+    "title": "Überschrift",
+    "until": "bis {{date}}"
+  },
+  "events": {
+    "create": "Termin anlegen",
+    "upcoming": "Anstehend",
+    "past": "Vergangen",
+    "noPast": "Keine vergangenen Termine.",
+    "types": {
+      "training": "Training",
+      "match": "Spieltag",
+      "extra": "Zusatztermin"
+    },
+    "modes": {
+      "rsvp": "Mit Zu-/Absage",
+      "info": "Nur Information (keine Rückmeldung)"
+    },
+    "status": {
+      "yes": "Zusage",
+      "maybe": "Vielleicht",
+      "no": "Absage"
+    },
+    "type": "Art",
+    "title": "Titel",
+    "titleHint": "Leer lassen für „Training“ bzw. „Spiel gegen …“",
+    "responseMode": "Rückmeldung",
+    "teams": "Teams",
+    "allTeams": "Für alle Teams der Abteilung",
+    "when": "Wann",
+    "start": "Beginn",
+    "end": "Ende",
+    "meetAt": "Treffpunkt",
+    "deadline": "Rückmeldefrist",
+    "deadlineHint": "leer = bis Terminbeginn",
+    "repeat": "Wöchentlich wiederholen (Serie)",
+    "weekdays": "Wochentage",
+    "interval": "Rhythmus",
+    "everyWeek": "jede Woche",
+    "everySecondWeek": "alle zwei Wochen",
+    "repeatUntil": "Bis einschließlich",
+    "repeatUntilHint": "leer = fortlaufend (es werden immer ca. 6 Monate im Voraus angelegt)",
+    "weekdayShort": {
+      "1": "Mo",
+      "2": "Di",
+      "3": "Mi",
+      "4": "Do",
+      "5": "Fr",
+      "6": "Sa",
+      "7": "So"
+    },
+    "where": "Wo",
+    "locationName": "Ort / Halle",
+    "address": "Adresse",
+    "addressHint": "Für den Button „Wegbeschreibung starten“ (Google Maps).",
+    "maxParticipants": "Teilnehmermaximum",
+    "description": "Beschreibung",
+    "opponent": "Gegner",
+    "newOpponent": "Neuer Gegner (Vereinsname)",
+    "uploadLogo": "Logo hochladen",
+    "changeLogo": "Logo ändern",
+    "homeAway": "Heim / Auswärts",
+    "home": "Heimspiel",
+    "away": "Auswärtsspiel",
+    "versus": "gegen",
+    "cancelled": "Abgesagt",
+    "infoOnly": "Information – keine Rückmeldung nötig",
+    "open_one": "{{count}} offen",
+    "open_other": "{{count}} offen",
+    "belowMinimum": "Mindestens {{min}} Zusagen nötig",
+    "full": "voll",
+    "deadlineUntil": "Rückmeldung bis {{date}}",
+    "deadlinePassed": "Die Rückmeldefrist ist abgelaufen.",
+    "askParents": "Deine Eltern antworten für dich.",
+    "replyFor": "Rückmeldung für {{name}}",
+    "reason": "Grund",
+    "reasonRequired": "Grund (Pflicht)",
+    "reasonOptional": "Grund (optional)",
+    "send": "Senden",
+    "directions": "Wegbeschreibung starten",
+    "yourReply": "Deine Rückmeldung",
+    "replies": "Rückmeldungen",
+    "notAnswered": "Noch offen",
+    "manage": "Verwalten",
+    "edit": "Termin bearbeiten",
+    "editSeries": "Ganze Serie bearbeiten",
+    "cancel": "Termin absagen",
+    "restore": "Absage zurücknehmen",
+    "endSeries": "Serie beenden",
+    "endSeriesConfirm": "Alle kommenden Termine dieser Serie werden abgesagt. Fortfahren?"
   }
 }

@@ -61,6 +61,7 @@ export function errorText(error: unknown, fallback: string): string {
 export interface TenantInfo {
   slug: string;
   name: string;
+  logo_url: string | null;
   default_locale: string;
 }
 
@@ -107,6 +108,7 @@ export interface Team {
   can_invite: boolean;
   can_see: boolean;
   rank_in_league?: number;
+  logo_url?: string | null;
   settings?: TeamSettings;
 }
 
@@ -200,4 +202,86 @@ export interface MemberRow {
   is_admin: boolean;
   status: 'active' | 'disabled';
   persons: { id: string; name: string; relation: 'self' | 'guardian' }[];
+}
+
+// ---- events ----
+
+export type EventType = 'training' | 'match' | 'extra';
+export type RsvpStatus = 'yes' | 'no' | 'maybe';
+
+export interface MyReply {
+  person_id: string;
+  name: string;
+  is_self: boolean;
+  status: RsvpStatus | null;
+  reason: string | null;
+  can_respond: boolean;
+}
+
+export interface EventSummary {
+  id: string;
+  type: EventType;
+  response_mode: 'rsvp' | 'info';
+  scope: 'team' | 'tenant';
+  status: 'scheduled' | 'cancelled';
+  title: string;
+  starts_at: string;
+  ends_at: string;
+  meet_at: string | null;
+  rsvp_deadline: string | null;
+  deadline_passed: boolean;
+  location_name: string | null;
+  address: string | null;
+  directions_url: string | null;
+  teams: { id: string; name: string; color: string | null }[];
+  opponent: { id: string; name: string } | null;
+  is_home: boolean | null;
+  own_logo_url: string | null;
+  opponent_logo_url: string | null;
+  counts: { yes: number; no: number; maybe: number; open: number };
+  max_participants: number | null;
+  is_full: boolean;
+  min_participants: number | null;
+  below_minimum: boolean;
+  can_manage: boolean;
+  reason_required: { no: boolean; maybe: boolean };
+  my: MyReply[];
+}
+
+export interface ResponseRow {
+  person: { id: string; name: string; avatar_url: string | null; primary_position: Position | null; role: TeamRole };
+  status: RsvpStatus | null;
+  reason: string | null;
+  responded_at: string | null;
+}
+
+export interface EventDetail extends EventSummary {
+  description: string | null;
+  names_visible: boolean;
+  series_id: string | null;
+  series: { weekdays: number[]; interval_weeks: number; ends_on: string | null } | null;
+  team_ids: string[];
+  responses: ResponseRow[] | null;
+}
+
+export interface EventPage {
+  data: EventSummary[];
+  next_cursor: string | null;
+}
+
+export interface Notice {
+  id: string;
+  scope: 'team' | 'tenant';
+  team: { id: string; name: string } | null;
+  title: string;
+  body: string | null;
+  visible_from: string;
+  visible_until: string;
+  can_delete: boolean;
+}
+
+export interface Opponent {
+  id: string;
+  name: string;
+  logo_url: string | null;
 }

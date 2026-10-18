@@ -333,5 +333,27 @@
     "restore": "Absage zurücknehmen",
     "endSeries": "Serie beenden",
     "endSeriesConfirm": "Alle kommenden Termine dieser Serie werden abgesagt. Fortfahren?"
+  },
+  "notifications": {
+    "title": "Benachrichtigungen",
+    "enable": "Aktivieren",
+    "disable": "Ausschalten",
+    "deviceOn": "Push-Nachrichten sind auf diesem Gerät aktiv.",
+    "deviceOff": "Push-Nachrichten sind auf diesem Gerät aus.",
+    "iosInstall": "Auf iPhone und iPad gibt es Push-Nachrichten nur, wenn die App auf dem Home-Bildschirm liegt: In Safari auf „Teilen“ tippen, dann „Zum Home-Bildschirm“. Danach die App von dort öffnen und hier aktivieren.",
+    "iosTooOld": "Für Push-Nachrichten wird iOS 16.4 oder neuer benötigt.",
+    "unsupported": "Dieser Browser unterstützt keine Push-Nachrichten. E-Mails kommen trotzdem an.",
+    "denied": "Benachrichtigungen sind für diese Seite blockiert. Bitte in den Browser- bzw. Systemeinstellungen erlauben.",
+    "failed": "Push konnte nicht aktiviert werden. Bitte später erneut versuchen.",
+    "category": "Worüber",
+    "push": "Push",
+    "email": "E-Mail",
+    "hint": "Gilt für diese Abteilung. Push kommt auf allen Geräten an, auf denen du es aktiviert hast.",
+    "categories": {
+      "event_new": "Neue Termine",
+      "event_changed": "Änderungen und Absagen",
+      "reminder": "Erinnerung, wenn du noch nicht geantwortet hast",
+      "notice": "Neue Infos"
+    }
   }
 }

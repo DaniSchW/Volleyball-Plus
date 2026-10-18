@@ -213,3 +213,47 @@ describe('joining', () => {
     });
   });
 });
+
+describe('notifications', () => {
+  const PREFS = [
+    { category: 'event_new', push: true, email: false },
+    { category: 'event_changed', push: true, email: true },
+    { category: 'reminder', push: true, email: false },
+    { category: 'notice', push: true, email: false },
+  ];
+  const profileApi = (extra: Record<string, Handler> = {}) => ({
+    'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+    'GET /me/sessions': { body: { data: [] } },
+    'GET /t/ssv-ulm/calendar': { body: { data: { url: 'https://vb.example.org/api/v1/t/ssv-ulm/calendar/x.ics' } } },
+    'GET /t/ssv-ulm/notification-preferences': { body: { data: PREFS } },
+    ...extra,
+  });
+
+  it('lets members choose push and e-mail per category', async () => {
+    let sent: Record<string, unknown> = {};
+    mockApi(profileApi({
+      'PUT /t/ssv-ulm/notification-preferences': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { body: { data: (sent as { preferences: unknown[] }).preferences } };
+      },
+    }));
+    renderAt('/ssv-ulm/profile');
+
+    const box = await screen.findByLabelText('Neue Termine: E-Mail');
+    expect(box).not.toBeChecked();
+    expect(screen.getByText(/unterstützt keine Push-Nachrichten/)).toBeInTheDocument();
+    fireEvent.click(box);
+
+    await waitFor(() => expect(sent).toEqual({ preferences: [{ ...PREFS[0], email: true }, ...PREFS.slice(1)] }));
+    expect(screen.getByLabelText('Neue Termine: E-Mail')).toBeChecked();
+  });
+
+  it('explains on iPhones that the app must be on the home screen', async () => {
+    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue('Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 Safari/604.1');
+    mockApi(profileApi());
+    renderAt('/ssv-ulm/profile');
+
+    expect(await screen.findByText(/Zum Home-Bildschirm/)).toBeInTheDocument();
+    vi.restoreAllMocks();
+  });
+});

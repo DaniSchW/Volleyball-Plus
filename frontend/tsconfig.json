@@ -15,5 +15,6 @@
     "noEmit": true,
     "types": ["vite/client", "vite-plugin-pwa/client", "@testing-library/jest-dom"]
   },
-  "include": ["src", "vite.config.ts"]
+  "include": ["src", "vite.config.ts"],
+  "exclude": ["src/sw.ts"]
 }

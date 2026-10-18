@@ -4,6 +4,8 @@ import { Link, useNavigate } from 'react-router';
 import { api, del, post, type SessionInfo } from '../lib/api';
 import { useAccount, useTenantMe, useTenantSlug } from '../lib/queries';
 import { Button, Card, Loading, PageTitle } from '../components/ui';
+import { NotificationsCard } from '../components/NotificationsCard';
+import { forgetPushOnLogout } from '../lib/push';
 import { ShareLink } from './TeamPage';
 
 /** Own account: profiles (own and children's), devices, logout. */
@@ -21,7 +23,10 @@ export function ProfilePage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['sessions'] }),
   });
   const logout = useMutation({
-    mutationFn: () => post('/auth/logout'),
+    mutationFn: async () => {
+      await forgetPushOnLogout();
+      return post('/auth/logout');
+    },
     onSuccess: () => {
       queryClient.clear();
       navigate(`/${slug}/login`, { replace: true });
@@ -53,6 +58,8 @@ export function ProfilePage() {
         </ul>
         {me.data?.persons.length === 0 && <p className="text-sm text-slate-500">{t('profile.noProfiles')}</p>}
       </Card>
+
+      <NotificationsCard />
 
       <CalendarCard />
 

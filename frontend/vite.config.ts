@@ -34,6 +34,10 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
+      // Own service worker (src/sw.ts) for push messages; the app shell is precached as before.
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       includeAssets: ['icons/apple-touch-icon.png', 'icons/favicon.svg'],
       manifest: {
         name: 'Volleyball Plus',
@@ -52,10 +56,8 @@ export default defineConfig({
           { src: '/icons/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
-      workbox: {
+      injectManifest: {
         globPatterns: ['**/*.{js,css,html,svg,png,woff2}'],
-        navigateFallback: `/${ENTRY}`,
-        navigateFallbackDenylist: [/^\/api\//, /^\/cron\//, /^\/up$/],
       },
     }),
     spaFallback(),

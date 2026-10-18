@@ -333,5 +333,27 @@
     "restore": "Undo cancellation",
     "endSeries": "End series",
     "endSeriesConfirm": "All upcoming events of this series will be cancelled. Continue?"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "enable": "Turn on",
+    "disable": "Turn off",
+    "deviceOn": "Push messages are on for this device.",
+    "deviceOff": "Push messages are off for this device.",
+    "iosInstall": "On iPhone and iPad push messages only work when the app is on the home screen: tap “Share” in Safari, then “Add to Home Screen”. Open the app from there and turn them on here.",
+    "iosTooOld": "Push messages need iOS 16.4 or later.",
+    "unsupported": "This browser does not support push messages. E-mails still arrive.",
+    "denied": "Notifications are blocked for this site. Please allow them in the browser or system settings.",
+    "failed": "Push could not be turned on. Please try again later.",
+    "category": "About",
+    "push": "Push",
+    "email": "E-mail",
+    "hint": "Applies to this department. Push arrives on every device where you turned it on.",
+    "categories": {
+      "event_new": "New events",
+      "event_changed": "Changes and cancellations",
+      "reminder": "Reminder if you have not replied yet",
+      "notice": "New notices"
+    }
   }
 }

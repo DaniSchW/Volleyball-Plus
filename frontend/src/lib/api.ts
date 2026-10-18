@@ -285,3 +285,11 @@ export interface Opponent {
   name: string;
   logo_url: string | null;
 }
+
+export type NotificationCategory = 'event_new' | 'event_changed' | 'reminder' | 'notice';
+
+export interface NotificationPreference {
+  category: NotificationCategory;
+  push: boolean;
+  email: boolean;
+}

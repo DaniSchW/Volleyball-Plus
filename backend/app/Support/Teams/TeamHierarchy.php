@@ -8,7 +8,6 @@ use App\Enums\TeamRole;
 use App\Models\Team;
 use App\Models\TeamMembership;
 use Illuminate\Support\Collection;
-use Illuminate\Validation\ValidationException;
 
 /**
  * Ranking of the department's teams from their league: a lower league
@@ -16,9 +15,9 @@ use Illuminate\Validation\ValidationException;
  * rank_in_league. Youth teams and teams without league are outside the
  * hierarchy.
  *
- * "A player of a higher team may not play in a lower one" compares only
- * teams of the same kind (men, women, mixed), so a Herren 1 player may
- * still play in a mixed hobby team. Cross-nominations compare across kinds
+ * A player of a higher team may train with a lower team but not play its
+ * matches. This compares only teams of the same kind (men, women, mixed),
+ * so a Herren 1 player may still play matches of a mixed hobby team. Cross-nominations compare across kinds
  * (a mixed team may invite from lower men's and women's teams); the
  * gender rule applies on top.
  */
@@ -60,10 +59,10 @@ class TeamHierarchy
     }
 
     /**
-     * A player of a higher team may not also play in a lower one. Returns
-     * the higher team that blocks joining $team as player, if any.
+     * The higher team (same kind) a person plays in, if any. Such a player
+     * may train with $team but not play its matches.
      */
-    public function blockingTeam(Team $team, string $personId): ?Team
+    public function higherTeamOf(Team $team, string $personId): ?Team
     {
         if ($this->rank($team) === null) {
             return null;
@@ -73,18 +72,26 @@ class TeamHierarchy
     }
 
     /**
-     * @throws ValidationException when a player of a higher team would join a lower one
+     * Of the given persons, those who play in a team above $team.
+     *
+     * @param  Collection<int, string>  $personIds
+     * @return Collection<string, Team> person id => higher team
      */
-    public function assertMayJoin(Team $team, string $personId, TeamRole $role): void
+    public function playingHigher(Team $team, Collection $personIds): Collection
     {
-        if ($role !== TeamRole::Player) {
-            return;
+        if ($this->rank($team) === null || $personIds->isEmpty()) {
+            return collect();
         }
 
-        $higher = $this->blockingTeam($team, $personId);
-        if ($higher !== null) {
-            throw ValidationException::withMessages(['person_id' => __('teams.higher_team', ['team' => $higher->name, 'lower' => $team->name])]);
+        $higher = Team::query()->with('league')->whereNull('archived_at')->get()
+            ->filter(fn (Team $other) => $this->isHigher($other, $team))->keyBy('id');
+        if ($higher->isEmpty()) {
+            return collect();
         }
+
+        return TeamMembership::query()
+            ->whereIn('team_id', $higher->keys())->whereIn('person_id', $personIds)->where('role', TeamRole::Player)
+            ->get()->mapWithKeys(fn (TeamMembership $m) => [$m->person_id => $higher[$m->team_id]]);
     }
 
     /**

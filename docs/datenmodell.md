@@ -159,7 +159,7 @@ Vorlage: Beim ersten Aufruf wird der Standard-Ligabaum angelegt (1. Bundesliga, 
 
 Hierarchie-Rang (berechnet, nur Teams mit `is_youth = false` und Liga): `(league.level, team.rank_in_league)` – kleinerer Wert = höheres Team. Teams ohne Liga stehen außerhalb der Hierarchie.
 
-**Regel „höheres Team spielt nicht im niedrigeren“:** Wer als Spieler in einem höheren Team ist, kann nicht als Spieler in ein niedrigeres Team **derselben Art** (Herren/Damen/Mixed) aufgenommen werden – weder über den Kader noch über einen Einladungslink. Trainer-/Betreuerrollen sind davon frei; ein Herren-1-Spieler darf also z. B. in einem Mixed-Hobbyteam mitspielen.
+**Regel „höheres Team spielt nicht im niedrigeren“:** Spieler eines höheren Teams dürfen auch im Kader eines niedrigeren Teams **derselben Art** (Herren/Damen/Mixed) stehen und dort **mittrainieren**, werden aber zu dessen **Spieltagen nicht eingeladen** (und können dort nicht zusagen). Der Kader zeigt dazu „Spielt in … – trainiert hier mit, aber keine Spieltage“. Ändert sich die Rangfolge (Liga, Rang, Art) oder der Kader, werden die Einladungen aller kommenden Termine neu abgeglichen. Trainer-/Betreuerrollen sind nicht betroffen; Mixed-Teams zählen als eigene Art.
 
 ### 🏢 `team_membership`
 | Feld | Typ | Hinweis |
@@ -169,7 +169,7 @@ Hierarchie-Rang (berechnet, nur Teams mit `is_youth = false` und Liga): `(league
 | role | enum `player`, `trainer`, `organizer` | eine Zeile pro Rolle |
 | joined_at | date | |
 
-Unique `(team_id, person_id, role)`. Ein Spieler (auch Erwachsene) kann so mehreren Teams angehören; ein Trainer mehrere Teams betreuen.
+Unique `(team_id, person_id, role)`. Ein Spieler (auch Erwachsene) kann so mehreren Teams angehören; ein Trainer mehrere Teams betreuen. **Jeder Trainer** (und jeder Admin) kann Personen der ganzen Abteilung direkt in sein Team holen (Suche nach Namen) – sie erscheinen sofort im Team, ohne Einladung oder Bestätigung.
 
 ### 🏢 `invitations` – Einladungslinks
 | Feld | Typ | Hinweis |

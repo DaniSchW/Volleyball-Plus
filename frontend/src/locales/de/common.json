@@ -125,7 +125,15 @@
     "removeConfirm": "{{name}} wirklich aus dem Team entfernen?",
     "addPerson": "Profil ohne Login anlegen",
     "addPersonHint": "Z. B. für ein Kind: Lege das Profil an und lade danach auf der Profilseite die Eltern per Link ein.",
-    "logo": "Team-Logo"
+    "logo": "Team-Logo",
+    "addFromDepartment": "Aus der Abteilung hinzufügen",
+    "addFromDepartmentHint": "Personen, die schon in der Abteilung sind (z. B. aus einem anderen Team), direkt ins Team holen – sie erscheinen sofort, ohne Einladung.",
+    "search": "Name suchen",
+    "searchPlaceholder": "Name (mind. 2 Buchstaben)",
+    "searchNone": "Niemand gefunden.",
+    "noTeam": "noch in keinem Team",
+    "alreadyIn": "Schon im Team",
+    "playsHigher": "Spielt in {{team}} – trainiert hier mit, aber keine Spieltage"
   },
   "invitations": {
     "active": "Aktive Einladungslinks",

@@ -10,6 +10,7 @@ import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
 import { Avatar, Button, Card, Field, Loading, Notice, PageTitle, Select, Toggle } from '../components/ui';
 import { EventFeed } from '../components/events/EventFeed';
 import { LogoUpload } from '../components/LogoUpload';
+import { AddFromDepartment } from '../components/team/AddFromDepartment';
 import { RefereeBadge } from '../components/team/RefereeBadge';
 import { TeamBaseData } from '../components/team/TeamBaseData';
 import { TeamGuests } from '../components/team/TeamGuests';
@@ -107,7 +108,7 @@ function Roster({ team }: { team: Team }) {
         return (
           <Card key={role} title={`${t(`roles.plural.${role}`)} (${rows.length})`}>
             <ul className="divide-y divide-slate-100">
-              {rows.map(({ person, roles }) => {
+              {rows.map(({ person, roles, plays_higher_in }) => {
                 const membership = roles.find((r) => r.role === role)!;
                 const name = `${person.first_name} ${person.last_name}`;
                 return (
@@ -121,6 +122,9 @@ function Roster({ team }: { team: Team }) {
                       <span className="block truncate text-xs text-slate-500">
                         {[person.primary_position && t(`positions.${person.primary_position}`), person.is_minor && t('profile.minor')].filter(Boolean).join(' · ')}
                       </span>
+                      {plays_higher_in && role === 'player' && (
+                        <span className="block text-xs text-amber-800">{t('team.playsHigher', { team: plays_higher_in })}</span>
+                      )}
                       {person.referee_license && <RefereeBadge license={person.referee_license} />}
                     </Link>
                     {team.can_manage && (
@@ -141,6 +145,7 @@ function Roster({ team }: { team: Team }) {
         );
       })}
       {roster.data.length === 0 && <Notice>{t('team.empty')}</Notice>}
+      {team.can_manage && <AddFromDepartment team={team} memberIds={new Set(roster.data.map((row) => row.person.id))} />}
       {team.can_manage && <AddPerson team={team} />}
     </div>
   );

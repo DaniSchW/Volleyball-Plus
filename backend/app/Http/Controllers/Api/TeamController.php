@@ -13,6 +13,7 @@ use App\Models\TenantMember;
 use App\Support\Auth\CurrentMember;
 use App\Support\Auth\Permissions;
 use App\Support\Auth\PersonPresenter;
+use App\Support\Events\InviteeSync;
 use App\Support\Teams\TeamHierarchy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -75,9 +76,16 @@ class TeamController extends Controller
             array_flip($allowed),
         ));
 
-        $team->fill($data)->save();
+        $team->fill($data);
+        $hierarchyChanged = $team->isDirty(['league_id', 'rank_in_league', 'gender', 'is_youth']);
+        $team->save();
 
-        return response()->json(['data' => $this->detail($team)]);
+        // Who plays matches of which team depends on the order of the teams.
+        if ($hierarchyChanged) {
+            app(InviteeSync::class)->syncTeams(Team::query()->whereNull('archived_at')->pluck('id'));
+        }
+
+        return response()->json(['data' => $this->detail($team->load('league'))]);
     }
 
     public function destroy(Team $team): JsonResponse
@@ -97,8 +105,12 @@ class TeamController extends Controller
 
         $memberships = $team->memberships()->with('person.refereeLicense')->get()->filter(fn (TeamMembership $m) => $m->person !== null);
 
+        $higher = $this->hierarchy->playingHigher($team, $memberships->where('role', TeamRole::Player)->pluck('person_id'));
+
         $rows = $memberships->groupBy('person_id')->map(fn ($group) => [
             'person' => $presenter->present($group->first()->person, $viewer),
+            // Trains with the team, but plays matches for this higher team.
+            'plays_higher_in' => $higher->has($group->first()->person_id) ? $higher[$group->first()->person_id]->name : null,
             'roles' => $group->map(fn (TeamMembership $m) => ['id' => $m->id, 'role' => $m->role->value])->values()->all(),
         ])->sortBy(fn ($row) => mb_strtolower($row['person']['last_name'].' '.$row['person']['first_name']))->values();
 
@@ -113,7 +125,6 @@ class TeamController extends Controller
             'person_id' => ['required', 'string', Rule::exists('persons', 'id')->where('tenant_id', $team->tenant_id)->whereNull('deleted_at')],
             'role' => ['required', Rule::enum(TeamRole::class)],
         ]);
-        $this->hierarchy->assertMayJoin($team, $data['person_id'], TeamRole::from($data['role']));
 
         $membership = TeamMembership::query()->firstOrCreate(
             ['team_id' => $team->id, 'person_id' => $data['person_id'], 'role' => $data['role']],

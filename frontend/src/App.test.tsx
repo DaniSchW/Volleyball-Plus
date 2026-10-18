@@ -337,3 +337,33 @@ describe('statistics', () => {
     expect(fetchMock.mock.calls.filter(([url]) => String(url).includes('/statistics')).length).toBe(2);
   });
 });
+
+describe('roster', () => {
+  it('lets trainers take players of other teams into the team', async () => {
+    let sent: Record<string, unknown> = {};
+    const team = { id: 't2', name: 'Herren 2', gender: 'men', is_youth: false, league_name: null, color: null, can_manage: true, can_invite: true, can_see: true };
+    const person = (id: string, first: string) => ({
+      id, first_name: first, last_name: 'Test', jersey_number: null, gender: 'male', primary_position: null, secondary_positions: [],
+      height_cm: null, reach_height_cm: null, jump_reach_cm: null, avatar_url: null, phone: null, email: null, address: null,
+      birthday: null, is_minor: false, referee_license: null,
+    });
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/teams/t2': { body: { data: team } },
+      'GET /t/ssv-ulm/teams/t2/members': { body: { data: [{ person: person('p1', 'Paul'), roles: [{ id: 'm1', role: 'player' }], plays_higher_in: 'Herren 1' }] } },
+      'GET /t/ssv-ulm/persons?q=Ma': { body: { data: [{ ...person('p2', 'Max'), teams: [{ id: 't1', name: 'Herren 1', role: 'player' }] }] } },
+      'POST /t/ssv-ulm/teams/t2/members': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { status: 201, body: { data: { id: 'm2' } } };
+      },
+    });
+    renderAt('/ssv-ulm/teams/t2');
+
+    expect(await screen.findByText('Spielt in Herren 1 – trainiert hier mit, aber keine Spieltage')).toBeInTheDocument();
+    fireEvent.change(screen.getByRole('searchbox', { name: 'Name suchen' }), { target: { value: 'Ma' } });
+    expect(await screen.findByText('Herren 1 (Spieler/in)')).toBeInTheDocument();
+    fireEvent.click(screen.getAllByRole('button', { name: 'Hinzufügen' })[0]);
+
+    await waitFor(() => expect(sent).toEqual({ person_id: 'p2', role: 'player' }));
+  });
+});

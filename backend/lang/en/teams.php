@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'higher_team' => 'Players of :team cannot also play in :lower (a higher team). Please use cross-nomination for trainings.',
     'league_in_use' => 'This league still has sub-leagues or teams.',
     'league_parent_invalid' => 'A league cannot be placed below itself.',
     'group_invalid' => 'This training group does not belong to the event’s team.',

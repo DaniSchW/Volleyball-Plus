@@ -17,7 +17,6 @@ use App\Models\PersonAccount;
 use App\Models\TeamMembership;
 use App\Models\TenantMember;
 use App\Support\Auth\MagicLinks;
-use App\Support\Teams\TeamHierarchy;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -177,8 +176,6 @@ class JoinService
 
     private function addToTeam(Invitation $invitation, Person $person): void
     {
-        app(TeamHierarchy::class)->assertMayJoin($invitation->team, $person->id, $invitation->role);
-
         TeamMembership::query()->firstOrCreate(
             ['team_id' => $invitation->team_id, 'person_id' => $person->id, 'role' => $invitation->role],
             ['joined_at' => Carbon::today()],

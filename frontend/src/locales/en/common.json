@@ -125,7 +125,15 @@
     "removeConfirm": "Really remove {{name}} from the team?",
     "addPerson": "Create profile without login",
     "addPersonHint": "E.g. for a child: create the profile, then invite the parents by link on the profile page.",
-    "logo": "Team logo"
+    "logo": "Team logo",
+    "addFromDepartment": "Add from the department",
+    "addFromDepartmentHint": "Take people who are already in the department (e.g. from another team) into the team – they appear right away, no invitation needed.",
+    "search": "Search name",
+    "searchPlaceholder": "Name (at least 2 letters)",
+    "searchNone": "Nobody found.",
+    "noTeam": "not in a team yet",
+    "alreadyIn": "Already in team",
+    "playsHigher": "Plays in {{team}} – trains here, but no match days"
   },
   "invitations": {
     "active": "Active invitation links",

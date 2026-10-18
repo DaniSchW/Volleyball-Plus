@@ -17,8 +17,11 @@ class TeamMembership extends Model
 
     protected static function booted(): void
     {
-        // Upcoming events of the team invite the current roster.
-        $sync = fn (TeamMembership $membership) => app(InviteeSync::class)->syncTeam($membership->team_id);
+        // Upcoming events of the team invite the current roster. The person's
+        // other teams too: playing in a higher team excludes from lower matches.
+        $sync = fn (TeamMembership $membership) => app(InviteeSync::class)->syncTeams(
+            TeamMembership::query()->where('person_id', $membership->person_id)->pluck('team_id')->push($membership->team_id),
+        );
         static::created($sync);
         static::deleted($sync);
     }

@@ -178,6 +178,12 @@ export interface PersonDetail extends Person {
 export interface RosterRow {
   person: Person;
   roles: { id: string; role: TeamRole }[];
+  /** Trains with this team but plays matches for this higher team. */
+  plays_higher_in: string | null;
+}
+
+export interface PersonSearchResult extends Person {
+  teams: { id: string; name: string; role: TeamRole }[];
 }
 
 export interface Invitation {

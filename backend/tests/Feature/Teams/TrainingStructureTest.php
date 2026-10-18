@@ -6,6 +6,7 @@ use App\Enums\TeamRole;
 use App\Models\EventInvitee;
 use App\Models\League;
 use App\Models\Team;
+use App\Models\TeamMembership;
 use App\Models\Tenant;
 use App\Models\TenantMember;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -131,20 +132,57 @@ class TrainingStructureTest extends TestCase
             ->assertJsonPath('data.league.name', 'Bezirksliga')->assertJsonPath('data.in_hierarchy', true);
     }
 
-    public function test_a_player_of_a_higher_team_cannot_play_in_a_lower_one(): void
+    public function test_any_trainer_adds_players_of_the_department_who_appear_right_away(): void
     {
-        $add = fn (string $team, string $role) => $this->loginAs($this->admin)->postJson($this->url("teams/{$this->teams[$team]->id}/members"), [
-            'person_id' => $this->personOf($this->max)->id, 'role' => $role,
-        ]);
+        $coach = $this->member($this->tenant, 'hanna@example.org', 'Hanna', 'Coach', gender: 'female');
+        $this->addToTeam($this->teams['H2'], $this->personOf($coach), TeamRole::Trainer);
 
-        $add('H2', 'player')->assertUnprocessable()->assertJsonValidationErrors('person_id');
-        $add('H2', 'trainer')->assertCreated();
-        // Other kind of team (mixed) is fine.
-        $add('MX', 'player')->assertCreated();
-        // Moving up is fine.
-        $this->loginAs($this->admin)->postJson($this->url("teams/{$this->teams['H1']->id}/members"), [
-            'person_id' => $this->personOf($this->paul)->id, 'role' => 'player',
+        $found = $this->loginAs($coach)->getJson($this->url('persons?q=Max'))->assertOk()->json('data.0');
+        $this->assertSame([['id' => $this->teams['H1']->id, 'name' => 'Herren 1', 'role' => 'player']], $found['teams']);
+
+        $this->loginAs($coach)->postJson($this->url("teams/{$this->teams['H2']->id}/members"), [
+            'person_id' => $found['id'], 'role' => 'player',
         ])->assertCreated();
+        $this->assertContains($found['id'], array_column(array_column(
+            $this->loginAs($coach)->getJson($this->url("teams/{$this->teams['H2']->id}/members"))->json('data'), 'person'), 'id'));
+
+        // Players cannot add people to teams.
+        $this->loginAs($this->paul)->getJson($this->url('persons?q=Max'))->assertForbidden();
+    }
+
+    public function test_players_of_a_higher_team_train_with_a_lower_one_but_do_not_play_its_matches(): void
+    {
+        $max = $this->personOf($this->max)->id;
+        $coach = $this->member($this->tenant, 'hanna@example.org', 'Hanna', 'Coach', gender: 'female');
+        $this->addToTeam($this->teams['H2'], $this->personOf($coach), TeamRole::Trainer);
+        $create = fn (string $team, string $type) => $this->loginAs($this->admin)->postJson($this->url('events'), [
+            'type' => $type, 'team_ids' => [$this->teams[$team]->id], 'starts_at' => '2026-10-24T15:00', 'ends_at' => '2026-10-24T18:00',
+        ])->assertCreated()->json('data.id');
+
+        $training = $create('H2', 'training');
+        $match = $create('H2', 'match');
+        $mixedMatch = $create('MX', 'match');
+        $this->loginAs($this->admin)->postJson($this->url("teams/{$this->teams['H2']->id}/members"), ['person_id' => $max, 'role' => 'player'])->assertCreated();
+        $this->loginAs($this->admin)->postJson($this->url("teams/{$this->teams['MX']->id}/members"), ['person_id' => $max, 'role' => 'player'])->assertCreated();
+
+        $this->assertArrayHasKey($max, $this->invited($training));
+        $this->assertArrayNotHasKey($max, $this->invited($match));
+        // Other kind of team: matches allowed.
+        $this->assertArrayHasKey($max, $this->invited($mixedMatch));
+        $row = collect($this->loginAs($coach)->getJson($this->url("teams/{$this->teams['H2']->id}/members"))->json('data'))->firstWhere('person.id', $max);
+        $this->assertSame('Herren 1', $row['plays_higher_in']);
+
+        // Leaving Herren 1 makes him a regular Herren 2 player again.
+        $membership = $this->inTenant($this->tenant, fn () => TeamMembership::query()->where('team_id', $this->teams['H1']->id)->where('person_id', $max)->first());
+        $this->loginAs($this->admin)->deleteJson($this->url("teams/{$this->teams['H1']->id}/members/{$membership->id}"))->assertOk();
+        $this->assertArrayHasKey($max, $this->invited($match));
+
+        // Moving Herren 2 above Herren 1 in the hierarchy turns it around.
+        $this->loginAs($this->admin)->postJson($this->url("teams/{$this->teams['H1']->id}/members"), ['person_id' => $max, 'role' => 'player'])->assertCreated();
+        $this->assertArrayNotHasKey($max, $this->invited($match));
+        $leagues = collect($this->loginAs($this->admin)->getJson($this->url('leagues'))->json('data'))->keyBy('name');
+        $this->loginAs($this->admin)->patchJson($this->url('teams/'.$this->teams['H2']->id), ['league_id' => $leagues['3. Liga']['id']])->assertOk();
+        $this->assertArrayHasKey($max, $this->invited($match));
     }
 
     public function test_cross_nomination_only_upwards_and_by_gender(): void

@@ -1,7 +1,6 @@
 <?php
 
 return [
-    'higher_team' => 'Wer in :team spielt, kann nicht zusätzlich in :lower spielen (höheres Team). Für Trainings bitte die Quernominierung nutzen.',
     'league_in_use' => 'Diese Liga hat noch Unterligen oder Teams.',
     'league_parent_invalid' => 'Eine Liga kann nicht unter sich selbst einsortiert werden.',
     'group_invalid' => 'Diese Trainingsgruppe gehört nicht zum Team des Termins.',

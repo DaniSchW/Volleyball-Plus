@@ -37,7 +37,7 @@ class PersonController extends Controller
         abort_unless($this->permissions->isAdmin($member) || $this->isAnyTrainer(), 403);
 
         $q = trim((string) $request->query('q', ''));
-        $persons = Person::query()
+        $persons = Person::query()->with('teamMemberships.team')
             ->when($q !== '', fn ($query) => $query->where(fn ($w) => $w
                 ->where('first_name', 'like', '%'.addcslashes($q, '%_\\').'%')
                 ->orWhere('last_name', 'like', '%'.addcslashes($q, '%_\\').'%')))
@@ -45,7 +45,11 @@ class PersonController extends Controller
             ->limit(50)
             ->get();
 
-        return response()->json(['data' => $persons->map(fn (Person $p) => $this->presenter->present($p, $member))->all()]);
+        return response()->json(['data' => $persons->map(fn (Person $p) => $this->presenter->present($p, $member) + [
+            // Where the person already is – shown when picking players for a team.
+            'teams' => $p->teamMemberships->filter(fn ($m) => $m->team && $m->team->archived_at === null)
+                ->map(fn ($m) => ['id' => $m->team_id, 'name' => $m->team->name, 'role' => $m->role->value])->values()->all(),
+        ])->all()]);
     }
 
     /**

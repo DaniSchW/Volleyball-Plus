@@ -9,8 +9,10 @@ use App\Models\CrossNomination;
 use App\Models\Event;
 use App\Models\EventInvitee;
 use App\Models\EventTeam;
+use App\Models\Team;
 use App\Models\TeamMembership;
 use App\Models\TrainingGroupMember;
+use App\Support\Teams\TeamHierarchy;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
@@ -20,7 +22,9 @@ use Illuminate\Support\Collection;
  *   organizers),
  * - trainings of a training group: the group plus the team's trainers and
  *   organizers,
- * - team trainings also invite the team's active cross-nominated guests.
+ * - team trainings also invite the team's active cross-nominated guests,
+ * - matches leave out players of a higher team (same kind): they may train
+ *   with a lower team but not play for it.
  * Roster changes update upcoming events; past events stay as they were
  * (statistics).
  */
@@ -50,6 +54,14 @@ class InviteeSync
         }
     }
 
+    /** After a roster or hierarchy change: all upcoming events of these teams. */
+    public function syncTeams(iterable $teamIds): void
+    {
+        foreach (collect($teamIds)->unique() as $teamId) {
+            $this->syncTeam($teamId);
+        }
+    }
+
     /** After a roster change: all upcoming events of the team. */
     public function syncTeam(string $teamId): void
     {
@@ -59,6 +71,26 @@ class InviteeSync
             ->whereIn('id', $eventIds)
             ->where('ends_at', '>=', Carbon::now())
             ->each(fn (Event $event) => $this->syncEvent($event));
+    }
+
+    /**
+     * Players of a higher team (same kind) do not play matches of a lower
+     * team; trainers and organizers of the event's teams always stay.
+     *
+     * @param  Collection<int, string>  $teamIds
+     * @param  Collection<int, string>  $personIds
+     * @return list<string>
+     */
+    private function playingHigher(Collection $teamIds, Collection $personIds): array
+    {
+        $staff = TeamMembership::query()->whereIn('team_id', $teamIds)
+            ->whereIn('role', [TeamRole::Trainer, TeamRole::Organizer])->pluck('person_id')->flip();
+        $hierarchy = app(TeamHierarchy::class);
+
+        return Team::query()->whereIn('id', $teamIds)->get()
+            ->flatMap(fn (Team $team) => $hierarchy->playingHigher($team, $personIds)->keys())
+            ->reject(fn ($id) => $staff->has($id))
+            ->unique()->values()->all();
     }
 
     /**
@@ -79,6 +111,10 @@ class InviteeSync
 
         $team = TeamMembership::query()->whereIn('team_id', $teamIds)->distinct()->pluck('person_id')
             ->mapWithKeys(fn ($id) => [$id => 'team']);
+
+        if ($event->type === EventType::Match) {
+            return $team->except($this->playingHigher($teamIds, $team->keys()));
+        }
 
         if ($event->type !== EventType::Training || $event->scope !== EventScope::Team) {
             return $team;

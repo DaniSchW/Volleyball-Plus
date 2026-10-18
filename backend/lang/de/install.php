@@ -22,6 +22,12 @@ return [
     'mail_phpmail' => 'PHP mail() – Standard, ohne weitere Angaben',
     'mail_smtp' => 'SMTP-Server',
     'slug_help' => 'Wird Teil der Adresse: :url/<kürzel>. Nur Kleinbuchstaben, Ziffern und Bindestriche.',
+    'section_admin' => 'Dein Admin-Konto',
+    'section_admin_help' => 'Du wirst Admin der Abteilung. Angemeldet wird ohne Passwort: Nach der Einrichtung forderst du auf der Anmeldeseite einen Link an diese Adresse an.',
+    'genders' => [
+        'male' => 'männlich',
+        'female' => 'weiblich',
+    ],
     'submit' => 'Jetzt einrichten',
     'errors_heading' => 'Bitte prüfen',
     'fields' => [
@@ -39,6 +45,10 @@ return [
         'smtp_username' => 'SMTP-Benutzer',
         'smtp_password' => 'SMTP-Passwort',
         'tenant_name' => 'Name der Abteilung',
+        'admin_first_name' => 'Vorname',
+        'admin_last_name' => 'Nachname',
+        'admin_gender' => 'Geschlecht',
+        'admin_email' => 'Deine E-Mail-Adresse',
         'tenant_slug' => 'Kürzel für die Adresse',
     ],
     'smtp_schemes' => [
@@ -70,6 +80,6 @@ return [
         'cron_intro' => 'Lege im Kundenmenü deines Hosters einen Cronjob an, der jede Minute läuft (oder so oft wie möglich). Er verschickt Mails, legt Serientermine an, spielt Updates der Datenbank ein und prüft täglich das SSL-Zertifikat.',
         'cron_command' => 'Alternative bei Hostern, deren Cronjobs Befehle ausführen:',
         'cron_url' => 'Webadresse für den Cronjob – bei ALL-INKL im KAS unter Tools → Cronjobs im Feld „Log / Path“ eintragen (geheim halten):',
-        'open_app' => 'Zur Abteilung',
+        'open_app' => 'Zur Anmeldung',
     ],
 ];

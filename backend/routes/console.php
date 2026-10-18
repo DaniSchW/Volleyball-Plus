@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\ReleaseAdults;
 use App\Support\Security\SslCheck;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schedule;
@@ -32,3 +33,6 @@ $task('app:migrate-pending');
 $task('queue:work --stop-when-empty --max-time=25');
 
 $task('security:check-ssl')->when(fn () => SslCheck::isDue());
+
+// Children are released from their parents' accounts on their 18th birthday.
+$task('app:release-adults')->when(fn () => ReleaseAdults::isDue());

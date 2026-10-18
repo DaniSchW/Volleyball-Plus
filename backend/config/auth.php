@@ -1,6 +1,6 @@
 <?php
 
-use App\Models\User;
+use App\Models\Account;
 
 return [
 
@@ -38,8 +38,9 @@ return [
     */
 
     'guards' => [
+        // Magic-link sessions (App\Support\Auth\SessionManager), no passwords.
         'web' => [
-            'driver' => 'session',
+            'driver' => 'vp-session',
             'provider' => 'users',
         ],
     ],
@@ -64,7 +65,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => env('AUTH_MODEL', User::class),
+            'model' => env('AUTH_MODEL', Account::class),
         ],
 
         // 'users' => [

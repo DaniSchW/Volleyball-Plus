@@ -2,13 +2,14 @@
 
 namespace App\Http\Middleware;
 
+use App\Support\Install\Installation;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * Picks the UI language for server-generated texts. Until accounts exist
- * this follows the browser; later the language chosen in the profile wins.
+ * Picks the language for server-generated texts: the one chosen in the
+ * account, otherwise the browser's.
  */
 class SetLocale
 {
@@ -17,7 +18,11 @@ class SetLocale
 
     public function handle(Request $request, Closure $next): Response
     {
-        app()->setLocale($request->getPreferredLanguage(self::SUPPORTED) ?? config('app.locale'));
+        $chosen = Installation::isInstalled() ? $request->user()?->locale : null;
+
+        app()->setLocale(in_array($chosen, self::SUPPORTED, true)
+            ? $chosen
+            : ($request->getPreferredLanguage(self::SUPPORTED) ?? config('app.locale')));
 
         return $next($request);
     }

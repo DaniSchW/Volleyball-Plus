@@ -106,6 +106,23 @@ ob_start();
     <p class="help"><?= $t('slug_help', ['url' => $defaults['app_url']]) ?></p>
   </section>
 
+  <section>
+    <h2><?= $t('section_admin') ?></h2>
+    <p><?= $t('section_admin_help') ?></p>
+    <div class="row" style="grid-template-columns: 1fr 1fr">
+      <div><label for="admin_first_name"><?= $t('fields.admin_first_name') ?></label><input id="admin_first_name" name="admin_first_name" required maxlength="80" value="<?= $value('admin_first_name') ?>"></div>
+      <div><label for="admin_last_name"><?= $t('fields.admin_last_name') ?></label><input id="admin_last_name" name="admin_last_name" required maxlength="80" value="<?= $value('admin_last_name') ?>"></div>
+    </div>
+    <label for="admin_gender"><?= $t('fields.admin_gender') ?></label>
+    <select id="admin_gender" name="admin_gender" required>
+      <?php foreach (['male', 'female'] as $gender) { ?>
+      <option value="<?= $gender ?>" <?= ($old['admin_gender'] ?? '') === $gender ? 'selected' : '' ?>><?= $t("genders.{$gender}") ?></option>
+      <?php } ?>
+    </select>
+    <label for="admin_email"><?= $t('fields.admin_email') ?></label>
+    <input id="admin_email" name="admin_email" type="email" required value="<?= $value('admin_email') ?>">
+  </section>
+
   <button type="submit" <?= $passes ? '' : 'disabled' ?>><?= $t('submit') ?></button>
 </form>
 <?php

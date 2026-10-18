@@ -1,0 +1,7 @@
+{{ $intro }}
+
+{{ $url }}
+
+{{ $validity }}
+
+{{ $ignore }}

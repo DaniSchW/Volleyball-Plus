@@ -3,10 +3,12 @@
 namespace App\Models;
 
 use App\Enums\CrossNominationMode;
+use App\Enums\RsvpVisibility;
 use App\Enums\TeamGender;
 use App\Support\Tenancy\BelongsToTenant;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Team extends Model
 {
@@ -24,6 +26,7 @@ class Team extends Model
         'decline_reason_required',
         'maybe_reason_required',
         'reasons_visible_to_teammates',
+        'rsvp_visibility',
         'color',
     ];
 
@@ -34,6 +37,7 @@ class Team extends Model
         'decline_reason_required' => false,
         'maybe_reason_required' => false,
         'reasons_visible_to_teammates' => false,
+        'rsvp_visibility' => 'names',
     ];
 
     protected function casts(): array
@@ -41,11 +45,20 @@ class Team extends Model
         return [
             'gender' => TeamGender::class,
             'cross_nomination_mode' => CrossNominationMode::class,
+            'rsvp_visibility' => RsvpVisibility::class,
             'is_youth' => 'boolean',
             'decline_reason_required' => 'boolean',
             'maybe_reason_required' => 'boolean',
             'reasons_visible_to_teammates' => 'boolean',
             'archived_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return HasMany<TeamMembership, $this>
+     */
+    public function memberships(): HasMany
+    {
+        return $this->hasMany(TeamMembership::class);
     }
 }

@@ -26,6 +26,12 @@ class TenantSchema
 
         Blueprint::macro('tenantForeign', function (string $column, string $on, bool $nullable = false, string $onDelete = 'cascade'): void {
             /** @var Blueprint $this */
+            // "set null" would also null tenant_id, which MySQL rejects; clear such
+            // references in the application before deleting the target instead.
+            if (strtolower($onDelete) === 'set null') {
+                throw new \InvalidArgumentException("tenantForeign({$column}): 'set null' is not possible on composite keys, use 'restrict'.");
+            }
+
             $definition = $this->char($column, 26);
             if ($nullable) {
                 $definition->nullable();

@@ -100,6 +100,10 @@ class InstallController extends Controller
             'smtp_password' => ['nullable', 'string', 'max:255'],
             'tenant_name' => ['required', 'string', 'max:120'],
             'tenant_slug' => ['required', 'regex:/^[a-z0-9]+(-[a-z0-9]+)*$/', 'min:2', 'max:64'],
+            'admin_first_name' => ['required', 'string', 'max:80'],
+            'admin_last_name' => ['required', 'string', 'max:80'],
+            'admin_gender' => ['required', 'in:male,female'],
+            'admin_email' => ['required', 'email', 'max:255'],
         ];
     }
 

@@ -2,7 +2,14 @@
 
 namespace App\Support\Install;
 
+use App\Enums\MemberStatus;
+use App\Enums\PersonRelation;
+use App\Models\Account;
+use App\Models\Person;
+use App\Models\PersonAccount;
 use App\Models\Tenant;
+use App\Models\TenantMember;
+use App\Support\Tenancy\TenantContext;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -35,6 +42,7 @@ class Installer
             ['slug' => $input['tenant_slug']],
             ['name' => $input['tenant_name'], 'mail_from_name' => $input['tenant_name']],
         );
+        $this->createAdmin($tenant, $input);
 
         $cronToken = Str::random(48);
         $env = EnvFile::render($this->envValues($input, $cronToken));
@@ -52,8 +60,43 @@ class Installer
             'env' => $env,
             'cron_command' => PHP_BINARY.' '.base_path('artisan').' schedule:run',
             'cron_url' => $appUrl.'/cron/'.$cronToken,
-            'tenant_url' => $appUrl.'/'.$tenant->slug,
+            'tenant_url' => $appUrl.'/'.$tenant->slug.'/login',
         ];
+    }
+
+    /**
+     * First admin of the department, with an own profile. Logs in afterwards
+     * with a magic link like everybody else.
+     *
+     * @param  array<string, mixed>  $input
+     */
+    private function createAdmin(Tenant $tenant, array $input): void
+    {
+        app(TenantContext::class)->run($tenant, function () use ($input) {
+            $account = Account::on(self::CONNECTION)->firstOrCreate(['email' => mb_strtolower(trim($input['admin_email']))]);
+
+            $member = TenantMember::on(self::CONNECTION)->firstOrCreate(['account_id' => $account->id]);
+            $member->forceFill(['is_admin' => true, 'status' => MemberStatus::Active])->save();
+
+            $hasOwnProfile = PersonAccount::on(self::CONNECTION)
+                ->where('tenant_member_id', $member->id)
+                ->where('relation', PersonRelation::Own)
+                ->exists();
+
+            if (! $hasOwnProfile) {
+                $person = Person::on(self::CONNECTION)->create([
+                    'first_name' => $input['admin_first_name'],
+                    'last_name' => $input['admin_last_name'],
+                    'gender' => $input['admin_gender'],
+                    'email' => $account->email,
+                ]);
+                PersonAccount::on(self::CONNECTION)->create([
+                    'person_id' => $person->id,
+                    'tenant_member_id' => $member->id,
+                    'relation' => PersonRelation::Own,
+                ]);
+            }
+        });
     }
 
     /**

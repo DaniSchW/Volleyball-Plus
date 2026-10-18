@@ -22,6 +22,12 @@ return [
     'mail_phpmail' => 'PHP mail() – default, nothing else to enter',
     'mail_smtp' => 'SMTP server',
     'slug_help' => 'Becomes part of the address: :url/<short-name>. Lowercase letters, digits and hyphens only.',
+    'section_admin' => 'Your admin account',
+    'section_admin_help' => 'You become admin of the department. There is no password: after the setup, request a login link to this address on the login page.',
+    'genders' => [
+        'male' => 'male',
+        'female' => 'female',
+    ],
     'submit' => 'Set up now',
     'errors_heading' => 'Please check',
     'fields' => [
@@ -39,6 +45,10 @@ return [
         'smtp_username' => 'SMTP user',
         'smtp_password' => 'SMTP password',
         'tenant_name' => 'Department name',
+        'admin_first_name' => 'First name',
+        'admin_last_name' => 'Last name',
+        'admin_gender' => 'Gender',
+        'admin_email' => 'Your e-mail address',
         'tenant_slug' => 'Short name for the address',
     ],
     'smtp_schemes' => [
@@ -70,6 +80,6 @@ return [
         'cron_intro' => 'Create a cron job in your hosting control panel that runs every minute (or as often as possible). It sends mail, creates recurring events, applies database updates and checks the SSL certificate daily.',
         'cron_command' => 'Alternative for hosters whose cron jobs run commands:',
         'cron_url' => 'Web address for the cron job – at ALL-INKL enter it in KAS under Tools → Cronjobs in the field “Log / Path” (keep it secret):',
-        'open_app' => 'Open department',
+        'open_app' => 'Go to login',
     ],
 ];

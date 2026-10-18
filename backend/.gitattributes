@@ -9,3 +9,6 @@
 /.github export-ignore
 CHANGELOG.md export-ignore
 .styleci.yml export-ignore
+
+# Original schedule exports (CRLF, Windows-1252) – keep byte for byte.
+/tests/Fixtures/import/** -text

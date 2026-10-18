@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\Gender;
+use App\Enums\PersonRelation;
 use App\Enums\Position;
 use App\Enums\TeamRole;
 use App\Http\Controllers\Controller;
@@ -75,6 +76,9 @@ class PersonController extends Controller
     {
         $member = $this->current->get();
         $data = $this->presenter->presentForEditing($person, $member);
+
+        $data['can_invite_guardian'] = $this->permissions->canInviteForPerson($member, $person, PersonRelation::Guardian);
+        $data['can_invite_own'] = $this->permissions->canInviteForPerson($member, $person, PersonRelation::Own);
 
         if ($data['can_manage_minor_permissions']) {
             $data['minor_permissions'] = $this->minorPermissions($person);

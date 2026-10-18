@@ -17,6 +17,9 @@ class SessionManager
 {
     public const REQUEST_ATTRIBUTE = 'vp.session';
 
+    /** Set when the session was extended, so the cookie is re-sent with the new expiry. */
+    public const REFRESH_ATTRIBUTE = 'vp.session.refresh';
+
     /**
      * @return array{0: AccountSession, 1: string}
      */
@@ -66,6 +69,7 @@ class SessionManager
                 'last_seen_at' => $now,
                 'expires_at' => $now->copy()->addDays(config('security.session.lifetime_days')),
             ])->save();
+            $request->attributes->set(self::REFRESH_ATTRIBUTE, $token);
         }
 
         $request->attributes->set(self::REQUEST_ATTRIBUTE, $session);

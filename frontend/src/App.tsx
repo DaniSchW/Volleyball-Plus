@@ -1,19 +1,36 @@
 import { createBrowserRouter, RouterProvider, type RouteObject } from 'react-router';
-import { MENU_SECTIONS } from './components/AppHeader';
+import { PLACEHOLDER_SECTIONS } from './components/AppHeader';
 import { TenantLayout } from './components/TenantLayout';
 import { HomePage } from './pages/HomePage';
+import { JoinPage } from './pages/JoinPage';
+import { LoginConfirmPage } from './pages/LoginConfirmPage';
+import { LoginPage } from './pages/LoginPage';
+import { MembersPage } from './pages/MembersPage';
 import { NoTenantPage } from './pages/NoTenantPage';
+import { PersonPage } from './pages/PersonPage';
 import { PlaceholderPage } from './pages/PlaceholderPage';
+import { ProfilePage } from './pages/ProfilePage';
+import { TeamPage } from './pages/TeamPage';
+import { TeamsPage } from './pages/TeamsPage';
 
 export const routes: RouteObject[] = [
   { path: '/', element: <NoTenantPage /> },
+  // Public pages of a department.
+  { path: '/:tenant/login', element: <LoginPage /> },
+  { path: '/:tenant/login/confirm', element: <LoginConfirmPage /> },
+  { path: '/:tenant/join/:token', element: <JoinPage /> },
   {
     // Every department lives under its own path: https://<domain>/<slug>/…
     path: '/:tenant',
     element: <TenantLayout />,
     children: [
       { index: true, element: <HomePage /> },
-      ...MENU_SECTIONS.map((section) => ({ path: section, element: <PlaceholderPage section={section} /> })),
+      { path: 'teams', element: <TeamsPage /> },
+      { path: 'teams/:teamId', element: <TeamPage /> },
+      { path: 'persons/:personId', element: <PersonPage /> },
+      { path: 'profile', element: <ProfilePage /> },
+      { path: 'members', element: <MembersPage /> },
+      ...PLACEHOLDER_SECTIONS.map((section) => ({ path: section, element: <PlaceholderPage section={section} /> })),
     ],
   },
 ];

@@ -145,10 +145,19 @@ class LoginTest extends TestCase
         $member = $this->member($this->tenant(), 'max@example.org');
         $this->loginAs($member);
 
+        // Within a day: no database write, no new cookie.
+        $this->assertEmpty($this->getJson('/api/v1/me')->assertOk()->headers->getCookies());
+
         Carbon::setTestNow(Carbon::now()->addDays(80));
-        $this->getJson('/api/v1/me')->assertOk();
+        $response = $this->getJson('/api/v1/me')->assertOk();
         $session = AccountSession::first();
         $this->assertEqualsWithDelta(Carbon::now()->addDays(90)->getTimestamp(), $session->expires_at->getTimestamp(), 5);
+
+        // The browser cookie is extended as well.
+        $cookie = collect($response->headers->getCookies())->first(fn ($c) => $c->getName() === config('security.session.cookie'));
+        $this->assertNotNull($cookie);
+        $this->assertEqualsWithDelta(Carbon::now()->addDays(90)->getTimestamp(), $cookie->getExpiresTime(), 5);
+        $this->assertTrue($cookie->isHttpOnly());
 
         Carbon::setTestNow(Carbon::now()->addDays(91));
         $this->getJson('/api/v1/me')->assertUnauthorized();

@@ -211,4 +211,34 @@ class Permissions
 
         return (bool) $person->minorPermission?->own_login;
     }
+
+    /**
+     * Single-use links for a profile: parents are invited by trainers/admins
+     * (the second parent also by the first); an own login for a child only
+     * by its parents, for an adult without login by trainers/admins.
+     */
+    public function canInviteForPerson(TenantMember $member, Person $person, PersonRelation $relation): bool
+    {
+        if ($relation === PersonRelation::Guardian) {
+            return $this->isAdmin($member)
+                || $this->isTrainerOfPerson($member, $person)
+                || $this->isGuardianOf($member, $person);
+        }
+
+        $hasOwnAccount = PersonAccount::query()
+            ->where('person_id', $person->id)
+            ->where('relation', PersonRelation::Own)
+            ->whereNull('ended_at')
+            ->exists();
+        if ($hasOwnAccount) {
+            return false;
+        }
+
+        // A child's own login is the parents' decision alone.
+        if ($person->hasGuardians()) {
+            return $this->isGuardianOf($member, $person);
+        }
+
+        return $this->isAdmin($member) || $this->isTrainerOfPerson($member, $person);
+    }
 }

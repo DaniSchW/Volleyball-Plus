@@ -6,6 +6,7 @@
     "open": "Open menu",
     "close": "Close menu",
     "events": "Events",
+    "teams": "Teams",
     "chat": "Chat",
     "polls": "Polls",
     "tasks": "Tasks",
@@ -13,6 +14,7 @@
     "cash": "Cash box",
     "halls": "Halls",
     "profile": "Profile",
+    "members": "Members & admins",
     "language": "Language"
   },
   "home": {
@@ -24,7 +26,8 @@
   "tenant": {
     "notFound": "This department does not exist.",
     "loading": "Loading …",
-    "choose": "Please open the app via your department's link."
+    "choose": "Please open the app via your department's link.",
+    "noAccess": "You have no access to this department."
   },
   "languages": {
     "de": "Deutsch",
@@ -35,5 +38,191 @@
   },
   "placeholder": {
     "comingSoon": "This section will follow in one of the next versions."
+  },
+  "common": {
+    "save": "Save",
+    "saved": "Saved.",
+    "create": "Create",
+    "add": "Add"
+  },
+  "genders": {
+    "male": "male",
+    "female": "female"
+  },
+  "roles": {
+    "player": "Player",
+    "trainer": "Coach",
+    "organizer": "Team manager",
+    "plural": {
+      "player": "Players",
+      "trainer": "Coaches",
+      "organizer": "Team managers"
+    }
+  },
+  "positions": {
+    "setter": "Setter",
+    "opposite": "Opposite",
+    "middle": "Middle blocker",
+    "outside": "Outside hitter",
+    "libero": "Libero",
+    "universal": "Universal"
+  },
+  "login": {
+    "intro": "Enter your e-mail address. You will get a link to log in without a password.",
+    "email": "E-mail address",
+    "submit": "Send login link",
+    "sent": "If the address belongs to a member, a login link is on its way. Please check your inbox (and spam folder).",
+    "inviteOnly": "New here? You become a member via your team's invitation link.",
+    "confirm": "Log in now",
+    "again": "Request a new link"
+  },
+  "join": {
+    "invalid": "This invitation link is invalid or expired.",
+    "teamHeading": "Invitation to {{team}} as {{role}}",
+    "guardianHeading": "Connect as parent of {{person}}",
+    "ownHeading": "Set up own access for {{person}}",
+    "who": "Who is joining?",
+    "mode": {
+      "self": "Myself",
+      "child": "I am registering my child (under 18)"
+    },
+    "profileIfMissing": "We only need name and gender if you have no profile in this department yet.",
+    "birthdayOptional": "Birthday (optional)",
+    "childIntro": "Your child gets an own profile. You decide what it may do in the app by itself.",
+    "childFirstName": "Child's first name",
+    "parentEmail": "Your e-mail address (parent)",
+    "emailHint": "We will send you a link to confirm the address.",
+    "submit": "Join"
+  },
+  "teams": {
+    "none": "No teams yet.",
+    "create": "New team",
+    "name": "Name",
+    "genderLabel": "Type",
+    "youthLabel": "Youth team",
+    "youth": "Youth",
+    "mine": "my team",
+    "gender": {
+      "men": "Men",
+      "women": "Women",
+      "mixed": "Mixed"
+    }
+  },
+  "team": {
+    "tabs": {
+      "roster": "Roster",
+      "invitations": "Invitations",
+      "settings": "Settings"
+    },
+    "empty": "Nobody in the team yet.",
+    "role": "Role",
+    "removeFromTeam": "Remove {{name}} from the team",
+    "removeConfirm": "Really remove {{name}} from the team?",
+    "addPerson": "Create profile without login",
+    "addPersonHint": "E.g. for a child: create the profile, then invite the parents by link on the profile page."
+  },
+  "invitations": {
+    "active": "Active invitation links",
+    "none": "No active links.",
+    "uses_one": "used {{count}} time",
+    "uses_other": "used {{count}} times",
+    "until": "valid until {{date}}",
+    "shareTitle": "Invitation to {{team}}",
+    "revoke": "Revoke link",
+    "create": "Create new link",
+    "days": "Valid (days)",
+    "maxUses": "Max. uses",
+    "optional": "empty = unlimited",
+    "createButton": "Create link",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "share": "Share",
+    "copyManually": "Copy the link:"
+  },
+  "settings": {
+    "rsvp": "Attendance replies",
+    "rsvpVisibility": "What do teammates see?",
+    "rsvpNames": "Who accepted and declined (names)",
+    "rsvpCounts": "Only the numbers",
+    "declineReasonRequired": "Reason for declining is required",
+    "maybeReasonRequired": "Reason also required for “maybe”",
+    "reasonsVisible": "Teammates see reasons",
+    "training": "Training",
+    "minParticipants": "Minimum participants",
+    "maxParticipants": "Maximum participants",
+    "crossNomination": "Guest players",
+    "crossNominationMode": "Guests from other teams may accept …",
+    "crossModes": {
+      "immediately": "immediately",
+      "hours_before_start": "from X hours before training",
+      "after_rsvp_deadline": "after the reply deadline"
+    },
+    "crossNominationHours": "Hours before start",
+    "crossNominationHint": "Default for all trainings – can be changed per event."
+  },
+  "profile": {
+    "standard": "Profile",
+    "standardHint": "All members of the department see these details.",
+    "details": "Contact & personal",
+    "detailsHint": "Only you, parents, your coaches and admins see these – others only what you share below.",
+    "sharing": "Share with all members",
+    "sharingHint": "What is switched on here, all members of the department can see.",
+    "picture": "Profile picture",
+    "pictureUpload": "Choose picture",
+    "pictureRemove": "Remove picture",
+    "pictureUploading": "Uploading …",
+    "minor": "minor",
+    "myProfiles": "My profiles",
+    "own": "Own profile",
+    "child": "Child",
+    "noProfiles": "No profile.",
+    "devices": "Logged-in devices",
+    "devicesHint": "Logged in as {{email}}. The login stays active for 90 days after the last use.",
+    "thisDevice": "This device",
+    "lastSeen": "last seen {{date}}",
+    "logoutDevice": "Log out",
+    "logout": "Log out",
+    "fields": {
+      "first_name": "First name",
+      "last_name": "Last name",
+      "gender": "Gender",
+      "jersey_number": "Jersey number",
+      "birthday": "Birthday",
+      "phone": "Phone",
+      "email": "E-mail",
+      "address": "Address",
+      "street": "Street and number",
+      "postal_code": "Postal code",
+      "city": "City",
+      "primary_position": "Position",
+      "secondary_positions": "Other positions",
+      "height_cm": "Height (cm)",
+      "reach_height_cm": "Reach (cm)",
+      "jump_reach_cm": "Jump reach (cm)"
+    }
+  },
+  "child": {
+    "title": "What may the child do by itself?",
+    "hint": "Only parents can change this. Everything else you do for your child.",
+    "flags": {
+      "own_login": "Own login",
+      "can_rsvp": "Accept and decline",
+      "can_chat": "Use chat",
+      "can_take_tasks": "Take on tasks",
+      "can_vote_polls": "Take part in polls"
+    },
+    "editable": "May change by itself:"
+  },
+  "personLinks": {
+    "title": "Access by link",
+    "hint": "Single-use link, valid for 14 days. Pass it on via messenger or e-mail.",
+    "guardian": "Invite a parent",
+    "own": "Set up own login",
+    "createdGuardian": "Link for the parent:",
+    "createdOwn": "Link for the own login:"
+  },
+  "members": {
+    "admin": "Admin",
+    "active": "Active"
   }
 }

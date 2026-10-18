@@ -6,6 +6,7 @@
     "open": "Menü öffnen",
     "close": "Menü schließen",
     "events": "Termine",
+    "teams": "Teams",
     "chat": "Chat",
     "polls": "Umfragen",
     "tasks": "Aufgaben",
@@ -13,6 +14,7 @@
     "cash": "Kasse",
     "halls": "Hallen",
     "profile": "Profil",
+    "members": "Mitglieder & Admins",
     "language": "Sprache"
   },
   "home": {
@@ -24,7 +26,8 @@
   "tenant": {
     "notFound": "Diese Abteilung gibt es nicht.",
     "loading": "Lädt …",
-    "choose": "Bitte rufe die App über den Link deiner Abteilung auf."
+    "choose": "Bitte rufe die App über den Link deiner Abteilung auf.",
+    "noAccess": "Du hast keinen Zugang zu dieser Abteilung."
   },
   "languages": {
     "de": "Deutsch",
@@ -35,5 +38,191 @@
   },
   "placeholder": {
     "comingSoon": "Dieser Bereich folgt in einer der nächsten Versionen."
+  },
+  "common": {
+    "save": "Speichern",
+    "saved": "Gespeichert.",
+    "create": "Anlegen",
+    "add": "Hinzufügen"
+  },
+  "genders": {
+    "male": "männlich",
+    "female": "weiblich"
+  },
+  "roles": {
+    "player": "Spieler/in",
+    "trainer": "Trainer/in",
+    "organizer": "Betreuer/in",
+    "plural": {
+      "player": "Spieler",
+      "trainer": "Trainer",
+      "organizer": "Betreuer"
+    }
+  },
+  "positions": {
+    "setter": "Zuspiel",
+    "opposite": "Diagonal",
+    "middle": "Mittelblock",
+    "outside": "Außenangriff",
+    "libero": "Libero",
+    "universal": "Universal"
+  },
+  "login": {
+    "intro": "Gib deine E-Mail-Adresse ein. Du bekommst einen Link, mit dem du dich ohne Passwort anmeldest.",
+    "email": "E-Mail-Adresse",
+    "submit": "Anmeldelink schicken",
+    "sent": "Falls die Adresse zu einem Mitglied gehört, ist ein Anmeldelink unterwegs. Bitte schau in dein Postfach (auch im Spam-Ordner).",
+    "inviteOnly": "Neu hier? Mitglied wirst du über einen Einladungslink deines Teams.",
+    "confirm": "Jetzt anmelden",
+    "again": "Neuen Link anfordern"
+  },
+  "join": {
+    "invalid": "Dieser Einladungslink ist ungültig oder abgelaufen.",
+    "teamHeading": "Einladung zu {{team}} als {{role}}",
+    "guardianHeading": "Als Elternteil von {{person}} verbinden",
+    "ownHeading": "Eigenen Zugang für {{person}} einrichten",
+    "who": "Wer tritt bei?",
+    "mode": {
+      "self": "Ich selbst",
+      "child": "Ich melde mein Kind an (unter 18)"
+    },
+    "profileIfMissing": "Name und Geschlecht brauchen wir nur, falls du in dieser Abteilung noch kein Profil hast.",
+    "birthdayOptional": "Geburtstag (optional)",
+    "childIntro": "Dein Kind bekommt ein eigenes Profil. Du entscheidest, was es selbst in der App tun darf.",
+    "childFirstName": "Vorname des Kindes",
+    "parentEmail": "Deine E-Mail-Adresse (Elternteil)",
+    "emailHint": "Wir schicken dir einen Link, um die Adresse zu bestätigen.",
+    "submit": "Beitreten"
+  },
+  "teams": {
+    "none": "Noch keine Teams.",
+    "create": "Neues Team",
+    "name": "Name",
+    "genderLabel": "Art",
+    "youthLabel": "Jugendteam",
+    "youth": "Jugend",
+    "mine": "mein Team",
+    "gender": {
+      "men": "Herren",
+      "women": "Damen",
+      "mixed": "Mixed"
+    }
+  },
+  "team": {
+    "tabs": {
+      "roster": "Kader",
+      "invitations": "Einladungen",
+      "settings": "Einstellungen"
+    },
+    "empty": "Noch niemand im Team.",
+    "role": "Rolle",
+    "removeFromTeam": "{{name}} aus dem Team entfernen",
+    "removeConfirm": "{{name}} wirklich aus dem Team entfernen?",
+    "addPerson": "Profil ohne Login anlegen",
+    "addPersonHint": "Z. B. für ein Kind: Lege das Profil an und lade danach auf der Profilseite die Eltern per Link ein."
+  },
+  "invitations": {
+    "active": "Aktive Einladungslinks",
+    "none": "Keine aktiven Links.",
+    "uses_one": "{{count}} Mal benutzt",
+    "uses_other": "{{count}} Mal benutzt",
+    "until": "gültig bis {{date}}",
+    "shareTitle": "Einladung zu {{team}}",
+    "revoke": "Link widerrufen",
+    "create": "Neuen Link erstellen",
+    "days": "Gültig (Tage)",
+    "maxUses": "Max. Nutzungen",
+    "optional": "leer = unbegrenzt",
+    "createButton": "Link erstellen",
+    "copy": "Kopieren",
+    "copied": "Kopiert!",
+    "share": "Teilen",
+    "copyManually": "Link kopieren:"
+  },
+  "settings": {
+    "rsvp": "Zu-/Absagen",
+    "rsvpVisibility": "Was sehen Mitspieler?",
+    "rsvpNames": "Wer zu- und abgesagt hat (Namen)",
+    "rsvpCounts": "Nur die Anzahl",
+    "declineReasonRequired": "Absagegrund ist Pflicht",
+    "maybeReasonRequired": "Grund auch bei „Vielleicht“ Pflicht",
+    "reasonsVisible": "Mitspieler sehen Absagegründe",
+    "training": "Training",
+    "minParticipants": "Mindestteilnehmer",
+    "maxParticipants": "Teilnehmermaximum",
+    "crossNomination": "Quernominierung",
+    "crossNominationMode": "Gäste aus anderen Teams dürfen zusagen …",
+    "crossModes": {
+      "immediately": "sofort",
+      "hours_before_start": "ab X Stunden vor Trainingsbeginn",
+      "after_rsvp_deadline": "nach Ablauf der Rückmeldefrist"
+    },
+    "crossNominationHours": "Stunden vor Beginn",
+    "crossNominationHint": "Standard für alle Trainings – im einzelnen Termin änderbar."
+  },
+  "profile": {
+    "standard": "Profil",
+    "standardHint": "Diese Angaben sehen alle Mitglieder der Abteilung.",
+    "details": "Kontakt & Persönliches",
+    "detailsHint": "Sehen nur du, Eltern, deine Trainer und Admins – andere nur, was du unten freigibst.",
+    "sharing": "Für alle Mitglieder freigeben",
+    "sharingHint": "Was hier aktiv ist, sehen alle Mitglieder der Abteilung.",
+    "picture": "Profilbild",
+    "pictureUpload": "Bild auswählen",
+    "pictureRemove": "Bild entfernen",
+    "pictureUploading": "Wird hochgeladen …",
+    "minor": "minderjährig",
+    "myProfiles": "Meine Profile",
+    "own": "Eigenes Profil",
+    "child": "Kind",
+    "noProfiles": "Kein Profil vorhanden.",
+    "devices": "Angemeldete Geräte",
+    "devicesHint": "Angemeldet als {{email}}. Die Anmeldung bleibt 90 Tage ab der letzten Nutzung aktiv.",
+    "thisDevice": "Dieses Gerät",
+    "lastSeen": "zuletzt {{date}}",
+    "logoutDevice": "Abmelden",
+    "logout": "Abmelden",
+    "fields": {
+      "first_name": "Vorname",
+      "last_name": "Nachname",
+      "gender": "Geschlecht",
+      "jersey_number": "Trikotnummer",
+      "birthday": "Geburtstag",
+      "phone": "Telefon",
+      "email": "E-Mail",
+      "address": "Adresse",
+      "street": "Straße und Hausnummer",
+      "postal_code": "PLZ",
+      "city": "Ort",
+      "primary_position": "Position",
+      "secondary_positions": "Weitere Positionen",
+      "height_cm": "Größe (cm)",
+      "reach_height_cm": "Reichhöhe (cm)",
+      "jump_reach_cm": "Sprunghöhe (cm)"
+    }
+  },
+  "child": {
+    "title": "Was darf das Kind selbst?",
+    "hint": "Nur Eltern können das einstellen. Alles andere erledigst du für dein Kind.",
+    "flags": {
+      "own_login": "Eigener Login",
+      "can_rsvp": "Selbst zu- und absagen",
+      "can_chat": "Chat nutzen",
+      "can_take_tasks": "Aufgaben übernehmen",
+      "can_vote_polls": "An Umfragen teilnehmen"
+    },
+    "editable": "Darf selbst ändern:"
+  },
+  "personLinks": {
+    "title": "Zugang per Link",
+    "hint": "Einmal-Link, 14 Tage gültig. Per Messenger oder Mail weitergeben.",
+    "guardian": "Elternteil einladen",
+    "own": "Eigenen Login einrichten",
+    "createdGuardian": "Link für das Elternteil:",
+    "createdOwn": "Link für den eigenen Login:"
+  },
+  "members": {
+    "admin": "Admin",
+    "active": "Aktiv"
   }
 }

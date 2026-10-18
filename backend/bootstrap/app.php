@@ -3,6 +3,7 @@
 use App\Http\Middleware\EnsureMember;
 use App\Http\Middleware\ForceHttps;
 use App\Http\Middleware\RedirectIfNotInstalled;
+use App\Http\Middleware\RefreshSessionCookie;
 use App\Http\Middleware\RequireAjaxHeader;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SecurityHeaders;
@@ -34,7 +35,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Global, so it runs before session/cookie handling, which needs an app key.
         $middleware->append(RedirectIfNotInstalled::class);
 
-        $middleware->api(append: [RequireAjaxHeader::class]);
+        $middleware->api(append: [RequireAjaxHeader::class, RefreshSessionCookie::class]);
         // API only: unauthenticated requests get 401 JSON, never a redirect.
         $middleware->redirectGuestsTo(fn () => null);
 

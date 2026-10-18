@@ -139,7 +139,7 @@ volleyball-plus/
 | Phase | Inhalt | Ergebnis |
 |---|---|---|
 | **0 – Fundament** ✅ | Laravel + React-Gerüst, CI, Mandanten-Scope & Tests, i18n-Grundgerüst, HTTPS-Erzwingung & SSL-Selbstprüfung, Mail per `mail()`/SMTP, Cron-Ersatz-URL, Deploy-Paket, **Einrichtungsassistent im Browser** (ohne SSH), automatische DB-Updates per Cron | lauffähiges Gerüst auf dem Hosting |
-| **1 – Login & Struktur** | Erstes Admin-Konto, Magic Link (mail()/SMTP), gleitende 90-Tage-Session, Abteilung, Teams, Personen, Rollen, **Einladungslinks**, Eltern-Verknüpfung, Profil inkl. Bild, Sprachwahl | Spieler können per Link beitreten |
+| **1 – Login & Struktur** ✅ | Erstes Admin-Konto, Magic Link (mail()/SMTP), gleitende 90-Tage-Session, Abteilung, Teams, Personen, Rollen, **Einladungslinks**, Eltern-Verknüpfung, Profil inkl. Bild, Sprachwahl | Spieler können per Link beitreten |
 | **2 – Termine & Zu-/Absage (MVP)** | Terminarten, Serien, Fristen, Startseite mit Infinite Scroll, Info-Termine, abteilungsweite Termine, drei Logo-Ebenen, Wegbeschreibung, Infobereich, ICS-Feed | **erste produktiv nutzbare Version** |
 | **3 – Benachrichtigungen** | Web-Push, iOS-Installationshinweis, Frist-Erinnerungen, Einstellungen pro Kategorie | |
 | **4 – Training** | Teilnehmermaximum, Mindestteilnehmer (gelb), Trainingsgruppen, Ligabaum, Hierarchie, Geschlechtsregel, Quernominierung mit Team-Standard & Termin-Override, SR-Lizenz, Positionsanzeige | |
@@ -168,7 +168,6 @@ volleyball-plus/
 - Hosting bei **ALL-INKL**: Cronjobs rufen dort eine Webadresse auf → Hauptweg ist `/cron/{token}`, Intervall jede Minute. Geplante Aufgaben dürfen daher nicht von einer exakten Minute abhängen und müssen in das Zeitlimit eines Webaufrufs passen.
 - Entwicklung auf `main`.
 
-**Noch offen (für Phase 1/2):**
-1. Registrierung nur über Einladungslinks, oder auch freie Selbstregistrierung?
-2. Welche Profildaten sehen Mitspieler (Telefon, Adresse, Geburtstag, E-Mail)?
-3. Sehen Mitspieler, wer zu-/abgesagt hat (Namen), oder nur die Anzahl?
+- Registrierung ausschließlich über Einladungslinks; Login-Links gehen nur an bestehende Mitglieder.
+- Profil: Standardangaben sehen alle Mitglieder; Details (Telefon, E-Mail, Adresse, Geburtstag) nur per Freigabe der Person – Trainer ihrer Teams, Admins und Eltern sehen sie immer.
+- Sichtbarkeit der Zu-/Absagen (Namen oder nur Anzahl) legt der Trainer pro Team fest.

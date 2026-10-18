@@ -43,4 +43,5 @@ Tests: `cd backend && php artisan test` und `cd frontend && npm test`.
 ## Status
 
 Phase 0 (Fundament) umgesetzt: Mandantentrennung, HTTPS-Erzwingung und SSL-Selbstprüfung, Mailversand per PHP `mail()`/SMTP, Cron/Queue, i18n DE/EN, App-Gerüst mit Menü oben rechts, CI und Upload-Paket, Einrichtungsassistent im Browser (kein SSH nötig).
-Nächster Schritt: Phase 1 – Login per Magic Link, Teams, Personen, Rollen, Einladungslinks.
+Phase 1 (Login & Struktur) umgesetzt: Login per Magic Link mit 90-Tage-Sitzung, Teams mit Einstellungen, Rollen (Admin, Trainer, Betreuer, Spieler, Eltern), Einladungslinks (auch Kinder-Anmeldung durch Eltern), Profile mit Freigaben und Profilbild, Kinderrechte und Ablösung mit 18.
+Nächster Schritt: Phase 2 – Termine und Zu-/Absagen.

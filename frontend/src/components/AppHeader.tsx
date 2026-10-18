@@ -1,22 +1,29 @@
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
+import { useQueryClient } from '@tanstack/react-query';
+import { patch } from '../lib/api';
 import { changeLanguage, LANGUAGES, type Language } from '../i18n';
 
-export const MENU_SECTIONS = ['events', 'chat', 'polls', 'tasks', 'stats', 'cash', 'halls', 'profile'] as const;
-export type MenuSection = (typeof MENU_SECTIONS)[number];
+/** Sections that follow in later phases (shown with a placeholder). */
+export const PLACEHOLDER_SECTIONS = ['events', 'chat', 'polls', 'tasks', 'stats', 'cash', 'halls'] as const;
+export type MenuSection = (typeof PLACEHOLDER_SECTIONS)[number] | 'teams' | 'profile' | 'members';
+
+const MENU: MenuSection[] = ['events', 'teams', 'chat', 'polls', 'tasks', 'stats', 'cash', 'halls', 'profile'];
 
 interface Props {
   tenantSlug: string;
   tenantName: string;
+  isAdmin: boolean;
 }
 
 /**
  * Top bar with the department name and a drop-down menu at the top right –
  * deliberately no bottom tab bar, so the content keeps the screen space.
  */
-export function AppHeader({ tenantSlug, tenantName }: Props) {
+export function AppHeader({ tenantSlug, tenantName, isAdmin }: Props) {
   const { t, i18n } = useTranslation();
+  const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
   const menuId = useId();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -65,7 +72,7 @@ export function AppHeader({ tenantSlug, tenantName }: Props) {
             className="absolute right-2 top-full mt-1 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
           >
             <ul className="py-1">
-              {MENU_SECTIONS.map((section) => (
+              {[...MENU, ...(isAdmin ? (['members'] as MenuSection[]) : [])].map((section) => (
                 <li key={section}>
                   <NavLink
                     to={`/${tenantSlug}/${section}`}
@@ -85,7 +92,12 @@ export function AppHeader({ tenantSlug, tenantName }: Props) {
                 <select
                   className="rounded-md border border-slate-300 bg-white px-2 py-1 text-sm"
                   value={i18n.resolvedLanguage}
-                  onChange={(event) => changeLanguage(event.target.value as Language)}
+                  onChange={(event) => {
+                    const locale = event.target.value as Language;
+                    changeLanguage(locale);
+                    // Also store it in the account, so mails and other devices use it.
+                    void patch('/me', { locale }).then(() => queryClient.invalidateQueries({ queryKey: ['account'] }));
+                  }}
                 >
                   {LANGUAGES.map((language) => (
                     <option key={language} value={language}>

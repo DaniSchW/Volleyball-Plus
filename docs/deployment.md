@@ -35,9 +35,11 @@ Im Kundenmenü des Hosters eine MySQL-Datenbank mit Benutzer anlegen (Zeichensat
 1. `https://deine-domain.de` aufrufen – die App leitet automatisch zum Einrichtungsassistenten (`/install`).
 2. Der Assistent prüft die Voraussetzungen (HTTPS, PHP-Version, Erweiterungen, Schreibrechte). Rot markierte Punkte zuerst beheben.
 3. **Einrichtungscode:** Der Assistent legt die Datei `backend/storage/app/setup-code.txt` an. Diese per FTP öffnen und den Code eintragen. So kann niemand Fremdes eine frisch hochgeladene Installation übernehmen.
-4. Adresse, Datenbank, Mailversand (Standard: PHP `mail()`, optional SMTP) und die erste Abteilung eintragen und **Jetzt einrichten** klicken.
+4. Adresse, Datenbank, Mailversand (Standard: PHP `mail()`, optional SMTP), die erste Abteilung und **dein Admin-Konto** (Name, E-Mail) eintragen und **Jetzt einrichten** klicken.
 5. Der Assistent legt die Tabellen und die Abteilung an und schreibt `backend/.env` (inklusive App-Schlüssel und Cron-Token). Danach ist er nicht mehr erreichbar.
    > Kann PHP die Datei `backend/.env` nicht schreiben, zeigt der Assistent ihren Inhalt an. Dann diesen Text als `.env` speichern, per FTP nach `backend/` hochladen und `backend/storage/app/setup-code.txt` löschen.
+
+6. Über **Zur Anmeldung** auf der Abschlussseite (oder `https://deine-domain.de/<kürzel>/login`) deine E-Mail-Adresse eingeben und den Anmeldelink aus dem Postfach öffnen. Danach legst du Teams an und verteilst Einladungslinks – andere Wege in die App gibt es nicht.
 
 ## 5. Cronjob
 

@@ -9,7 +9,8 @@ MySQL 8, InnoDB, `utf8mb4_unicode_ci` (E-Mail-Vergleiche damit automatisch ohne 
 - Weiche Löschung (`deleted_at`) nur wo Historie nötig ist (Personen, Termine, Buchungen).
 - Aufzählungen (Enums) als `VARCHAR` + PHP-Backed-Enums (Laravel-Casts), damit neue Werte ohne Tabellenumbau möglich sind.
 - Listen (z. B. Nebenpositionen) als `JSON`-Spalte oder eigene Zuordnungstabelle.
-- Tabellennamen im Code im Plural (Laravel-Konvention, z. B. `events`); hier zur besseren Lesbarkeit im Singular.
+- Tabellennamen im Code im Plural (Laravel-Konvention, z. B. `events`); noch nicht umgesetzte Tabellen stehen hier zur besseren Lesbarkeit im Singular.
+- Zusammengesetzte Fremdschlüssel können nicht `ON DELETE SET NULL` sein (würde auch `tenant_id` leeren); solche Verweise leert die Anwendung vor dem Löschen (`restrict`).
 
 Legende: 🌐 = global (kein Mandant), 🏢 = mandantenbezogen.
 
@@ -42,12 +43,13 @@ Legende: 🌐 = global (kein Mandant), 🏢 = mandantenbezogen.
 | is_platform_admin | bool | darf nur Mandanten verwalten |
 | last_login_at | datetime | |
 
-### 🌐 `auth_token` – Magic-Link
-`id`, `email`, `token_hash` (`CHAR(64)`, SHA-256), `expires_at` (+15 min), `used_at`, `requested_ip`, `user_agent`, `redirect_to` (z. B. zurück zum Einladungslink).
+### 🌐 `auth_tokens` – Magic-Link
+`id`, `email`, `token_hash` (`CHAR(64)`, SHA-256), `purpose` (`login` | `join`), `tenant_id`, `payload` (JSON, bei `join`: Einladung und Formulardaten), `expires_at` (+15 min), `used_at`, `requested_ip`, `user_agent`.
+Einmalig einlösbar (atomares `UPDATE … WHERE used_at IS NULL`). Der Link öffnet eine Seite mit Button – erst der Klick (POST) meldet an, damit Mail-Scanner den Link nicht verbrauchen.
 
-### 🌐 `session`
-`id`, `account_id`, `token_hash`, `created_at`, `last_seen_at`, `expires_at`, `user_agent`, `revoked_at`.
-**Gleitende Laufzeit:** `expires_at = last_seen_at + 90 Tage`; bei Nutzung wird verlängert (Schreibzugriff höchstens einmal pro Tag).
+### 🌐 `account_sessions`
+`id`, `account_id`, `token_hash`, `created_at`, `last_seen_at`, `expires_at`, `user_agent`, `ip`, `revoked_at`.
+**Gleitende Laufzeit:** `expires_at = last_seen_at + 90 Tage`; bei Nutzung wird verlängert (Schreibzugriff höchstens einmal pro Tag). Cookie `__Host-vp_session` (HttpOnly, Secure, SameSite=Lax), nur der Hash liegt in der Datenbank.
 
 ### 🌐 `push_subscription`
 `id`, `account_id`, `endpoint` (unique), `p256dh`, `auth`, `user_agent`, `created_at`, `last_success_at`.
@@ -64,7 +66,7 @@ Trennung zwischen **Account** (wer sich einloggt) und **Person** (Spielerprofil 
 | tenant_id, id | | |
 | account_id | ulid → account | unique (tenant_id, account_id) |
 | is_admin | bool | Rolle **Admin** |
-| status | enum `invited`, `active`, `disabled` | |
+| status | enum `active`, `disabled` | `disabled` = Zugang gesperrt (Admin) |
 
 ### 🏢 `person` – zentrales Spielerprofil
 | Feld | Typ | Hinweis |
@@ -82,7 +84,12 @@ Trennung zwischen **Account** (wer sich einloggt) und **Person** (Spielerprofil 
 | reach_height_cm | smallint null | Reichhöhe (stehend) |
 | jump_reach_cm | smallint null | Sprung-Reichhöhe (Angriff) |
 | avatar_file_id | ulid → file null | |
+| shared_fields | JSON | Detailfelder (`phone`, `email`, `address`, `birthday`), die die Person **allen** Mitgliedern freigibt |
 | deleted_at | datetime null | |
+
+**Sichtbarkeit:** Standardangaben (Name, Trikotnummer, Geschlecht, Positionen, Größe, Reich-/Sprunghöhe, Profilbild) sehen alle Mitglieder der Abteilung. Detailangaben (Telefon, E-Mail, Adresse, Geburtstag) nur, wenn freigegeben – oder für die Person selbst, ihre Eltern, Trainer ihrer Teams und Admins.
+
+**Bearbeiten:** Person selbst und Eltern alles (ein Kind nur, was die Eltern erlauben); Trainer der Person nur Trikotnummer und Positionen; Admins alles.
 
 `position` = `setter` (Zuspiel), `opposite` (Diagonal), `middle` (Mittelblock), `outside` (Außenangriff), `libero`, `universal`.
 
@@ -111,7 +118,7 @@ Unique `(person_id, tenant_member_id)`. Ein Account hat höchstens eine `self`-P
 Regeln:
 - Eine Person gilt als minderjährig, solange eine aktive `guardian`-Verknüpfung besteht; dafür ist das Geburtsdatum Pflicht.
 - Ohne Freigabe in `minor_permission` darf nur das Elternteil handeln; die Eltern haben immer die alleinige Entscheidung über das Profil.
-- **Zum 18. Geburtstag** setzt ein täglicher Job `ended_at` an allen `guardian`-Verknüpfungen, löscht `minor_permission` und schickt Kind und Eltern eine Mail. Hat das Kind noch keinen eigenen Login, erhält es eine Einladung per Mail (sofern eine Adresse hinterlegt ist).
+- **Zum 18. Geburtstag** setzt ein täglicher Job (`app:release-adults`) `ended_at` an allen `guardian`-Verknüpfungen und löscht `minor_permission`; ab dann verwaltet die Person ihr Profil allein. Hat sie noch keinen eigenen Login, lädt sie ein Trainer/Admin per Personen-Link ein. *(Benachrichtigungsmails folgen mit Phase 3.)*
 
 ### 🏢 `referee_license` – Schiedsrichter-Lizenz
 `person_id`, `level` (text, z. B. „D“, „C“, „BK“), `license_number` null, `valid_until` date. Wird Trainern im Kader angezeigt, inkl. Hinweis bei Ablauf < 60 Tage.
@@ -146,6 +153,7 @@ Vorlage beim Anlegen eines Mandanten: Standard-Ligabaum (1. BL … Kreisliga), f
 | decline_reason_required | bool | **Team-Einstellung (Trainer):** Absagegrund ist Pflicht (gilt für `no`; optional auch für `maybe`) |
 | maybe_reason_required | bool | Begründung auch bei „Vielleicht“ Pflicht |
 | reasons_visible_to_teammates | bool | Mitspieler sehen Absagegründe; Trainer/Admin sehen sie immer |
+| rsvp_visibility | enum `names`, `counts` | **Team-Einstellung (Trainer):** Mitspieler sehen, wer zu-/abgesagt hat, oder nur die Anzahl |
 | color | text | Akzentfarbe in der UI |
 | archived_at | datetime null | |
 
@@ -157,29 +165,32 @@ Hierarchie-Rang (berechnet, nur Teams mit `is_youth = false`): `(league.level, t
 | team_id | → team | |
 | person_id | → person | |
 | role | enum `player`, `trainer`, `organizer` | eine Zeile pro Rolle |
-| joined_at, left_at | date | |
+| joined_at | date | |
 
 Unique `(team_id, person_id, role)`. Ein Spieler (auch Erwachsene) kann so mehreren Teams angehören; ein Trainer mehrere Teams betreuen.
 
-### 🏢 `team_invitation` – Einladungslinks
+### 🏢 `invitations` – Einladungslinks
 | Feld | Typ | Hinweis |
 |---|---|---|
-| team_id | → team | |
-| kind | enum `link`, `personal` | `link` = teilbarer Link für mehrere Personen; `personal` = an eine bestimmte E-Mail |
-| token_hash | char(64) | Link: `/<slug>/join/<token>`; nur Hash gespeichert |
-| role | enum `player`, `trainer`, `organizer`, `guardian` | Rolle nach Beitritt; `guardian` = Elternteil wird mit `person_id` verknüpft |
-| person_id | → person null | bei `personal`: vorhandenes Profil (z. B. Kind), mit dem verknüpft wird |
-| email | varchar null | bei `personal` |
-| max_uses | smallint null | null = unbegrenzt |
+| kind | enum `team`, `person` | `team` = teilbarer Link zu einem Team; `person` = Einmal-Link für ein vorhandenes Profil |
+| team_id | → team null | bei `team` |
+| role | enum `player`, `trainer`, `organizer` null | Rolle im Team nach Beitritt (bei `team`) |
+| person_id | → person null | bei `person`: das Profil, z. B. ein Kind |
+| relation | enum `self`, `guardian` null | bei `person`: eigener Login bzw. Elternteil |
+| token_hash | char(64) | Link `/<slug>/join/<token>`; Suche nur über den Hash |
+| token_encrypted | text | mit dem App-Schlüssel verschlüsselt, damit Trainer den Link erneut anzeigen/kopieren können |
+| max_uses | smallint null | null = unbegrenzt; Personen-Links: 1 |
 | use_count | smallint | |
-| expires_at | datetime null | |
+| expires_at | datetime null | Personen-Links: 14 Tage |
 | revoked_at | datetime null | |
-| created_by | → tenant_member | |
+| created_by | → tenant_member null | |
 
-Wer den Link nutzt, ist **sofort Mitglied** im Team (keine Freigabe). Trainer können Mitglieder jederzeit wieder entfernen und den Link widerrufen.
+- **Team-Links** erstellen Trainer, Betreuer (nur für Spieler) und Admins. Beitritt: *selbst* (eigenes Profil, wird bei Bedarf angelegt) oder bei Spieler-Links *Kind anmelden* (Eltern legen ein Kinderprofil an und werden verknüpft).
+- **Personen-Links:** Eltern einladen (Trainer der Person, Admins, das erste Elternteil) oder eigenen Login einrichten (bei Kindern nur die Eltern – das setzt `own_login`; bei Erwachsenen Trainer/Admins).
+- Ohne Login wird die E-Mail-Adresse per Magic Link bestätigt; erst dann entstehen Konto und Mitgliedschaft. Wer den Link nutzt, ist **sofort Mitglied** (keine Freigabe). Beitritte zählen unter Zeilensperre, damit `max_uses` auch bei gleichzeitigen Beitritten hält.
 
-### 🏢 `team_invitation_use` – Protokoll der Beitritte
-`team_invitation_id`, `tenant_member_id`, `person_id`, `created_at` – wer ist über welchen Link beigetreten.
+### 🏢 `invitation_uses` – Protokoll der Beitritte
+`invitation_id`, `tenant_member_id`, `person_id`, `created_at` – wer ist über welchen Link beigetreten.
 
 ### 🏢 `cross_nomination` – Quernominierung (dauerhaft)
 | Feld | Typ | Hinweis |
@@ -369,8 +380,8 @@ erDiagram
   person ||--o{ person_account : wird_vertreten
   person ||--o{ team_membership : spielt_in
   team ||--o{ team_membership : hat
-  team ||--o{ team_invitation : einladungslinks
-  team_invitation ||--o{ team_invitation_use : beitritte
+  team ||--o{ invitations : einladungslinks
+  invitations ||--o{ invitation_uses : beitritte
   person ||--o| minor_permission : rechte_kind
   league ||--o{ team : spielklasse
   league ||--o{ league : unterliga
@@ -405,4 +416,4 @@ erDiagram
 | Chat-Verlauf / Polling | `chat_message(chat_id, topic_id, id)` |
 | Hallenkonflikt | `hall_booking(hall_id, weekday)` |
 | Login | `auth_token(token_hash)`, `session(token_hash)` |
-| Einladungslink | `team_invitation(token_hash)` |
+| Einladungslink | `invitations(token_hash)` |

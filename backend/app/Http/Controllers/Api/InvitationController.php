@@ -9,7 +9,6 @@ use App\Enums\TeamRole;
 use App\Http\Controllers\Controller;
 use App\Models\Invitation;
 use App\Models\Person;
-use App\Models\PersonAccount;
 use App\Models\Team;
 use App\Models\TenantMember;
 use App\Support\Auth\CurrentMember;
@@ -73,7 +72,7 @@ class InvitationController extends Controller
         $data = $request->validate(['relation' => ['required', Rule::in(['self', 'guardian'])]]);
         $relation = PersonRelation::from($data['relation']);
 
-        abort_unless($this->mayInviteForPerson($member, $person, $relation), 403);
+        abort_unless($this->permissions->canInviteForPerson($member, $person, $relation), 403);
 
         $invitation = $this->invitations->createPersonLink($person, $relation, $member);
 
@@ -159,32 +158,6 @@ class InvitationController extends Controller
         $member = TenantMember::query()->where('account_id', $request->user()->id)->first();
 
         return $member === null || $member->ownPerson() === null;
-    }
-
-    private function mayInviteForPerson(TenantMember $member, Person $person, PersonRelation $relation): bool
-    {
-        if ($relation === PersonRelation::Guardian) {
-            // Trainers/admins invite the first parent, parents the second one.
-            return $this->permissions->isAdmin($member)
-                || $this->permissions->isTrainerOfPerson($member, $person)
-                || $this->permissions->isGuardianOf($member, $person);
-        }
-
-        $hasOwnAccount = PersonAccount::query()
-            ->where('person_id', $person->id)
-            ->where('relation', PersonRelation::Own)
-            ->whereNull('ended_at')
-            ->exists();
-        if ($hasOwnAccount) {
-            return false;
-        }
-
-        // A child's own login is the parents' decision alone.
-        if ($person->hasGuardians()) {
-            return $this->permissions->isGuardianOf($member, $person);
-        }
-
-        return $this->permissions->isAdmin($member) || $this->permissions->isTrainerOfPerson($member, $person);
     }
 
     /**

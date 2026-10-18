@@ -165,8 +165,10 @@ volleyball-plus/
 - Kinder werden mit 18 automatisch vom Elternkonto gelöst; Eltern bestimmen, was das Kind selbst einstellen darf.
 - Über einen Einladungslink ist man automatisch im Team.
 - Kein SSH: Einrichtung per Browser-Assistent (geschützt durch Einrichtungscode aus einer Datei, die nur per FTP lesbar ist), Updates per FTP-Upload, Datenbank-Migrationen automatisch per Cron.
-- Hosting bei **ALL-INKL**: Cronjobs rufen dort eine Webadresse auf → Hauptweg ist `/cron/{token}`. Geplante Aufgaben dürfen daher nicht von einer exakten Minute abhängen und müssen in das Zeitlimit eines Webaufrufs passen.
+- Hosting bei **ALL-INKL**: Cronjobs rufen dort eine Webadresse auf → Hauptweg ist `/cron/{token}`, Intervall jede Minute. Geplante Aufgaben dürfen daher nicht von einer exakten Minute abhängen und müssen in das Zeitlimit eines Webaufrufs passen.
 - Entwicklung auf `main`.
 
-**Noch offen (blockiert nicht):**
-1. Kürzestes Cron-Intervall im ALL-INKL-Tarif (ideal: jede Minute).
+**Noch offen (für Phase 1/2):**
+1. Registrierung nur über Einladungslinks, oder auch freie Selbstregistrierung?
+2. Welche Profildaten sehen Mitspieler (Telefon, Adresse, Geburtstag, E-Mail)?
+3. Sehen Mitspieler, wer zu-/abgesagt hat (Namen), oder nur die Anzahl?

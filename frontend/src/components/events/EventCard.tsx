@@ -38,7 +38,8 @@ export function EventCard({ event }: { event: EventSummary }) {
               <span className="truncate">{event.title}</span>
             </h3>
             <p className="truncate text-sm text-slate-600">
-              {[event.teams.map((team) => team.name).join(', '), event.location_name].filter(Boolean).join(' · ')}
+              {[event.teams.map((team) => team.name).join(', '), event.training_group?.name, event.my.some((r) => r.is_guest) && t('events.asGuest'), event.location_name]
+                .filter(Boolean).join(' · ')}
             </p>
           </div>
           {event.type === 'match' && (event.own_logo_url || event.opponent_logo_url) && (

@@ -27,7 +27,7 @@ class EventService
 {
     public const EVENT_FIELDS = [
         'type', 'response_mode', 'title', 'description', 'starts_at', 'ends_at', 'meet_at', 'rsvp_deadline',
-        'location_name', 'address', 'max_participants', 'opponent_id', 'is_home',
+        'location_name', 'address', 'max_participants', 'opponent_id', 'is_home', 'cross_nomination_opens_at', 'training_group_id',
     ];
 
     public function __construct(
@@ -79,7 +79,12 @@ class EventService
             $event->series_exception = true;
         }
         $relevant = $event->isDirty(EventNotifications::RELEVANT_FIELDS);
+        $groupChanged = $event->isDirty('training_group_id');
         $event->save();
+
+        if ($groupChanged) {
+            $this->invitees->syncEvent($event);
+        }
 
         if ($relevant && ! $event->isCancelled()) {
             $this->notifications->changed($event, $actor);
@@ -114,6 +119,7 @@ class EventService
             'rsvp_deadline_minutes' => isset($attributes['rsvp_deadline'])
                 ? (int) CarbonImmutable::parse($attributes['rsvp_deadline'])->diffInMinutes($start, true) : null,
             'max_participants' => $attributes['max_participants'] ?? null,
+            'training_group_id' => $attributes['training_group_id'] ?? null,
         ])->save();
 
         DB::transaction(fn () => $this->series->update($series));
@@ -194,6 +200,7 @@ class EventService
             'rsvp_deadline_minutes' => isset($attributes['rsvp_deadline'])
                 ? (int) CarbonImmutable::parse($attributes['rsvp_deadline'])->diffInMinutes($start, true) : null,
             'max_participants' => $attributes['max_participants'] ?? null,
+            'training_group_id' => $attributes['training_group_id'] ?? null,
             'created_by' => $creator->id,
         ]);
 
@@ -213,7 +220,7 @@ class EventService
         $tz = $this->tenants->get()->timezone;
         $attributes = Arr::only($data, self::EVENT_FIELDS);
 
-        foreach (['starts_at', 'ends_at', 'meet_at', 'rsvp_deadline'] as $field) {
+        foreach (['starts_at', 'ends_at', 'meet_at', 'rsvp_deadline', 'cross_nomination_opens_at'] as $field) {
             if (array_key_exists($field, $attributes)) {
                 $attributes[$field] = $attributes[$field] === null ? null : CarbonImmutable::parse($attributes[$field], $tz)->utc();
             }
@@ -222,6 +229,11 @@ class EventService
         $type = EventType::tryFrom((string) ($attributes['type'] ?? $existing?->type?->value));
         if ($type !== EventType::Extra) {
             $attributes['response_mode'] = 'rsvp';
+        }
+        // Guests and training groups only exist for trainings.
+        if ($type !== EventType::Training) {
+            $attributes['cross_nomination_opens_at'] = null;
+            $attributes['training_group_id'] = null;
         }
         if (array_key_exists('title', $attributes) || $existing === null) {
             $opponent = $type === EventType::Match && ! empty($attributes['opponent_id'] ?? $existing?->opponent_id)

@@ -21,7 +21,7 @@ class Event extends Model
     protected $fillable = [
         'type', 'response_mode', 'scope', 'title', 'description', 'starts_at', 'ends_at', 'meet_at',
         'rsvp_deadline', 'location_name', 'address', 'max_participants', 'series_id', 'series_exception',
-        'opponent_id', 'is_home', 'status', 'created_by',
+        'opponent_id', 'is_home', 'status', 'created_by', 'cross_nomination_opens_at', 'training_group_id',
     ];
 
     protected $attributes = [
@@ -42,6 +42,7 @@ class Event extends Model
             'ends_at' => 'datetime',
             'meet_at' => 'datetime',
             'rsvp_deadline' => 'datetime',
+            'cross_nomination_opens_at' => 'datetime',
             'max_participants' => 'integer',
             'series_exception' => 'boolean',
             'reminder_sent_at' => 'datetime',
@@ -79,6 +80,14 @@ class Event extends Model
     public function opponent(): BelongsTo
     {
         return $this->belongsTo(Opponent::class);
+    }
+
+    /**
+     * @return BelongsTo<TrainingGroup, $this>
+     */
+    public function trainingGroup(): BelongsTo
+    {
+        return $this->belongsTo(TrainingGroup::class);
     }
 
     /**

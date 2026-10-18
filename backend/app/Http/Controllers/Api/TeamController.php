@@ -13,6 +13,7 @@ use App\Models\TenantMember;
 use App\Support\Auth\CurrentMember;
 use App\Support\Auth\Permissions;
 use App\Support\Auth\PersonPresenter;
+use App\Support\Teams\TeamHierarchy;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -21,7 +22,7 @@ use Illuminate\Validation\Rule;
 class TeamController extends Controller
 {
     /** Basic team data – admin only. */
-    private const BASE_FIELDS = ['name', 'gender', 'is_youth', 'rank_in_league', 'color'];
+    private const BASE_FIELDS = ['name', 'gender', 'is_youth', 'league_id', 'rank_in_league', 'color'];
 
     /** Team settings – admin and the team's trainers. */
     private const SETTING_FIELDS = [
@@ -29,12 +30,14 @@ class TeamController extends Controller
         'decline_reason_required', 'maybe_reason_required', 'reasons_visible_to_teammates', 'rsvp_visibility',
     ];
 
-    public function __construct(private CurrentMember $current, private Permissions $permissions) {}
+    public function __construct(private CurrentMember $current, private Permissions $permissions, private TeamHierarchy $hierarchy) {}
 
     public function index(): JsonResponse
     {
         $member = $this->current->get();
-        $teams = Team::query()->whereNull('archived_at')->orderBy('rank_in_league')->orderBy('name')->get();
+        // In hierarchy order: highest team first, then teams without league, then youth.
+        $teams = Team::query()->with('league')->whereNull('archived_at')->get()
+            ->sortBy(fn (Team $team) => $this->hierarchy->sortKey($team))->values();
 
         return response()->json(['data' => $teams->map(fn (Team $team) => $this->summary($team, $member))->values()->all()]);
     }
@@ -92,7 +95,7 @@ class TeamController extends Controller
         $viewer = $this->current->get();
         abort_unless($this->permissions->canSeeTeam($viewer, $team), 403);
 
-        $memberships = $team->memberships()->with('person')->get()->filter(fn (TeamMembership $m) => $m->person !== null);
+        $memberships = $team->memberships()->with('person.refereeLicense')->get()->filter(fn (TeamMembership $m) => $m->person !== null);
 
         $rows = $memberships->groupBy('person_id')->map(fn ($group) => [
             'person' => $presenter->present($group->first()->person, $viewer),
@@ -110,6 +113,7 @@ class TeamController extends Controller
             'person_id' => ['required', 'string', Rule::exists('persons', 'id')->where('tenant_id', $team->tenant_id)->whereNull('deleted_at')],
             'role' => ['required', Rule::enum(TeamRole::class)],
         ]);
+        $this->hierarchy->assertMayJoin($team, $data['person_id'], TeamRole::from($data['role']));
 
         $membership = TeamMembership::query()->firstOrCreate(
             ['team_id' => $team->id, 'person_id' => $data['person_id'], 'role' => $data['role']],
@@ -139,6 +143,7 @@ class TeamController extends Controller
             'name' => $team->name,
             'gender' => $team->gender->value,
             'is_youth' => $team->is_youth,
+            'league_name' => $team->league?->name,
             'color' => $team->color,
             'can_manage' => $this->permissions->canManageTeam($member, $team),
             'can_invite' => $this->permissions->canInviteToTeam($member, $team),
@@ -153,6 +158,8 @@ class TeamController extends Controller
     {
         return $this->summary($team, $this->current->get()) + [
             'rank_in_league' => $team->rank_in_league,
+            'league' => $team->league ? ['id' => $team->league->id, 'name' => $team->league->name, 'level' => $team->league->level] : null,
+            'in_hierarchy' => $this->hierarchy->rank($team) !== null,
             'logo_url' => $team->logo_file_id ? '/api/v1/t/'.$this->current->get()->tenant->slug.'/files/'.$team->logo_file_id : null,
             'settings' => [
                 'min_participants' => $team->min_participants,
@@ -178,6 +185,7 @@ class TeamController extends Controller
             'name' => [$presence, 'string', 'max:80'],
             'gender' => [$presence, Rule::enum(TeamGender::class)],
             'is_youth' => ['sometimes', 'boolean'],
+            'league_id' => ['sometimes', 'nullable', 'string', Rule::exists('leagues', 'id')->where('tenant_id', $this->current->get()->tenant_id)],
             'rank_in_league' => ['sometimes', 'integer', 'between:1,99'],
             'color' => ['sometimes', 'nullable', 'regex:/^#[0-9a-fA-F]{6}$/'],
         ];

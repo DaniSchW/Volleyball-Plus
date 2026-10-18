@@ -6,17 +6,22 @@ import {
   api, del, errorText, patch, post,
   type Invitation, type RosterRow, type Team, type TeamRole, type TeamSettings,
 } from '../lib/api';
-import { useTenantPath, useTenantSlug } from '../lib/queries';
+import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
 import { Avatar, Button, Card, Field, Loading, Notice, PageTitle, Select, Toggle } from '../components/ui';
 import { EventFeed } from '../components/events/EventFeed';
 import { LogoUpload } from '../components/LogoUpload';
+import { RefereeBadge } from '../components/team/RefereeBadge';
+import { TeamBaseData } from '../components/team/TeamBaseData';
+import { TeamGuests } from '../components/team/TeamGuests';
+import { TrainingGroups } from '../components/team/TrainingGroups';
 
-type Tab = 'roster' | 'events' | 'invitations' | 'settings';
+type Tab = 'roster' | 'events' | 'groups' | 'guests' | 'invitations' | 'settings';
 
 export function TeamPage() {
   const { t } = useTranslation();
   const { teamId = '' } = useParams();
   const tp = useTenantPath();
+  const me = useTenantMe();
   const [tab, setTab] = useState<Tab>('roster');
   const queryClient = useQueryClient();
 
@@ -25,13 +30,19 @@ export function TeamPage() {
   if (team.isPending) return <Loading />;
   if (team.isError) return <Notice tone="error">{errorText(team.error, t('errors.generic'))}</Notice>;
 
-  const tabs: Tab[] = ['roster', 'events', ...(team.data.can_invite ? (['invitations'] as Tab[]) : []), ...(team.data.can_manage ? (['settings'] as Tab[]) : [])];
+  const managed = team.data.can_invite;
+  const tabs: Tab[] = [
+    'roster', 'events', 'groups',
+    ...(managed && !team.data.is_youth ? (['guests'] as Tab[]) : []),
+    ...(managed ? (['invitations'] as Tab[]) : []),
+    ...(team.data.can_manage ? (['settings'] as Tab[]) : []),
+  ];
 
   return (
     <div className="space-y-4">
       <PageTitle>{team.data.name}</PageTitle>
       {tabs.length > 1 && (
-        <div role="tablist" className="flex gap-1 rounded-lg bg-slate-100 p-1">
+        <div role="tablist" className="-mx-4 flex gap-1 overflow-x-auto bg-slate-100 p-1 px-4 sm:mx-0 sm:rounded-lg sm:px-1">
           {tabs.map((value) => (
             <button
               key={value}
@@ -39,7 +50,7 @@ export function TeamPage() {
               type="button"
               aria-selected={tab === value}
               onClick={() => setTab(value)}
-              className={`min-h-10 flex-1 rounded-md text-sm ${tab === value ? 'bg-white font-medium shadow-sm' : 'text-slate-600'}`}
+              className={`min-h-10 shrink-0 grow whitespace-nowrap rounded-md px-3 text-sm ${tab === value ? 'bg-white font-medium shadow-sm' : 'text-slate-600'}`}
             >
               {t(`team.tabs.${value}`)}
             </button>
@@ -47,9 +58,12 @@ export function TeamPage() {
         </div>
       )}
       {tab === 'roster' && <Roster team={team.data} />}
+      {tab === 'groups' && <TrainingGroups team={team.data} />}
+      {tab === 'guests' && <TeamGuests team={team.data} />}
       {tab === 'invitations' && <Invitations team={team.data} />}
       {tab === 'settings' && team.data.settings && (
         <>
+          {me.data?.is_admin && <TeamBaseData team={team.data} />}
           <LogoUpload
             title={t('team.logo')}
             path={tp(`teams/${team.data.id}/logo`)}
@@ -105,6 +119,7 @@ function Roster({ team }: { team: Team }) {
                       <span className="block truncate text-xs text-slate-500">
                         {[person.primary_position && t(`positions.${person.primary_position}`), person.is_minor && t('profile.minor')].filter(Boolean).join(' · ')}
                       </span>
+                      {person.referee_license && <RefereeBadge license={person.referee_license} />}
                     </Link>
                     {team.can_manage && (
                       <button

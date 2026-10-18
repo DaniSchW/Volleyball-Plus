@@ -77,6 +77,14 @@ class Person extends Model
     }
 
     /**
+     * @return HasOne<RefereeLicense, $this>
+     */
+    public function refereeLicense(): HasOne
+    {
+        return $this->hasOne(RefereeLicense::class);
+    }
+
+    /**
      * @return HasOne<MinorPermission, $this>
      */
     public function minorPermission(): HasOne

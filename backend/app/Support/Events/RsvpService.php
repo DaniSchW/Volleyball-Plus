@@ -11,6 +11,7 @@ use App\Models\Person;
 use App\Models\Team;
 use App\Models\TenantMember;
 use App\Support\Auth\Permissions;
+use App\Support\Teams\GuestWindow;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
@@ -21,11 +22,12 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  * - only for invited persons and events that expect replies,
  * - until the deadline (people managing the event may still change it),
  * - a reason if the team requires one (for several teams: the strictest rule),
- * - "yes" closes when the maximum number of participants is reached.
+ * - "yes" closes when the maximum number of participants is reached,
+ * - cross-nominated guests may accept only from the opening time (GuestWindow).
  */
 class RsvpService
 {
-    public function __construct(private Permissions $permissions) {}
+    public function __construct(private Permissions $permissions, private GuestWindow $guests) {}
 
     public function respond(Event $event, Person $person, RsvpStatus $status, ?string $reason, TenantMember $actor): EventResponse
     {
@@ -37,13 +39,21 @@ class RsvpService
         if (! $event->expectsResponses()) {
             throw ValidationException::withMessages(['status' => __('events.no_replies')]);
         }
-        if (! EventInvitee::query()->where('event_id', $event->id)->where('person_id', $person->id)->exists()) {
+        $invitee = EventInvitee::query()->where('event_id', $event->id)->where('person_id', $person->id)->first();
+        if ($invitee === null) {
             throw ValidationException::withMessages(['person_id' => __('events.not_invited')]);
         }
 
-        $afterDeadline = $event->deadlinePassed();
+        // Cross-nominated guests fill up places: "yes" only from the opening time.
+        $guest = $invitee->source === 'cross_nomination';
+        $afterDeadline = $guest ? $this->guests->isClosed($event) : $event->deadlinePassed();
         if ($afterDeadline && ! $manager) {
             throw ValidationException::withMessages(['status' => __('events.deadline_passed')]);
+        }
+        if ($guest && $status === RsvpStatus::Yes && ! $manager && ! $this->guests->isOpen($event)) {
+            throw ValidationException::withMessages(['status' => __('events.guests_not_open', [
+                'at' => $this->guests->opensAt($event)->copy()->setTimezone($event->tenant->timezone)->locale(app()->getLocale())->isoFormat(__('notifications.date_format')),
+            ])]);
         }
 
         $reason = trim((string) $reason) ?: null;

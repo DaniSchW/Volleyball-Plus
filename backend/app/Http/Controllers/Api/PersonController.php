@@ -9,6 +9,7 @@ use App\Enums\TeamRole;
 use App\Http\Controllers\Controller;
 use App\Models\MinorPermission;
 use App\Models\Person;
+use App\Models\RefereeLicense;
 use App\Models\Team;
 use App\Models\TeamMembership;
 use App\Support\Auth\CurrentMember;
@@ -167,6 +168,30 @@ class PersonController extends Controller
         if ($previous !== null) {
             $images->delete($previous);
         }
+
+        return $this->show($person->refresh());
+    }
+
+    /** Referee license with expiry date; the person (parents for children) or admins. */
+    public function updateRefereeLicense(Request $request, Person $person): JsonResponse
+    {
+        abort_unless($this->permissions->canEditRefereeLicense($this->current->get(), $person), 403);
+        $data = $request->validate([
+            'level' => ['required', 'string', 'max:20'],
+            'license_number' => ['nullable', 'string', 'max:40'],
+            'valid_until' => ['required', 'date'],
+        ]);
+
+        RefereeLicense::query()->updateOrCreate(['person_id' => $person->id], $data);
+
+        return $this->show($person->refresh());
+    }
+
+    public function deleteRefereeLicense(Person $person): JsonResponse
+    {
+        abort_unless($this->permissions->canEditRefereeLicense($this->current->get(), $person), 403);
+
+        RefereeLicense::query()->where('person_id', $person->id)->delete();
 
         return $this->show($person->refresh());
     }

@@ -113,7 +113,10 @@
     "tabs": {
       "roster": "Kader",
       "invitations": "Einladungen",
-      "settings": "Einstellungen"
+      "settings": "Einstellungen",
+      "groups": "Gruppen",
+      "guests": "Gäste",
+      "events": "Termine"
     },
     "empty": "Noch niemand im Team.",
     "role": "Rolle",
@@ -332,7 +335,17 @@
     "cancel": "Termin absagen",
     "restore": "Absage zurücknehmen",
     "endSeries": "Serie beenden",
-    "endSeriesConfirm": "Alle kommenden Termine dieser Serie werden abgesagt. Fortfahren?"
+    "endSeriesConfirm": "Alle kommenden Termine dieser Serie werden abgesagt. Fortfahren?",
+    "guestOpensAt": "Als Gast kannst du ab {{date}} zusagen.",
+    "positions": "Zusagen nach Position",
+    "positionUnknown": "ohne Position",
+    "guest": "Gast",
+    "asGuest": "als Gast",
+    "trainingOptions": "Training",
+    "trainingGroup": "Für",
+    "wholeTeam": "ganzes Team",
+    "guestsFrom": "Gäste dürfen zusagen ab",
+    "guestsFromHint": "Leer = Standard aus den Team-Einstellungen (Quernominierung)."
   },
   "notifications": {
     "title": "Benachrichtigungen",
@@ -355,5 +368,68 @@
       "reminder": "Erinnerung, wenn du noch nicht geantwortet hast",
       "notice": "Neue Infos"
     }
+  },
+  "leagues": {
+    "manage": "Ligabaum verwalten",
+    "title": "Ligabaum",
+    "hint": "Die Ebene (1 = höchste Spielklasse) bestimmt die Rangfolge der Teams. Daraus ergibt sich, wer wen per Quernominierung einladen kann und dass Spieler eines höheren Teams nicht in einem niedrigeren mitspielen.",
+    "level": "Ebene",
+    "teams_one": "{{count}} Team",
+    "teams_other": "{{count}} Teams",
+    "edit": "Ändern",
+    "delete": "{{name}} löschen",
+    "deleteConfirm": "„{{name}}“ wirklich löschen?",
+    "name": "Name",
+    "add": "Liga hinzufügen",
+    "namePlaceholder": "z. B. Regionalliga Süd",
+    "parent": "Unter",
+    "noParent": "– oberste Ebene –",
+    "levelHint": "Leer = wie die übergeordnete Liga."
+  },
+  "referee": {
+    "badge": "SR {{level}} bis {{date}}",
+    "expired": "abgelaufen",
+    "title": "Schiedsrichter-Lizenz",
+    "number": "Lizenznummer",
+    "expiresSoon": "Läuft bald ab – bitte rechtzeitig verlängern.",
+    "none": "Keine Lizenz hinterlegt.",
+    "edit": "Ändern",
+    "add": "Lizenz eintragen",
+    "delete": "Entfernen",
+    "deleteConfirm": "Lizenz wirklich entfernen?",
+    "level": "Stufe",
+    "validUntil": "Gültig bis"
+  },
+  "guests": {
+    "hint": "Quernominierung: Spieler aus unteren Teams dauerhaft zu euren Trainings einladen. Sie sehen die Trainings auf ihrer Startseite und können ab dem eingestellten Zeitpunkt zusagen, solange Plätze frei sind.",
+    "noLeague": "Für die Quernominierung braucht das Team eine Liga (Admins tragen sie in den Einstellungen ein).",
+    "title": "Gäste",
+    "none": "Noch keine Gäste eingeladen.",
+    "active": "{{name}} einladen",
+    "on": "aktiv",
+    "remove": "{{name}} entfernen",
+    "removeConfirm": "{{name}} nicht mehr zu Trainings einladen?",
+    "invite": "Spieler einladen",
+    "noCandidates": "Keine passenden Spieler in unteren Teams.",
+    "player": "Spieler (Stammteam)",
+    "add": "Einladen"
+  },
+  "groups": {
+    "hint": "Trainingsgruppen sind Teile des Teams mit eigenen Trainings (z. B. Zuspielertraining). Trainer und Betreuer sind immer eingeladen.",
+    "none": "Noch keine Trainingsgruppen.",
+    "create": "Gruppe anlegen",
+    "name": "Name",
+    "namePlaceholder": "z. B. Zuspielertraining",
+    "empty": "Noch niemand in der Gruppe.",
+    "chooseMembers": "Mitglieder wählen",
+    "delete": "Löschen",
+    "deleteConfirm": "Gruppe „{{name}}“ löschen? Ihre Trainings werden zu Trainings des ganzen Teams."
+  },
+  "teamBase": {
+    "title": "Team & Liga",
+    "league": "Liga",
+    "noLeague": "– keine –",
+    "rank": "Rang",
+    "hint": "Rang: Reihenfolge, wenn mehrere eigene Teams in derselben Liga spielen (1 = höchstes)."
   }
 }

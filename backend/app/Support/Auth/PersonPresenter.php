@@ -47,6 +47,8 @@ class PersonPresenter
             ] : null,
             'birthday' => $visible('birthday') ? $person->birthday?->toDateString() : null,
             'is_minor' => $person->hasGuardians(),
+            // Referee license: for trainers (and whoever sees all details).
+            'referee_license' => $all ? $person->refereeLicense?->toPublic() : null,
         ];
     }
 
@@ -63,6 +65,7 @@ class PersonPresenter
             'shared_fields' => $canManage ? ($person->shared_fields ?? []) : null,
             'editable_fields' => $this->permissions->editableFields($viewer, $person),
             'can_manage_profile' => $canManage,
+            'can_edit_referee_license' => $this->permissions->canEditRefereeLicense($viewer, $person),
             'can_manage_minor_permissions' => $this->permissions->canManageMinorPermissions($viewer, $person),
         ];
     }

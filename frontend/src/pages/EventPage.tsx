@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
-import { api, errorText, post, type EventDetail, type ResponseRow, type RsvpStatus } from '../lib/api';
+import { api, errorText, post, POSITIONS, type EventDetail, type ResponseRow, type RsvpStatus } from '../lib/api';
 import { formatDateTime, formatLongDay, formatTime } from '../lib/dates';
 import { useTenantPath, useTenantSlug } from '../lib/queries';
 import { RsvpControl } from '../components/events/RsvpControl';
@@ -42,7 +42,10 @@ export function EventPage() {
   return (
     <div className="space-y-4">
       <div>
-        <p className="text-sm text-slate-500">{e.teams.map((team) => team.name).join(', ')}</p>
+        <p className="text-sm text-slate-500">
+          {e.teams.map((team) => team.name).join(', ')}
+          {e.training_group && ` · ${e.training_group.name}`}
+        </p>
         <h1 className={`flex items-center gap-2 text-xl font-semibold ${cancelled ? 'line-through' : ''}`}>
           <TypeIcon type={e.type} />
           {e.title}
@@ -98,6 +101,8 @@ export function EventPage() {
         </Card>
       )}
 
+      {e.positions && <Positions positions={e.positions} />}
+
       {e.response_mode === 'rsvp' && <Responses event={e} />}
 
       {e.can_manage && (
@@ -117,6 +122,25 @@ export function EventPage() {
         </Card>
       )}
     </div>
+  );
+}
+
+/** Accepted players per position, so the trainer can plan the training. */
+function Positions({ positions }: { positions: NonNullable<EventDetail['positions']> }) {
+  const { t } = useTranslation();
+  const keys = [...POSITIONS, 'unknown' as const].filter((key) => positions[key]);
+  if (keys.length === 0) return null;
+
+  return (
+    <Card title={t('events.positions')}>
+      <ul className="flex flex-wrap gap-2">
+        {keys.map((key) => (
+          <li key={key} className="rounded-full bg-slate-100 px-3 py-1 text-sm">
+            {key === 'unknown' ? t('events.positionUnknown') : t(`positions.${key}`)}: <span className="font-semibold">{positions[key]}</span>
+          </li>
+        ))}
+      </ul>
+    </Card>
   );
 }
 
@@ -156,7 +180,7 @@ function Responses({ event }: { event: EventDetail }) {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm">{row.person.name}</span>
                       <span className="block truncate text-xs text-slate-500">
-                        {[row.person.role !== 'player' && t(`roles.${row.person.role}`), row.person.primary_position && t(`positions.${row.person.primary_position}`), row.reason]
+                        {[row.person.is_guest && t('events.guest'), row.person.role !== 'player' && !row.person.is_guest && t(`roles.${row.person.role}`), row.person.primary_position && t(`positions.${row.person.primary_position}`), row.reason]
                           .filter(Boolean).join(' · ')}
                       </span>
                     </span>

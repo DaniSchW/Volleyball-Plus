@@ -8,6 +8,7 @@ use App\Enums\TeamGender;
 use App\Support\Tenancy\BelongsToTenant;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Team extends Model
@@ -18,6 +19,7 @@ class Team extends Model
         'name',
         'gender',
         'is_youth',
+        'league_id',
         'rank_in_league',
         'min_participants',
         'default_max_participants',
@@ -52,6 +54,22 @@ class Team extends Model
             'reasons_visible_to_teammates' => 'boolean',
             'archived_at' => 'datetime',
         ];
+    }
+
+    /**
+     * @return BelongsTo<League, $this>
+     */
+    public function league(): BelongsTo
+    {
+        return $this->belongsTo(League::class);
+    }
+
+    /**
+     * @return HasMany<TrainingGroup, $this>
+     */
+    public function trainingGroups(): HasMany
+    {
+        return $this->hasMany(TrainingGroup::class);
     }
 
     /**

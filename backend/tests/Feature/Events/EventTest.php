@@ -96,7 +96,8 @@ class EventTest extends TestCase
 
         $feed = $this->loginAs($this->player)->getJson('/api/v1/t/ssv-ulm/events')->assertOk()->json('data');
         $this->assertCount(1, $feed);
-        $this->assertSame([['person_id' => $this->personOf($this->player)->id, 'name' => 'Paul', 'is_self' => true, 'status' => null, 'reason' => null, 'can_respond' => true]], $feed[0]['my']);
+        $this->assertSame([['person_id' => $this->personOf($this->player)->id, 'name' => 'Paul', 'is_self' => true, 'status' => null, 'reason' => null,
+            'is_guest' => false, 'can_accept' => true, 'guests_open_at' => null, 'can_respond' => true]], $feed[0]['my']);
     }
 
     public function test_who_may_create_events(): void

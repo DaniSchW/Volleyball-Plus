@@ -191,6 +191,11 @@ class Permissions
     }
 
     /** Only parents decide what the child may do. */
+    public function canEditRefereeLicense(TenantMember $member, Person $person): bool
+    {
+        return $this->isAdmin($member) || $this->canManageProfile($member, $person);
+    }
+
     public function canManageMinorPermissions(TenantMember $member, Person $person): bool
     {
         return $this->isGuardianOf($member, $person);

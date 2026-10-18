@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
-import { api, errorText, patch, post, type EventDetail, type EventType, type Opponent, type Team } from '../lib/api';
+import { api, errorText, patch, post, type EventDetail, type EventType, type Opponent, type Team, type TrainingGroup } from '../lib/api';
 import { addMinutes, toLocalInput } from '../lib/dates';
 import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
 import { Button, Card, Field, Loading, Notice, PageTitle, Select, Toggle } from '../components/ui';
@@ -25,6 +25,8 @@ interface FormState {
   max_participants: string;
   opponent_id: string;
   is_home: '' | 'home' | 'away';
+  training_group_id: string;
+  guests_from: string;
   repeat: boolean;
   weekdays: number[];
   interval_weeks: number;
@@ -39,7 +41,7 @@ function initial(teamId?: string): FormState {
   return {
     type: 'training', title: '', description: '', allTeams: false, team_ids: teamId ? [teamId] : [], response_mode: 'rsvp',
     starts_at: startLocal, ends_at: addMinutes(startLocal, 120), meet_at: '', rsvp_deadline: '',
-    location_name: '', address: '', max_participants: '', opponent_id: '', is_home: '',
+    location_name: '', address: '', max_participants: '', opponent_id: '', is_home: '', training_group_id: '', guests_from: '',
     repeat: false, weekdays: [((start.getDay() + 6) % 7) + 1], interval_weeks: 1, ends_on: '',
   };
 }
@@ -52,6 +54,7 @@ function fromEvent(e: EventDetail): FormState {
     meet_at: toLocalInput(e.meet_at), rsvp_deadline: toLocalInput(e.rsvp_deadline), location_name: e.location_name ?? '',
     address: e.address ?? '', max_participants: e.max_participants?.toString() ?? '', opponent_id: e.opponent?.id ?? '',
     is_home: e.is_home === null ? '' : e.is_home ? 'home' : 'away',
+    training_group_id: e.training_group?.id ?? '', guests_from: toLocalInput(e.cross_nomination_opens_at),
     ...(e.series ? { weekdays: e.series.weekdays, interval_weeks: e.series.interval_weeks, ends_on: e.series.ends_on ?? '' } : {}),
   };
 }
@@ -99,6 +102,10 @@ export function EventFormPage() {
         max_participants: form.max_participants ? Number(form.max_participants) : null,
         response_mode: form.type === 'extra' ? form.response_mode : 'rsvp',
       };
+      if (form.type === 'training') {
+        body.training_group_id = form.training_group_id || null;
+        body.cross_nomination_opens_at = form.guests_from || null;
+      }
       if (form.type === 'match') {
         body.opponent_id = form.opponent_id || null;
         body.is_home = form.is_home === '' ? null : form.is_home === 'home';
@@ -126,6 +133,8 @@ export function EventFormPage() {
     event.preventDefault();
     save.mutate();
   };
+
+  const singleTeam = !form.allTeams && form.team_ids.length === 1 ? form.team_ids[0] : null;
 
   const toggleTeam = (id: string, on: boolean) => set('team_ids', on ? [...form.team_ids, id] : form.team_ids.filter((x) => x !== id));
   const canRepeat = form.type === 'training' && !form.allTeams && (eventId ? editSeries : true);
@@ -225,6 +234,16 @@ export function EventFormPage() {
         </div>
       </Card>
 
+      {form.type === 'training' && (
+        <TrainingOptions
+          teamId={singleTeam}
+          groupId={form.training_group_id}
+          onGroupChange={(id) => set('training_group_id', id)}
+          guestsFrom={form.guests_from}
+          onGuestsFromChange={(value) => set('guests_from', value)}
+        />
+      )}
+
       <Card title={t('events.where')}>
         <div className="space-y-3">
           <Field label={t('events.locationName')} maxLength={120} value={form.location_name} onChange={(e) => set('location_name', e.target.value)} />
@@ -245,6 +264,45 @@ export function EventFormPage() {
       {save.isError && <Notice tone="error">{errorText(save.error, t('errors.generic'))}</Notice>}
       <Button type="submit" className="w-full" disabled={save.isPending}>{t('common.save')}</Button>
     </form>
+  );
+}
+
+/** Training group (own trainings for part of the team) and when cross-nominated guests may accept. */
+function TrainingOptions({ teamId, groupId, onGroupChange, guestsFrom, onGuestsFromChange }: {
+  teamId: string | null;
+  groupId: string;
+  onGroupChange: (id: string) => void;
+  guestsFrom: string;
+  onGuestsFromChange: (value: string) => void;
+}) {
+  const { t } = useTranslation();
+  const tp = useTenantPath();
+  const groups = useQuery({
+    queryKey: ['training-groups', teamId],
+    queryFn: async () => (await api<{ data: TrainingGroup[] }>(tp(`teams/${teamId}/training-groups`))).data,
+    enabled: !!teamId,
+  });
+
+  return (
+    <Card title={t('events.trainingOptions')}>
+      <div className="space-y-3">
+        {teamId && (groups.data?.length ?? 0) > 0 && (
+          <Select label={t('events.trainingGroup')} value={groupId} onChange={(e) => onGroupChange(e.target.value)}>
+            <option value="">{t('events.wholeTeam')}</option>
+            {groups.data!.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}
+          </Select>
+        )}
+        {!groupId && (
+          <Field
+            label={t('events.guestsFrom')}
+            type="datetime-local"
+            value={guestsFrom}
+            onChange={(e) => onGuestsFromChange(e.target.value)}
+            hint={t('events.guestsFromHint')}
+          />
+        )}
+      </div>
+    </Card>
   );
 }
 

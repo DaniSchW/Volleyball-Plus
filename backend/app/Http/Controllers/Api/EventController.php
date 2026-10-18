@@ -13,6 +13,7 @@ use App\Models\Person;
 use App\Models\Team;
 use App\Models\TeamMembership;
 use App\Models\TenantMember;
+use App\Models\TrainingGroup;
 use App\Support\Auth\CurrentMember;
 use App\Support\Auth\Permissions;
 use App\Support\Events\EventPresenter;
@@ -94,6 +95,7 @@ class EventController extends Controller
 
         $repeat = $data['repeat'] ?? null;
         abort_if($repeat !== null && ($data['type'] !== EventType::Training->value || $teams->count() !== 1), 422, __('events.series_only_training'));
+        $this->checkTrainingGroup($data['training_group_id'] ?? null, $teams);
 
         $event = $events->create($data, $teams, $scope, $member, $repeat);
 
@@ -110,9 +112,12 @@ class EventController extends Controller
 
         if ($request->boolean('series') && $event->series_id !== null) {
             $data = $request->validate($this->rules(creating: true) + ['repeat' => ['required', 'array']]);
+            $this->checkTrainingGroup($data['training_group_id'] ?? null, $event->teams);
             $events->updateSeries($event->series, $data, $data['repeat'], $member);
         } else {
-            $events->update($event, $request->validate($this->rules(creating: false)), $member);
+            $data = $request->validate($this->rules(creating: false));
+            $this->checkTrainingGroup($data['training_group_id'] ?? null, $event->teams);
+            $events->update($event, $data, $member);
         }
 
         return response()->json(['data' => $this->presenter->detail($event->refresh(), $member)]);
@@ -188,6 +193,22 @@ class EventController extends Controller
             ->pluck('team_id')->values();
     }
 
+    /**
+     * A training group must belong to the (single) team of the event.
+     *
+     * @param  Collection<int, Team>  $teams
+     */
+    private function checkTrainingGroup(?string $groupId, Collection $teams): void
+    {
+        if ($groupId === null) {
+            return;
+        }
+
+        $valid = $teams->count() === 1
+            && TrainingGroup::query()->where('id', $groupId)->where('team_id', $teams->first()->id)->exists();
+        abort_unless($valid, 422, __('teams.group_invalid'));
+    }
+
     private function canSee(TenantMember $member, Event $event): bool
     {
         if ($this->permissions->isAdmin($member) || $this->permissions->canManageEvent($member, $event)) {
@@ -236,6 +257,8 @@ class EventController extends Controller
             'max_participants' => ['sometimes', 'nullable', 'integer', 'between:1,500'],
             'opponent_id' => ['sometimes', 'nullable', 'string', Rule::exists('opponents', 'id')->where('tenant_id', $this->current->get()->tenant_id)],
             'is_home' => ['sometimes', 'nullable', 'boolean'],
+            'cross_nomination_opens_at' => ['sometimes', 'nullable', 'date'],
+            'training_group_id' => ['sometimes', 'nullable', 'string'],
             'repeat' => ['sometimes', 'nullable', 'array'],
             'repeat.weekdays' => ['required_with:repeat', 'array', 'min:1'],
             'repeat.weekdays.*' => ['integer', 'between:1,7'],

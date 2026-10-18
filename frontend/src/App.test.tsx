@@ -97,8 +97,8 @@ const EVENT = {
   location_name: 'Kuhberghalle', address: null, directions_url: null, teams: [{ id: 't1', name: 'Herren 1', color: null }],
   opponent: null, is_home: null, own_logo_url: null, opponent_logo_url: null, counts: { yes: 3, no: 1, maybe: 0, open: 6 },
   max_participants: null, is_full: false, min_participants: 6, below_minimum: true, can_manage: false,
-  reason_required: { no: true, maybe: false },
-  my: [{ person_id: 'p1', name: 'Max', is_self: true, status: null, reason: null, can_respond: true }],
+  reason_required: { no: true, maybe: false }, training_group: null,
+  my: [{ person_id: 'p1', name: 'Max', is_self: true, status: null, reason: null, is_guest: false, can_accept: true, guests_open_at: null, can_respond: true }],
 };
 
 describe('start page', () => {
@@ -255,5 +255,54 @@ describe('notifications', () => {
 
     expect(await screen.findByText(/Zum Home-Bildschirm/)).toBeInTheDocument();
     vi.restoreAllMocks();
+  });
+});
+
+describe('cross-nominated guests', () => {
+  it('can decline but accept only once places open for guests', async () => {
+    const guestEvent = { ...EVENT, my: [{ ...EVENT.my[0], is_guest: true, can_accept: false, guests_open_at: '2026-10-21T17:30:00Z' }] };
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/notices': { body: { data: [] } },
+      'GET /t/ssv-ulm/events?': { body: { data: [guestEvent], next_cursor: null } },
+    });
+    renderAt('/ssv-ulm');
+
+    const card = await screen.findByRole('article', { name: 'Hallentraining' });
+    expect(card).toHaveTextContent('als Gast');
+    expect(card).toHaveTextContent(/Als Gast kannst du ab 21\.10\., \d\d:30 zusagen\./);
+    expect(screen.getByRole('button', { name: /Zusage/ })).toBeDisabled();
+    expect(screen.getByRole('button', { name: /Absage/ })).toBeEnabled();
+  });
+});
+
+describe('league tree', () => {
+  it('lets admins add a sub-league', async () => {
+    let sent: Record<string, unknown> = {};
+    const tree = [
+      { id: 'l4', parent_id: null, name: 'Regionalliga', level: 4, depth: 0, team_count: 1 },
+      { id: 'l5', parent_id: null, name: 'Oberliga', level: 5, depth: 0, team_count: 0 },
+    ];
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME(true) },
+      'GET /t/ssv-ulm/leagues': { body: { data: tree } },
+      'POST /t/ssv-ulm/leagues': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { status: 201, body: { data: [tree[0], { id: 'l4s', parent_id: 'l4', name: 'Regionalliga Süd', level: 4, depth: 1, team_count: 0 }, tree[1]] } };
+      },
+    });
+    renderAt('/ssv-ulm/leagues');
+
+    expect(await screen.findByText('Oberliga', { selector: 'span' })).toBeInTheDocument();
+    // Leagues in use cannot be deleted.
+    expect(screen.queryByRole('button', { name: 'Regionalliga löschen' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Oberliga löschen' })).toBeInTheDocument();
+
+    fireEvent.change(screen.getByPlaceholderText('z. B. Regionalliga Süd'), { target: { value: 'Regionalliga Süd' } });
+    fireEvent.change(screen.getByLabelText('Unter'), { target: { value: 'l4' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Hinzufügen' }));
+
+    expect(await screen.findByText(/^Regionalliga Süd/, { selector: 'span' })).toBeInTheDocument();
+    expect(sent).toEqual({ name: 'Regionalliga Süd', parent_id: 'l4' });
   });
 });

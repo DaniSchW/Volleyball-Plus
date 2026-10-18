@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { errorText, post, type EventDetail, type EventSummary, type MyReply, type RsvpStatus } from '../../lib/api';
+import { formatDateTime } from '../../lib/dates';
 import { useTenantPath } from '../../lib/queries';
 import { Notice } from '../ui';
 
@@ -52,7 +53,7 @@ export function RsvpControl({ event, reply, showName }: { event: EventSummary; r
         <div className="flex flex-1 gap-2" role="group" aria-label={t('events.replyFor', { name: reply.name })}>
           {STATUSES.map((status) => {
             const active = (pending ?? reply.status) === status;
-            const full = status === 'yes' && event.is_full && reply.status !== 'yes';
+            const full = status === 'yes' && reply.status !== 'yes' && (event.is_full || !reply.can_accept);
             return (
               <button
                 key={status}
@@ -96,6 +97,9 @@ export function RsvpControl({ event, reply, showName }: { event: EventSummary; r
         </form>
       )}
 
+      {reply.is_guest && !reply.can_accept && reply.guests_open_at && reply.can_respond && (
+        <p className="text-xs text-slate-500">{t('events.guestOpensAt', { date: formatDateTime(reply.guests_open_at) })}</p>
+      )}
       {!reply.can_respond && reply.status === null && event.response_mode === 'rsvp' && event.status === 'scheduled' && (
         <p className="text-xs text-slate-500">{event.deadline_passed ? t('events.deadlinePassed') : t('events.askParents')}</p>
       )}

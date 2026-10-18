@@ -76,7 +76,11 @@ class SeriesGenerator
 
                 $event->fill($this->eventData($series, $day, $tz));
                 $event->status = $fits ? EventStatus::Scheduled : EventStatus::Cancelled;
+                $groupChanged = $event->isDirty('training_group_id');
                 $event->save();
+                if ($groupChanged) {
+                    $this->invitees->syncEvent($event);
+                }
             });
 
         $this->generate($series);
@@ -147,6 +151,7 @@ class SeriesGenerator
             'location_name' => $series->location_name,
             'address' => $series->address,
             'max_participants' => $series->max_participants,
+            'training_group_id' => $series->training_group_id,
         ];
     }
 }

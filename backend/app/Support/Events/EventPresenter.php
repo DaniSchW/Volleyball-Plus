@@ -14,6 +14,7 @@ use App\Models\Team;
 use App\Models\TeamMembership;
 use App\Models\TenantMember;
 use App\Support\Auth\Permissions;
+use App\Support\Teams\GuestWindow;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Support\Collection;
@@ -32,6 +33,7 @@ class EventPresenter
         private Permissions $permissions,
         private RsvpService $rsvp,
         private TenantContext $tenants,
+        private GuestWindow $guests,
     ) {}
 
     /**
@@ -40,7 +42,7 @@ class EventPresenter
      */
     public function list(Collection $events, TenantMember $viewer): array
     {
-        $events = (new EloquentCollection($events->all()))->loadMissing(['teams', 'opponent']);
+        $events = (new EloquentCollection($events->all()))->loadMissing(['teams', 'opponent', 'trainingGroup']);
         $ids = $events->pluck('id');
 
         $counts = EventResponse::query()->whereIn('event_id', $ids)
@@ -86,14 +88,18 @@ class EventPresenter
             'ends_on' => $event->series->ends_on?->toDateString(),
         ] : null;
         $data['team_ids'] = $event->teams->pluck('id')->all();
+        $data['cross_nomination_opens_at'] = $event->cross_nomination_opens_at?->toIso8601ZuluString();
+        $data['guests_open_at'] = $this->guests->opensAt($event)?->toIso8601ZuluString();
         $data['responses'] = null;
+        $data['positions'] = null;
 
         if ($showNames) {
-            $invitees = Person::query()->whereIn('id', EventInvitee::query()->where('event_id', $event->id)->pluck('person_id'))->get()->keyBy('id');
+            $invitees = EventInvitee::query()->where('event_id', $event->id)->pluck('source', 'person_id');
+            $persons = Person::query()->whereIn('id', $invitees->keys())->get()->keyBy('id');
             $responses = EventResponse::query()->where('event_id', $event->id)->get()->keyBy('person_id');
             $roles = $this->rolesInEvent($event);
 
-            $data['responses'] = $invitees->map(function (Person $person) use ($responses, $showReasons, $roles) {
+            $data['responses'] = $persons->map(function (Person $person) use ($responses, $showReasons, $roles, $invitees) {
                 $response = $responses->get($person->id);
 
                 return [
@@ -103,12 +109,21 @@ class EventPresenter
                         'avatar_url' => $person->avatar_file_id ? $this->fileUrl($person->avatar_file_id) : null,
                         'primary_position' => $person->primary_position?->value,
                         'role' => $roles[$person->id] ?? TeamRole::Player->value,
+                        'is_guest' => $invitees[$person->id] === 'cross_nomination',
                     ],
                     'status' => $response?->status->value,
                     'reason' => $showReasons ? $response?->reason : null,
                     'responded_at' => $response?->responded_at?->toIso8601ZuluString(),
                 ];
             })->sortBy(fn ($row) => mb_strtolower($row['person']['name']))->values()->all();
+
+            // Who is coming per position (players only), so trainers can plan the training.
+            if ($canManage) {
+                $data['positions'] = collect($data['responses'])
+                    ->filter(fn ($row) => $row['status'] === RsvpStatus::Yes->value && $row['person']['role'] === TeamRole::Player->value)
+                    ->countBy(fn ($row) => $row['person']['primary_position'] ?? 'unknown')
+                    ->all();
+            }
         }
 
         return $data;
@@ -168,9 +183,12 @@ class EventPresenter
                 'no' => $this->rsvp->reasonRequired($event, RsvpStatus::No),
                 'maybe' => $this->rsvp->reasonRequired($event, RsvpStatus::Maybe),
             ],
+            'training_group' => $event->trainingGroup ? ['id' => $event->trainingGroup->id, 'name' => $event->trainingGroup->name] : null,
             'my' => $myInvites->map(function (EventInvitee $invite) use ($acting, $myResponses, $viewer, $event, $deadlinePassed, $canManage) {
                 $person = $acting[$invite->person_id];
                 $response = $myResponses->firstWhere('person_id', $invite->person_id);
+                $guest = $invite->source === 'cross_nomination';
+                $closed = $guest ? $this->guests->isClosed($event) : $deadlinePassed;
 
                 return [
                     'person_id' => $person->id,
@@ -178,8 +196,12 @@ class EventPresenter
                     'is_self' => $person->id === $this->permissions->ownPersonId($viewer),
                     'status' => $response?->status->value,
                     'reason' => $response?->reason,
+                    'is_guest' => $guest,
+                    // Guests may decline any time, accept only once places open up for them.
+                    'can_accept' => $canManage || ! $guest || $this->guests->isOpen($event),
+                    'guests_open_at' => $guest ? $this->guests->opensAt($event)?->toIso8601ZuluString() : null,
                     'can_respond' => $event->expectsResponses()
-                        && ($canManage || (! $deadlinePassed && $this->permissions->canRespondFor($viewer, $person))),
+                        && ($canManage || (! $closed && $this->permissions->canRespondFor($viewer, $person))),
                 ];
             })->values()->all(),
         ];

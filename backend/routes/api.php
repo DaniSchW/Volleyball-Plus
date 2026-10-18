@@ -3,10 +3,12 @@
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CalendarController;
+use App\Http\Controllers\Api\CrossNominationController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\FileController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\InvitationController;
+use App\Http\Controllers\Api\LeagueController;
 use App\Http\Controllers\Api\LogoController;
 use App\Http\Controllers\Api\MemberController;
 use App\Http\Controllers\Api\NoticeController;
@@ -16,6 +18,7 @@ use App\Http\Controllers\Api\PushController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Api\TenantMeController;
+use App\Http\Controllers\Api\TrainingGroupController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('health', HealthController::class);
@@ -61,12 +64,30 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
         Route::post('teams/{team}/invitations', [InvitationController::class, 'store']);
         Route::delete('invitations/{invitation}', [InvitationController::class, 'destroy']);
 
+        Route::get('leagues', [LeagueController::class, 'index']);
+        Route::post('leagues', [LeagueController::class, 'store']);
+        Route::patch('leagues/{league}', [LeagueController::class, 'update']);
+        Route::delete('leagues/{league}', [LeagueController::class, 'destroy']);
+
+        Route::get('teams/{team}/cross-nominations', [CrossNominationController::class, 'index']);
+        Route::get('teams/{team}/cross-nomination-candidates', [CrossNominationController::class, 'candidates']);
+        Route::post('teams/{team}/cross-nominations', [CrossNominationController::class, 'store']);
+        Route::patch('cross-nominations/{nomination}', [CrossNominationController::class, 'update']);
+        Route::delete('cross-nominations/{nomination}', [CrossNominationController::class, 'destroy']);
+
+        Route::get('teams/{team}/training-groups', [TrainingGroupController::class, 'index']);
+        Route::post('teams/{team}/training-groups', [TrainingGroupController::class, 'store']);
+        Route::patch('training-groups/{group}', [TrainingGroupController::class, 'update']);
+        Route::delete('training-groups/{group}', [TrainingGroupController::class, 'destroy']);
+
         Route::get('persons', [PersonController::class, 'index']);
         Route::post('persons', [PersonController::class, 'store']);
         Route::get('persons/{person}', [PersonController::class, 'show']);
         Route::patch('persons/{person}', [PersonController::class, 'update']);
         Route::post('persons/{person}/avatar', [PersonController::class, 'uploadAvatar']);
         Route::delete('persons/{person}/avatar', [PersonController::class, 'deleteAvatar']);
+        Route::put('persons/{person}/referee-license', [PersonController::class, 'updateRefereeLicense']);
+        Route::delete('persons/{person}/referee-license', [PersonController::class, 'deleteRefereeLicense']);
         Route::put('persons/{person}/minor-permissions', [PersonController::class, 'updateMinorPermissions']);
         Route::post('persons/{person}/invitations', [InvitationController::class, 'storeForPerson']);
 

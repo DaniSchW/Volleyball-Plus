@@ -142,7 +142,7 @@ volleyball-plus/
 | **1 – Login & Struktur** ✅ | Erstes Admin-Konto, Magic Link (mail()/SMTP), gleitende 90-Tage-Session, Abteilung, Teams, Personen, Rollen, **Einladungslinks**, Eltern-Verknüpfung, Profil inkl. Bild, Sprachwahl | Spieler können per Link beitreten |
 | **2 – Termine & Zu-/Absage (MVP)** ✅ | Terminarten, Serien, Fristen, Startseite mit Infinite Scroll, Info-Termine, abteilungsweite Termine, drei Logo-Ebenen, Wegbeschreibung, Infobereich, ICS-Feed | **erste produktiv nutzbare Version** |
 | **3 – Benachrichtigungen** ✅ | Web-Push, iOS-Installationshinweis, Frist-Erinnerungen, Einstellungen pro Kategorie | |
-| **4 – Training** | Teilnehmermaximum, Mindestteilnehmer (gelb), Trainingsgruppen, Ligabaum, Hierarchie, Geschlechtsregel, Quernominierung mit Team-Standard & Termin-Override, SR-Lizenz, Positionsanzeige | |
+| **4 – Training** ✅ | Teilnehmermaximum, Mindestteilnehmer (gelb), Trainingsgruppen, Ligabaum, Hierarchie, Geschlechtsregel, Quernominierung mit Team-Standard & Termin-Override, SR-Lizenz, Positionsanzeige | |
 | **5 – Statistik** | Quoten mit Sichtbarkeitsregeln, frei wählbarer Zeitraum, Balkendiagramm, Helfer-Statistik | |
 | **6 – Aufgaben, Helferdienste, Umfragen** | Aufgaben zu Terminen, Helfertermine, Umfragen pro Team und teamübergreifend | |
 | **7 – Chat** | Teamchats, Admin-Chats mit freier Auswahl, Themen/Unterkanäle, Polling + Push | |
@@ -175,4 +175,8 @@ volleyball-plus/
 - Registrierung ausschließlich über Einladungslinks; Login-Links gehen nur an bestehende Mitglieder.
 - Profil: Standardangaben sehen alle Mitglieder; Details (Telefon, E-Mail, Adresse, Geburtstag) nur per Freigabe der Person – Trainer ihrer Teams, Admins und Eltern sehen sie immer.
 - Sichtbarkeit der Zu-/Absagen (Namen oder nur Anzahl) legt der Trainer pro Team fest.
+- Hierarchie (Phase 4): Rang aus der Liga (Ebene) und dem Rang in der Liga; Jugendteams und Teams ohne Liga stehen außerhalb. „Wer im höheren Team spielt, spielt nicht im niedrigeren“ gilt nur zwischen Teams derselben Art (Herren/Damen/Mixed), damit z. B. Mixed-Hobbyteams möglich bleiben. Quernominierung vergleicht über alle Arten (ein Mixed-Team darf aus niedrigeren Herren- und Damenteams einladen), dazu die Geschlechtsregel.
+- Quernominierte Gäste: nur zu Team-Trainings (nicht Spiele/Gruppentrainings), Absage jederzeit, Zusage ab Freigabe; bei Freigabe „ab Rückmeldefrist“ bis Trainingsbeginn. Trainer/Admins verwalten die Gäste, Betreuer sehen sie.
+- Trainingsgruppen: Gruppentrainings laden nur die Gruppe plus Trainer und Betreuer ein.
+- Schiedsrichter-Lizenz: trägt die Person selbst (Kinder: Eltern) oder ein Admin ein; Trainer sehen sie im Kader mit Ablaufhinweis (60 Tage).
 - Benachrichtigungen (Phase 3): Kategorien neue Termine, Änderungen/Absagen, Erinnerung, neue Infos. Standard: Push für alles, E-Mail nur bei Änderungen/Absagen; pro Kategorie und Abteilung im Profil einstellbar. Erinnerung einmal 24 h vor der Frist (sonst vor Beginn) an alle ohne Antwort. Eine neue Trainingsreihe wird einmal gemeldet, nicht je Termin. Versand über die Warteschlange im Cron-Lauf, also bis zu einer Cron-Runde verzögert.

@@ -5,6 +5,7 @@ namespace Tests\Feature\Tenancy;
 use App\Enums\InvitationKind;
 use App\Enums\TeamRole;
 use App\Models\CalendarFeed;
+use App\Models\CrossNomination;
 use App\Models\Event;
 use App\Models\EventInvitee;
 use App\Models\EventResponse;
@@ -13,16 +14,20 @@ use App\Models\EventSeries;
 use App\Models\EventTeam;
 use App\Models\Invitation;
 use App\Models\InvitationUse;
+use App\Models\League;
 use App\Models\MinorPermission;
 use App\Models\Notice;
 use App\Models\NotificationPreference;
 use App\Models\Opponent;
 use App\Models\Person;
 use App\Models\PersonAccount;
+use App\Models\RefereeLicense;
 use App\Models\StoredFile;
 use App\Models\Team;
 use App\Models\TeamMembership;
 use App\Models\TenantMember;
+use App\Models\TrainingGroup;
+use App\Models\TrainingGroupMember;
 use App\Support\Tenancy\BelongsToTenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -40,7 +45,8 @@ class ModelIsolationTest extends TestCase
         TeamMembership::class, Invitation::class, InvitationUse::class, StoredFile::class,
         Event::class, EventSeries::class, EventTeam::class, EventInvitee::class, EventResponse::class,
         EventResponseLog::class, Opponent::class, Notice::class, CalendarFeed::class,
-        NotificationPreference::class,
+        NotificationPreference::class, League::class, CrossNomination::class, TrainingGroup::class, TrainingGroupMember::class,
+        RefereeLicense::class,
     ];
 
     public function test_every_tenant_model_is_listed_here(): void
@@ -86,6 +92,13 @@ class ModelIsolationTest extends TestCase
             Opponent::create(['name' => 'TSV Gegner']);
             Notice::create(['scope' => 'tenant', 'title' => 'Info', 'visible_from' => now(), 'visible_until' => now()->addDay()]);
             CalendarFeed::create(['tenant_member_id' => $member->id, 'token_hash' => hash('sha256', 'c'), 'token_encrypted' => 'c']);
+            $league = League::create(['name' => 'Landesliga', 'level' => 7]);
+            $lower = Team::create(['name' => 'B-Team 2', 'gender' => 'mixed', 'league_id' => $league->id]);
+            TeamMembership::create(['team_id' => $lower->id, 'person_id' => $person->id, 'role' => TeamRole::Player]);
+            CrossNomination::create(['host_team_id' => $team->id, 'person_id' => $person->id, 'home_team_id' => $lower->id]);
+            $group = TrainingGroup::create(['team_id' => $team->id, 'name' => 'Zuspiel']);
+            TrainingGroupMember::create(['training_group_id' => $group->id, 'person_id' => $person->id]);
+            RefereeLicense::create(['person_id' => $person->id, 'level' => 'D', 'valid_until' => '2027-06-30']);
             NotificationPreference::create(['tenant_member_id' => $member->id, 'category' => 'notice', 'push' => false, 'email' => false]);
         });
 

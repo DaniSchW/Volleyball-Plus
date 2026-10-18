@@ -103,11 +103,14 @@ export interface Team {
   name: string;
   gender: 'men' | 'women' | 'mixed';
   is_youth: boolean;
+  league_name: string | null;
   color: string | null;
   can_manage: boolean;
   can_invite: boolean;
   can_see: boolean;
   rank_in_league?: number;
+  league?: { id: string; name: string; level: number } | null;
+  in_hierarchy?: boolean;
   logo_url?: string | null;
   settings?: TeamSettings;
 }
@@ -140,6 +143,15 @@ export interface Person {
   address: Address | null;
   birthday: string | null;
   is_minor: boolean;
+  referee_license: RefereeLicense | null;
+}
+
+export interface RefereeLicense {
+  level: string;
+  license_number: string | null;
+  valid_until: string;
+  expired: boolean;
+  expires_soon: boolean;
 }
 
 export interface MinorPermissions {
@@ -156,6 +168,7 @@ export interface PersonDetail extends Person {
   editable_fields: string[];
   can_manage_profile: boolean;
   can_manage_minor_permissions: boolean;
+  can_edit_referee_license: boolean;
   can_invite_guardian: boolean;
   can_invite_own: boolean;
   minor_permissions?: MinorPermissions;
@@ -215,6 +228,9 @@ export interface MyReply {
   is_self: boolean;
   status: RsvpStatus | null;
   reason: string | null;
+  is_guest: boolean;
+  can_accept: boolean;
+  guests_open_at: string | null;
   can_respond: boolean;
 }
 
@@ -245,11 +261,12 @@ export interface EventSummary {
   below_minimum: boolean;
   can_manage: boolean;
   reason_required: { no: boolean; maybe: boolean };
+  training_group: { id: string; name: string } | null;
   my: MyReply[];
 }
 
 export interface ResponseRow {
-  person: { id: string; name: string; avatar_url: string | null; primary_position: Position | null; role: TeamRole };
+  person: { id: string; name: string; avatar_url: string | null; primary_position: Position | null; role: TeamRole; is_guest: boolean };
   status: RsvpStatus | null;
   reason: string | null;
   responded_at: string | null;
@@ -261,7 +278,11 @@ export interface EventDetail extends EventSummary {
   series_id: string | null;
   series: { weekdays: number[]; interval_weeks: number; ends_on: string | null } | null;
   team_ids: string[];
+  cross_nomination_opens_at: string | null;
+  guests_open_at: string | null;
   responses: ResponseRow[] | null;
+  /** Accepted players per position – only for people managing the event. */
+  positions: Partial<Record<Position | 'unknown', number>> | null;
 }
 
 export interface EventPage {
@@ -292,4 +313,34 @@ export interface NotificationPreference {
   category: NotificationCategory;
   push: boolean;
   email: boolean;
+}
+
+// ---- training structure ----
+
+export interface League {
+  id: string;
+  parent_id: string | null;
+  name: string;
+  level: number;
+  depth: number;
+  team_count: number;
+}
+
+export interface CrossNomination {
+  id: string;
+  active: boolean;
+  person: Person;
+  home_team: { id: string; name: string };
+}
+
+export interface CrossCandidate {
+  person: Person;
+  home_team: { id: string; name: string };
+}
+
+export interface TrainingGroup {
+  id: string;
+  team_id: string;
+  name: string;
+  person_ids: string[];
 }

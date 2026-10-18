@@ -120,14 +120,14 @@ Regeln:
 - Ohne Freigabe in `minor_permission` darf nur das Elternteil handeln; die Eltern haben immer die alleinige Entscheidung über das Profil.
 - **Zum 18. Geburtstag** setzt ein täglicher Job (`app:release-adults`) `ended_at` an allen `guardian`-Verknüpfungen und löscht `minor_permission`; ab dann verwaltet die Person ihr Profil allein. Hat sie noch keinen eigenen Login, lädt sie ein Trainer/Admin per Personen-Link ein. Eltern und Person bekommen dazu eine E-Mail.
 
-### 🏢 `referee_license` – Schiedsrichter-Lizenz
-`person_id`, `level` (text, z. B. „D“, „C“, „BK“), `license_number` null, `valid_until` date. Wird Trainern im Kader angezeigt, inkl. Hinweis bei Ablauf < 60 Tage.
+### 🏢 `referee_licenses` – Schiedsrichter-Lizenz ✅
+`person_id` (unique), `level` (text, z. B. „D“, „C“, „BK“), `license_number` null, `valid_until` date. Eintragen: die Person selbst (bei Kindern die Eltern) und Admins. Sichtbar für alle, die die Profildetails sehen (Person, Eltern, Trainer ihrer Teams, Admins) – im Kader als Hinweis „SR D bis …“, gelb ab 60 Tage vor Ablauf, rot wenn abgelaufen.
 
 ---
 
 ## 3. Ligabaum, Teams, Hierarchie
 
-### 🏢 `league` – admin-pflegbarer Ligabaum
+### 🏢 `leagues` – admin-pflegbarer Ligabaum ✅
 | Feld | Typ | Hinweis |
 |---|---|---|
 | parent_id | → league null | Baumstruktur (z. B. Verband → Ebene → Staffel) |
@@ -135,7 +135,7 @@ Regeln:
 | level | smallint | 1 = höchste Spielklasse; daraus Hierarchie-Rang |
 | sort_order | int | |
 
-Vorlage beim Anlegen eines Mandanten: Standard-Ligabaum (1. BL … Kreisliga), frei anpassbar.
+Vorlage: Beim ersten Aufruf wird der Standard-Ligabaum angelegt (1. Bundesliga, 2. Bundesliga, 3. Liga, Regionalliga, Oberliga, Verbandsliga, Landesliga, Bezirksliga, Bezirksklasse, Kreisliga, Kreisklasse – Ebene 1 … 11), danach frei anpassbar. Unterligen (z. B. „Regionalliga Süd“) übernehmen die Ebene der übergeordneten Liga, wenn nichts anderes eingetragen ist. Löschen nur ohne Unterligen und ohne (aktive) Teams.
 
 ### 🏢 `team`
 | Feld | Typ | Hinweis |
@@ -143,7 +143,7 @@ Vorlage beim Anlegen eines Mandanten: Standard-Ligabaum (1. BL … Kreisliga), f
 | name | text | „Herren 1“, „U18 männlich“ |
 | gender | enum `men`, `women`, `mixed` | Geschlechtsart |
 | is_youth | bool | Jugendteam (U12 … U20): von Hierarchie, Quernominierung und Spielerauswahl ausgenommen |
-| league_id | → league null | |
+| league_id | → leagues null | ✅ Liga aus dem Ligabaum |
 | rank_in_league | smallint | Reihenfolge, falls zwei eigene Teams in gleicher Liga |
 | logo_file_id | → file null | Logo-Ebene 2 |
 | min_participants | smallint null | Mindestteilnehmerzahl Training (global pro Team) |
@@ -157,7 +157,9 @@ Vorlage beim Anlegen eines Mandanten: Standard-Ligabaum (1. BL … Kreisliga), f
 | color | text | Akzentfarbe in der UI |
 | archived_at | datetime null | |
 
-Hierarchie-Rang (berechnet, nur Teams mit `is_youth = false`): `(league.level, team.rank_in_league)` – kleinerer Wert = höheres Team.
+Hierarchie-Rang (berechnet, nur Teams mit `is_youth = false` und Liga): `(league.level, team.rank_in_league)` – kleinerer Wert = höheres Team. Teams ohne Liga stehen außerhalb der Hierarchie.
+
+**Regel „höheres Team spielt nicht im niedrigeren“:** Wer als Spieler in einem höheren Team ist, kann nicht als Spieler in ein niedrigeres Team **derselben Art** (Herren/Damen/Mixed) aufgenommen werden – weder über den Kader noch über einen Einladungslink. Trainer-/Betreuerrollen sind davon frei; ein Herren-1-Spieler darf also z. B. in einem Mixed-Hobbyteam mitspielen.
 
 ### 🏢 `team_membership`
 | Feld | Typ | Hinweis |
@@ -192,7 +194,7 @@ Unique `(team_id, person_id, role)`. Ein Spieler (auch Erwachsene) kann so mehre
 ### 🏢 `invitation_uses` – Protokoll der Beitritte
 `invitation_id`, `tenant_member_id`, `person_id`, `created_at` – wer ist über welchen Link beigetreten.
 
-### 🏢 `cross_nomination` – Quernominierung (dauerhaft)
+### 🏢 `cross_nominations` – Quernominierung (dauerhaft) ✅
 | Feld | Typ | Hinweis |
 |---|---|---|
 | host_team_id | → team | Team, zu dessen Trainings eingeladen wird |
@@ -201,17 +203,20 @@ Unique `(team_id, person_id, role)`. Ein Spieler (auch Erwachsene) kann so mehre
 | active | bool | pro Spieler aktivierbar |
 | invited_by | → tenant_member | |
 
-Prüfung beim Anlegen (Server): Host- und Stammteam sind keine Jugendteams, Rang(host) höher als Rang(home), Geschlechtsregel erfüllt (`men` ↔ `male`, `women` ↔ `female`, `mixed` ↔ beide). Gilt nur für Termine vom Typ `training` des Host-Teams. Ab wann zugesagt werden darf, regelt `team.cross_nomination_mode`, im Termin überschreibbar über `event.cross_nomination_opens_at`. Keine Warteliste.
+Prüfung beim Anlegen (Server): Host- und Stammteam sind keine Jugendteams, Rang(host) höher als Rang(home) (über alle Teamarten hinweg, die Ligaebenen sind vergleichbar), die Person ist Spieler im Stammteam und noch nicht im Host-Team, Geschlechtsregel erfüllt (`men` ↔ `male`, `women` ↔ `female`, `mixed` ↔ beide). Unique (`host_team_id`, `person_id`); `active` schaltet pro Spieler an/aus.
 
-### 🏢 `training_group` / `training_group_member`
-`training_group`: `team_id`, `name` (z. B. „Zuspielertraining“). `training_group_member`: `training_group_id`, `person_id`.
+Gäste werden zu allen kommenden **Team-Trainings** des Host-Teams eingeladen (`event_invitees.source = cross_nomination`), nicht zu Spielen, Zusatzterminen oder Gruppentrainings. Ab wann sie zusagen dürfen, regelt `team.cross_nomination_mode` (sofort / X Stunden vor Beginn / ab Rückmeldefrist), im Termin überschreibbar über `event.cross_nomination_opens_at`. Absagen dürfen Gäste jederzeit. Liegt die Freigabe auf oder nach der Rückmeldefrist, können Gäste bis Trainingsbeginn zusagen (sie füllen freie Plätze auf). Keine Warteliste; das Teilnehmermaximum gilt für alle.
+
+### 🏢 `training_groups` / `training_group_members` ✅
+`training_groups`: `team_id`, `name` (z. B. „Zuspielertraining“). `training_group_members`: `training_group_id`, `person_id` (unique je Gruppe; nur Personen aus dem Team).
+Trainings mit `training_group_id` laden nur die Gruppe ein (`source = group`) plus Trainer und Betreuer des Teams. Wird eine Gruppe gelöscht, werden ihre Trainings wieder Trainings des ganzen Teams.
 
 ---
 
 ## 4. Termine & Zu-/Absagen
 
 ### 🏢 `event_series` – Serientermin (Training) ✅
-`team_id`, `title`, `description`, `weekdays` (JSON, ISO 1 = Mo … 7 = So), `interval_weeks` (1 = jede Woche, 2 = 14-tägig), `starts_on`, `ends_on` null, `start_time`, `end_time` (Ortszeit der Abteilung), `location_name`, `address`, `rsvp_deadline_minutes` (vor Beginn), `max_participants`, `generated_until`, `created_by`. *(Später: `training_group_id`, `hall_booking_id`.)*
+`team_id`, `title`, `description`, `weekdays` (JSON, ISO 1 = Mo … 7 = So), `interval_weeks` (1 = jede Woche, 2 = 14-tägig), `starts_on`, `ends_on` null, `start_time`, `end_time` (Ortszeit der Abteilung), `location_name`, `address`, `rsvp_deadline_minutes` (vor Beginn), `max_participants`, `generated_until`, `created_by`. `training_group_id` null ✅ *(Später: `hall_booking_id`.)*
 Ein täglicher Job (`app:generate-series`) erzeugt daraus Einzeltermine rollierend ~6 Monate voraus; 19:30 bleibt über die Zeitumstellung 19:30. Serie ändern wirkt auf kommende, nicht einzeln bearbeitete Termine (`series_exception`); nicht mehr passende Termine werden abgesagt, nicht gelöscht. Serie beenden sagt alle kommenden Termine ab.
 
 ### 🏢 `opponents` – wiederverwendbare Gegner ✅
@@ -229,10 +234,10 @@ Ein täglicher Job (`app:generate-series`) erzeugt daraus Einzeltermine rolliere
 | location_name, address | text null | Adresse → Google-Maps-Link |
 | rsvp_deadline | datetime null | Frist |
 | max_participants | smallint null | Teilnehmermaximum |
-| cross_nomination_opens_at | datetime null | *(Phase 4)* Override: ab wann Quernominierte zusagen dürfen; null = Team-Standard |
+| cross_nomination_opens_at | datetime null | ✅ Override: ab wann Quernominierte zusagen dürfen; null = Team-Standard |
 | series_id | → event_series null | |
 | series_exception | bool | Einzeltermin wurde abweichend bearbeitet |
-| training_group_id | → training_group null | *(Phase 4)* |
+| training_group_id | → training_groups null | ✅ nur Trainings eines Teams |
 | opponent_id | → opponent null | nur `match` |
 | is_home | bool null | Heim-/Auswärtsspiel |
 | scope | enum `team`, `tenant` | `tenant` = vom Admin für alle Teams |
@@ -243,7 +248,7 @@ Ein täglicher Job (`app:generate-series`) erzeugt daraus Einzeltermine rolliere
 `event_id`, `team_id`. Bei `scope = tenant` werden alle (aktiven) Teams eingetragen; ein Termin kann damit auch mehreren ausgewählten Teams gehören.
 
 ### 🏢 `event_invitees` – eingeladene Personen (materialisiert) ✅
-`event_id`, `person_id`, `source` enum `team` (später `group`, `cross_nomination`, `manual`).
+`event_id`, `person_id`, `source` enum `team`, `group`, `cross_nomination` (später `manual`).
 Eingeladen sind alle Personen der Termin-Teams (Spieler, Trainer, Betreuer). Kaderänderungen aktualisieren automatisch alle kommenden Termine des Teams; vergangene bleiben unverändert (Statistik). Basis für Statistik („war eingeladen“) und Startseite.
 
 ### 🏢 `event_position_quota` – Positions-Soll (Ausbaustufe)
@@ -267,6 +272,8 @@ Append-only: `event_id`, `person_id`, `old_status`, `new_status`, `responded_by`
 **Sichtbarkeit:** Trainer, Betreuer, Admins sehen immer Namen; Mitspieler Namen oder nur Anzahl laut `team.rsvp_visibility` (mehrere Teams: strenger). Gründe sehen Trainer/Admins immer, andere nur, wenn alle Teams sie freigeben.
 
 **Mindestteilnehmer:** Trainings mit weniger Zusagen als `team.min_participants` werden gelb markiert.
+
+**Positionen:** Wer den Termin verwaltet, sieht die Zusagen der Spieler nach Hauptposition gezählt (z. B. „Zuspiel: 2, Mittelblock: 3“). Gäste sind in der Rückmeldeliste als „Gast“ markiert. Ein Positions-Soll mit automatischem Stopp folgt als Ausbaustufe (`event_position_quota`).
 
 **Kapazitätsprüfung:** Zusage läuft in einer Transaktion mit `SELECT … FROM event WHERE id = ? FOR UPDATE`, prüft Frist und (bei Quernominierten) Freigabezeitpunkt, zählt `yes`-Antworten (gesamt und je `as_position`) und lehnt bei vollem Limit ab. Keine Warteliste – bei einer Absage wird der Platz einfach wieder frei.
 

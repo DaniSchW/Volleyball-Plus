@@ -113,7 +113,10 @@
     "tabs": {
       "roster": "Roster",
       "invitations": "Invitations",
-      "settings": "Settings"
+      "settings": "Settings",
+      "groups": "Groups",
+      "guests": "Guests",
+      "events": "Events"
     },
     "empty": "Nobody in the team yet.",
     "role": "Role",
@@ -332,7 +335,17 @@
     "cancel": "Cancel event",
     "restore": "Undo cancellation",
     "endSeries": "End series",
-    "endSeriesConfirm": "All upcoming events of this series will be cancelled. Continue?"
+    "endSeriesConfirm": "All upcoming events of this series will be cancelled. Continue?",
+    "guestOpensAt": "As a guest you can accept from {{date}}.",
+    "positions": "Accepted per position",
+    "positionUnknown": "no position",
+    "guest": "Guest",
+    "asGuest": "as guest",
+    "trainingOptions": "Training",
+    "trainingGroup": "For",
+    "wholeTeam": "whole team",
+    "guestsFrom": "Guests may accept from",
+    "guestsFromHint": "Empty = default from the team settings (cross-nomination)."
   },
   "notifications": {
     "title": "Notifications",
@@ -355,5 +368,68 @@
       "reminder": "Reminder if you have not replied yet",
       "notice": "New notices"
     }
+  },
+  "leagues": {
+    "manage": "Manage league tree",
+    "title": "League tree",
+    "hint": "The level (1 = top division) ranks the teams. It decides who can invite whom by cross-nomination and that players of a higher team cannot play in a lower one.",
+    "level": "Level",
+    "teams_one": "{{count}} team",
+    "teams_other": "{{count}} teams",
+    "edit": "Edit",
+    "delete": "Delete {{name}}",
+    "deleteConfirm": "Really delete “{{name}}”?",
+    "name": "Name",
+    "add": "Add league",
+    "namePlaceholder": "e.g. Regionalliga Süd",
+    "parent": "Below",
+    "noParent": "– top level –",
+    "levelHint": "Empty = same as the parent league."
+  },
+  "referee": {
+    "badge": "Ref {{level}} until {{date}}",
+    "expired": "expired",
+    "title": "Referee license",
+    "number": "License number",
+    "expiresSoon": "Expires soon – please renew in time.",
+    "none": "No license entered.",
+    "edit": "Edit",
+    "add": "Add license",
+    "delete": "Remove",
+    "deleteConfirm": "Really remove the license?",
+    "level": "Level",
+    "validUntil": "Valid until"
+  },
+  "guests": {
+    "hint": "Cross-nomination: invite players of lower teams to your trainings for good. They see the trainings on their start page and can accept from the set time while places are free.",
+    "noLeague": "Cross-nomination needs a league for the team (admins set it in the settings).",
+    "title": "Guests",
+    "none": "No guests invited yet.",
+    "active": "Invite {{name}}",
+    "on": "active",
+    "remove": "Remove {{name}}",
+    "removeConfirm": "Stop inviting {{name}} to trainings?",
+    "invite": "Invite player",
+    "noCandidates": "No matching players in lower teams.",
+    "player": "Player (home team)",
+    "add": "Invite"
+  },
+  "groups": {
+    "hint": "Training groups are parts of the team with their own trainings (e.g. setter training). Trainers and organizers are always invited.",
+    "none": "No training groups yet.",
+    "create": "Create group",
+    "name": "Name",
+    "namePlaceholder": "e.g. setter training",
+    "empty": "Nobody in the group yet.",
+    "chooseMembers": "Choose members",
+    "delete": "Delete",
+    "deleteConfirm": "Delete group “{{name}}”? Its trainings become trainings of the whole team."
+  },
+  "teamBase": {
+    "title": "Team & league",
+    "league": "League",
+    "noLeague": "– none –",
+    "rank": "Rank",
+    "hint": "Rank: order when several own teams play in the same league (1 = highest)."
   }
 }

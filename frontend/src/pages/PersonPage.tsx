@@ -8,6 +8,7 @@ import {
 } from '../lib/api';
 import { useTenantPath } from '../lib/queries';
 import { Avatar, Button, Card, Field, Loading, Notice, PageTitle, Select, Toggle } from '../components/ui';
+import { RefereeLicenseCard } from '../components/team/RefereeLicenseCard';
 import { ShareLink } from './TeamPage';
 
 export function PersonPage() {
@@ -38,6 +39,7 @@ export function PersonPage() {
 
       {canEdit ? <ProfileForm person={p} /> : <ProfileView person={p} />}
       {(p.can_manage_profile || p.editable_fields.length > 0) && <AvatarUpload person={p} />}
+      <RefereeLicenseCard person={p} />
       {p.can_manage_minor_permissions && p.minor_permissions && <ChildPermissions person={p} permissions={p.minor_permissions} />}
       {(p.can_invite_guardian || p.can_invite_own) && <PersonLinks person={p} />}
     </div>

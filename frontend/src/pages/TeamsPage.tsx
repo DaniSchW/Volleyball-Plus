@@ -38,6 +38,11 @@ export function TeamsPage() {
         ))}
         {teams.data.length === 0 && <li className="p-4 text-sm text-slate-500">{t('teams.none')}</li>}
       </ul>
+      {me.data?.is_admin && (
+        <Link to={`/${slug}/leagues`} className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium">
+          {t('leagues.manage')}
+        </Link>
+      )}
       {me.data?.is_admin && <CreateTeam />}
     </div>
   );
@@ -52,6 +57,7 @@ function TeamLabel({ team, mine }: { team: Team; mine: boolean }) {
         <span className="font-medium">{team.name}</span>
         <span className="block text-xs text-slate-500">
           {t(`teams.gender.${team.gender}`)}
+          {team.league_name ? ` · ${team.league_name}` : ''}
           {team.is_youth ? ` · ${t('teams.youth')}` : ''}
           {mine ? ` · ${t('teams.mine')}` : ''}
         </span>

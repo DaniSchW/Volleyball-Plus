@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\CleanupChatUploads;
 use App\Console\Commands\GenerateSeries;
 use App\Console\Commands\ReleaseAdults;
 use App\Support\Security\SslCheck;
@@ -43,3 +44,6 @@ $task('app:release-adults')->when(fn () => ReleaseAdults::isDue());
 
 // Keeps about six months of training dates ahead for every series.
 $task('app:generate-series')->when(fn () => GenerateSeries::isDue());
+
+// Chat uploads that were never sent are removed after a day.
+$task('app:cleanup-chat-uploads')->when(fn () => CleanupChatUploads::isDue());

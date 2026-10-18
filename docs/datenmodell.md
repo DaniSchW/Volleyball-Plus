@@ -347,7 +347,7 @@ Admin-Gesamtübersicht = Aggregation über alle `cash_book` des Mandanten. Keine
 ### 🏢 `chat_messages` ✅
 `chat_id`, `topic_id` null, `author_id` → tenant_member (Eltern schreiben als sie selbst; die Anzeige ergänzt den Namen des Kindes), `body` text (leer, wenn gelöscht), `reply_to_id` null, `edited_at`, `deleted_at`, `created_at`. Index `(chat_id, topic_id, id)` – Polling lädt „alle Nachrichten nach ID x“ (ULIDs sind zeitlich sortiert).
 
-### 🏢 `chat_attachment` – `message_id`, `file_id` *(später)*
+### 🏢 `chat_attachments` ✅ – `chat_id`, `message_id` null (null = hochgeladen, noch nicht gesendet), `file_id` → files (`purpose = chat_attachment`), `kind` enum `image`, `video`, `file`, `name` (Originalname), `uploaded_by`, `created_at`
 ### 🏢 `chat_read_states` ✅ – `chat_id`, `tenant_member_id`, `topic_key` ('' ohne Themen, sonst Themen-ID), `last_read_message_id`, `last_seen_at` (wer den Chat gerade offen hat, bekommt keinen Push); unique (`chat_id`, `tenant_member_id`, `topic_key`)
 
 ---

@@ -477,11 +477,11 @@ describe('chat', () => {
     let sent: Record<string, unknown> = {};
     const msg = (id: string, body: string, mine = false) => ({
       id, topic_id: null, author: { id: mine ? 'm1' : 'm2', name: mine ? 'Max Muster' : 'Tom Trainer' }, is_mine: mine, body,
-      deleted: false, edited: false, reply_to: null, can_delete: mine, created_at: '2026-10-19T08:00:00Z',
+      deleted: false, edited: false, reply_to: null, attachments: [], can_delete: mine, created_at: '2026-10-19T08:00:00Z',
     });
     mockApi({
       'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
-      'GET /t/ssv-ulm/chats/c1': { body: { data: { id: 'c1', kind: 'team', name: 'Herren 1', team_id: 't1', mode: 'flat', can_moderate: false, topics: [], members: [] } } },
+      'GET /t/ssv-ulm/chats/c1': { body: { data: { id: 'c1', kind: 'team', name: 'Herren 1', team_id: 't1', mode: 'flat', can_moderate: false, topics: [], members: [], upload: { max_bytes: 52428800, per_message: 10, extensions: ['pdf', 'jpg'] } } } },
       'GET /t/ssv-ulm/chats/c1/messages': { body: { data: [msg('01a', 'Training fällt aus')], changed: [], has_more: false, server_time: '2026-10-19T10:00:00Z' } },
       'GET /t/ssv-ulm/chats': { body: { data: [] } },
       'POST /t/ssv-ulm/chats/c1/messages': (init) => {
@@ -497,7 +497,34 @@ describe('chat', () => {
     fireEvent.change(screen.getByLabelText('Nachricht schreiben'), { target: { value: 'Schade!' } });
     fireEvent.click(screen.getByRole('button', { name: 'Senden' }));
 
-    await waitFor(() => expect(sent).toEqual({ body: 'Schade!', topic_id: null, reply_to_id: '01a' }));
+    await waitFor(() => expect(sent).toEqual({ body: 'Schade!', topic_id: null, reply_to_id: '01a', attachment_ids: [] }));
     expect(await screen.findByRole('button', { name: /Schade!/ })).toBeInTheDocument();
+  });
+});
+
+describe('chat attachments', () => {
+  it('shows pictures, videos and documents of a message', async () => {
+    const att = (id: string, kind: string, name: string, mime: string) => ({ id, kind, name, mime_type: mime, size: 245760, width: null, height: null, url: `/api/v1/t/ssv-ulm/chat-attachments/${id}` });
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/chats': { body: { data: [] } },
+      'GET /t/ssv-ulm/chats/c1': { body: { data: { id: 'c1', kind: 'team', name: 'Herren 1', team_id: 't1', mode: 'flat', can_moderate: false, topics: [], members: [], upload: { max_bytes: 1000, per_message: 10, extensions: ['pdf'] } } } },
+      'GET /t/ssv-ulm/chats/c1/messages': { body: { data: [{
+        id: '01a', topic_id: null, author: { id: 'm2', name: 'Tom Trainer' }, is_mine: false, body: 'Infos zum Turnier', deleted: false, edited: false,
+        reply_to: null, can_delete: false, created_at: '2026-10-19T08:00:00Z',
+        attachments: [att('a1', 'image', 'Halle.webp', 'image/webp'), att('a2', 'video', 'Aufschlag.mp4', 'video/mp4'), att('a3', 'file', 'Spielplan.ods', 'application/vnd.oasis.opendocument.spreadsheet')],
+      }], changed: [], has_more: false, server_time: '2026-10-19T10:00:00Z' } },
+    });
+    renderAt('/ssv-ulm/chat/c1');
+
+    expect(await screen.findByRole('img', { name: 'Halle.webp' })).toHaveAttribute('src', '/api/v1/t/ssv-ulm/chat-attachments/a1');
+    expect(document.querySelector('video')).toHaveAttribute('src', '/api/v1/t/ssv-ulm/chat-attachments/a2');
+    expect(screen.getByRole('link', { name: /Spielplan\.ods/ })).toHaveAttribute('download', 'Spielplan.ods');
+    expect(screen.getAllByText(/240 KB/)).toHaveLength(2);
+
+    // Too large files are refused before uploading.
+    const input = document.querySelector('input[type=file]') as HTMLInputElement;
+    fireEvent.change(input, { target: { files: [new File(['x'.repeat(2000)], 'gross.pdf', { type: 'application/pdf' })] } });
+    expect(await screen.findByText('zu groß (max. 0 MB)')).toBeInTheDocument();
   });
 });

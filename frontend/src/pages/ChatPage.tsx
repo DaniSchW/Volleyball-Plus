@@ -2,7 +2,8 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useSearchParams } from 'react-router';
-import { api, del, errorText, patch, post, type ChatDetail, type ChatMessage, type ChatMessagesPage } from '../lib/api';
+import { api, del, errorText, patch, post, upload, type ChatAttachment, type ChatDetail, type ChatMessage, type ChatMessagesPage } from '../lib/api';
+import { Attachments } from '../components/chat/Attachments';
 import { formatDay, formatTime } from '../lib/dates';
 import { useTenantPath, useTenantSlug } from '../lib/queries';
 import { Button, Loading, Notice } from '../components/ui';
@@ -54,12 +55,12 @@ export function ChatPage() {
           ))}
         </div>
       )}
-      {(c.mode === 'flat' || topicId) && <Conversation key={topicId ?? 'flat'} chatId={c.id} topicId={topicId} />}
+      {(c.mode === 'flat' || topicId) && <Conversation key={topicId ?? 'flat'} chatId={c.id} topicId={topicId} uploadInfo={c.upload} />}
     </div>
   );
 }
 
-function Conversation({ chatId, topicId }: { chatId: string; topicId: string | null }) {
+function Conversation({ chatId, topicId, uploadInfo }: { chatId: string; topicId: string | null; uploadInfo: ChatDetail['upload'] }) {
   const { t } = useTranslation();
   const tp = useTenantPath();
   const queryClient = useQueryClient();
@@ -181,6 +182,7 @@ function Conversation({ chatId, topicId }: { chatId: string; topicId: string | n
       <Composer
         chatId={chatId}
         topicId={topicId}
+        uploadInfo={uploadInfo}
         reply={reply}
         editing={editing}
         onCancel={() => { setReply(null); setEditing(null); }}
@@ -208,7 +210,7 @@ function Bubble({ message: m, showAuthor, active, onToggle, onReply, onEdit, onD
         type="button"
         onClick={onToggle}
         disabled={m.deleted}
-        className={`max-w-[85%] whitespace-pre-wrap break-words rounded-2xl px-3 py-2 text-left text-sm ${
+        className={`${m.attachments.length > 0 ? 'w-[85%] sm:w-80' : 'max-w-[85%]'} whitespace-pre-wrap break-words rounded-2xl px-3 py-2 text-left text-sm ${
           m.deleted ? 'border border-dashed border-slate-300 italic text-slate-500' : m.is_mine ? 'bg-brand-700 text-white' : 'border border-slate-200 bg-white'
         }`}
       >
@@ -217,6 +219,7 @@ function Bubble({ message: m, showAuthor, active, onToggle, onReply, onEdit, onD
             <span className="font-medium">{m.reply_to.author}</span>: {m.reply_to.body ?? t('chat.deleted')}
           </span>
         )}
+        {!m.deleted && m.attachments.length > 0 && <div className={m.body ? 'mb-1' : ''}><Attachments items={m.attachments} mine={m.is_mine} /></div>}
         {m.deleted ? t('chat.deleted') : m.body}
         <span className={`mt-0.5 block text-right text-[11px] ${m.is_mine && !m.deleted ? 'text-white/70' : 'text-slate-400'}`}>
           {m.edited && !m.deleted && `${t('chat.edited')} · `}{formatTime(m.created_at)}
@@ -233,9 +236,18 @@ function Bubble({ message: m, showAuthor, active, onToggle, onReply, onEdit, onD
   );
 }
 
-function Composer({ chatId, topicId, reply, editing, onCancel, onSent }: {
+interface PendingUpload {
+  key: string;
+  name: string;
+  progress: number;
+  attachment?: ChatAttachment;
+  error?: string;
+}
+
+function Composer({ chatId, topicId, uploadInfo, reply, editing, onCancel, onSent }: {
   chatId: string;
   topicId: string | null;
+  uploadInfo: ChatDetail['upload'];
   reply: ChatMessage | null;
   editing: ChatMessage | null;
   onCancel: () => void;
@@ -244,24 +256,48 @@ function Composer({ chatId, topicId, reply, editing, onCancel, onSent }: {
   const { t } = useTranslation();
   const tp = useTenantPath();
   const [body, setBody] = useState('');
+  const [uploads, setUploads] = useState<PendingUpload[]>([]);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (editing) setBody(editing.body ?? '');
   }, [editing]);
 
+  const ready = uploads.filter((u) => u.attachment).map((u) => u.attachment!.id);
+  const uploading = uploads.some((u) => !u.attachment && !u.error);
+
   const send = useMutation({
     mutationFn: () => editing
       ? patch<{ data: ChatMessage }>(tp(`chat-messages/${editing.id}`), { body })
-      : post<{ data: ChatMessage }>(tp(`chats/${chatId}/messages`), { body, topic_id: topicId, reply_to_id: reply?.id ?? null }),
+      : post<{ data: ChatMessage }>(tp(`chats/${chatId}/messages`), { body, topic_id: topicId, reply_to_id: reply?.id ?? null, attachment_ids: ready }),
     onSuccess: ({ data }) => {
       setBody('');
+      setUploads([]);
       onSent(data);
     },
   });
 
+  const addFiles = (files: FileList | null) => {
+    if (!files) return;
+    const room = uploadInfo.per_message - uploads.length;
+    [...files].slice(0, Math.max(0, room)).forEach((file) => {
+      const key = `${file.name}-${file.size}-${Math.random()}`;
+      const update = (patchValue: Partial<PendingUpload>) => setUploads((list) => list.map((u) => (u.key === key ? { ...u, ...patchValue } : u)));
+      if (file.size > uploadInfo.max_bytes) {
+        setUploads((list) => [...list, { key, name: file.name, progress: 0, error: t('chat.tooBig', { mb: Math.floor(uploadInfo.max_bytes / 1048576) }) }]);
+        return;
+      }
+      setUploads((list) => [...list, { key, name: file.name, progress: 0 }]);
+      upload<{ data: ChatAttachment }>(tp(`chats/${chatId}/attachments`), file, (progress) => update({ progress }))
+        .then(({ data }) => update({ attachment: data, progress: 1 }))
+        .catch((error) => update({ error: errorText(error, t('errors.generic')) }));
+    });
+    if (fileInput.current) fileInput.current.value = '';
+  };
+
   const submit = (event?: FormEvent) => {
     event?.preventDefault();
-    if (body.trim() && !send.isPending) send.mutate();
+    if ((body.trim() || (ready.length > 0 && !editing)) && !uploading && !send.isPending) send.mutate();
   };
 
   return (
@@ -276,7 +312,41 @@ function Composer({ chatId, topicId, reply, editing, onCancel, onSent }: {
         </div>
       )}
       {send.isError && <div className="mb-2"><Notice tone="error">{errorText(send.error, t('errors.generic'))}</Notice></div>}
+      {uploads.length > 0 && (
+        <ul className="mb-2 flex flex-wrap gap-2">
+          {uploads.map((u) => (
+            <li key={u.key} className={`flex max-w-full items-center gap-2 rounded-full px-3 py-1 text-xs ${u.error ? 'bg-red-50 text-red-800' : 'bg-white'}`}>
+              <span className="min-w-0 truncate">{u.name}</span>
+              {u.error ? <span>{u.error}</span> : !u.attachment && <span className="tabular-nums text-slate-500">{Math.round(u.progress * 100)} %</span>}
+              <button type="button" className="text-slate-500" aria-label={t('chat.removeFile', { name: u.name })} onClick={() => setUploads((list) => list.filter((x) => x.key !== u.key))}>✕</button>
+            </li>
+          ))}
+        </ul>
+      )}
       <div className="flex items-end gap-2">
+        {!editing && (
+          <>
+            <button
+              type="button"
+              className="flex size-11 shrink-0 items-center justify-center rounded-full text-xl text-slate-600 hover:bg-slate-200 disabled:opacity-40"
+              aria-label={t('chat.attach')}
+              disabled={uploads.length >= uploadInfo.per_message}
+              onClick={() => fileInput.current?.click()}
+            >
+              📎
+            </button>
+            <input
+              ref={fileInput}
+              type="file"
+              multiple
+              className="sr-only"
+              tabIndex={-1}
+              aria-hidden="true"
+              accept={['image/*', 'video/*', ...uploadInfo.extensions.map((e) => `.${e}`)].join(',')}
+              onChange={(e) => addFiles(e.target.files)}
+            />
+          </>
+        )}
         <textarea
           rows={Math.min(4, Math.max(1, body.split('\n').length))}
           className="min-h-11 min-w-0 flex-1 resize-none rounded-2xl border border-slate-300 px-3 py-2 text-base"
@@ -289,7 +359,7 @@ function Composer({ chatId, topicId, reply, editing, onCancel, onSent }: {
             if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) submit();
           }}
         />
-        <Button type="submit" disabled={!body.trim() || send.isPending}>{editing ? t('common.save') : t('chat.send')}</Button>
+        <Button type="submit" disabled={(!body.trim() && (editing !== null || ready.length === 0)) || uploading || send.isPending}>{editing ? t('common.save') : t('chat.send')}</Button>
       </div>
     </form>
   );

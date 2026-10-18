@@ -5,6 +5,7 @@ namespace App\Support\Chat;
 use App\Enums\NotificationCategory;
 use App\Enums\PersonRelation;
 use App\Models\Chat;
+use App\Models\ChatAttachment;
 use App\Models\ChatMessage;
 use App\Models\ChatReadState;
 use App\Models\ChatTopic;
@@ -40,17 +41,30 @@ class ChatService
         }
     }
 
-    public function send(Chat $chat, TenantMember $author, string $body, ?string $topicId, ?string $replyToId): ChatMessage
+    /**
+     * @param  list<string>  $attachmentIds  own, not yet sent uploads of this chat
+     */
+    public function send(Chat $chat, TenantMember $author, string $body, ?string $topicId, ?string $replyToId, array $attachmentIds = []): ChatMessage
     {
         $topicId = $this->topicFor($chat, $topicId);
         if ($replyToId !== null && ! ChatMessage::query()->where('chat_id', $chat->id)->where('id', $replyToId)->exists()) {
             $replyToId = null;
         }
+        $attachments = ChatAttachment::query()->whereIn('id', $attachmentIds)
+            ->where('chat_id', $chat->id)->where('uploaded_by', $author->id)->whereNull('message_id')->get();
+        if ($body === '' && $attachments->isEmpty()) {
+            throw ValidationException::withMessages(['body' => __('chat.empty_message')]);
+        }
 
-        $message = ChatMessage::create([
-            'chat_id' => $chat->id, 'topic_id' => $topicId, 'author_id' => $author->id,
-            'body' => $body, 'reply_to_id' => $replyToId,
-        ]);
+        $message = DB::transaction(function () use ($chat, $topicId, $author, $body, $replyToId, $attachments) {
+            $message = ChatMessage::create([
+                'chat_id' => $chat->id, 'topic_id' => $topicId, 'author_id' => $author->id,
+                'body' => $body, 'reply_to_id' => $replyToId,
+            ]);
+            ChatAttachment::query()->whereIn('id', $attachments->pluck('id'))->update(['message_id' => $message->id]);
+
+            return $message;
+        });
         $this->markRead($chat, $author, $topicId, $message->id);
         $this->announce($chat, $message, $author);
 
@@ -176,6 +190,14 @@ class ChatService
         })->all();
     }
 
+    /** "📷 Foto", "🎥 Video" or "📄 plan.pdf" for messages without text. */
+    public function attachmentLabel(ChatMessage $message): string
+    {
+        $first = ChatAttachment::query()->where('message_id', $message->id)->orderBy('id')->first();
+
+        return $first ? __('chat.attachment.'.$first->kind, ['name' => $first->name]) : '';
+    }
+
     private function topicFor(Chat $chat, ?string $topicId): ?string
     {
         if (! $chat->hasTopics()) {
@@ -199,7 +221,7 @@ class ChatService
 
         $this->notifier->toMembers(NotificationCategory::Chat, $recipients, fn () => [
             'title' => $chat->displayName().($topic ? ' · '.$topic : ''),
-            'body' => $name.': '.Str::limit($message->body, 120),
+            'body' => $name.': '.($message->body !== '' ? Str::limit($message->body, 120) : $this->attachmentLabel($message)),
         ], '/chat/'.$chat->id.($message->topic_id ? '?topic='.$message->topic_id : ''), $author);
     }
 }

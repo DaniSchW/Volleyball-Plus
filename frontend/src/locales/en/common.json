@@ -594,6 +594,11 @@
     "placeholder": "Write a message",
     "send": "Send",
     "newTopic": "New topic",
-    "membersList": "Members: {{names}}"
+    "membersList": "Members: {{names}}",
+    "attach": "Attach file",
+    "removeFile": "Remove {{name}}",
+    "tooBig": "too large (max. {{mb}} MB)",
+    "open": "open",
+    "downloadVideo": "Download video ({{size}})"
   }
 }

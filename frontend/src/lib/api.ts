@@ -42,6 +42,31 @@ export async function api<T>(path: string, { body, ...init }: Options = {}): Pro
   return (await response.json()) as T;
 }
 
+/**
+ * File upload with progress (fetch cannot report upload progress). Same
+ * headers and error handling as api().
+ */
+export function upload<T>(path: string, file: File, onProgress: (share: number) => void): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `/api/v1${path}`);
+    xhr.withCredentials = true;
+    xhr.setRequestHeader('Accept', 'application/json');
+    xhr.setRequestHeader('Accept-Language', document.documentElement.lang || 'de');
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    xhr.upload.onprogress = (e) => e.lengthComputable && onProgress(e.loaded / e.total);
+    xhr.onload = () => {
+      const data = (() => { try { return JSON.parse(xhr.responseText); } catch { return null; } })();
+      if (xhr.status >= 200 && xhr.status < 300) resolve(data as T);
+      else reject(new ApiError(xhr.status, data?.message ?? xhr.statusText, data?.errors ?? {}));
+    };
+    xhr.onerror = () => reject(new ApiError(0, 'network'));
+    const body = new FormData();
+    body.append('file', file);
+    xhr.send(body);
+  });
+}
+
 export const post = <T>(path: string, body: Body = {}) => api<T>(path, { method: 'POST', body });
 export const patch = <T>(path: string, body: Body) => api<T>(path, { method: 'PATCH', body });
 export const put = <T>(path: string, body: Body) => api<T>(path, { method: 'PUT', body });
@@ -477,6 +502,18 @@ export interface ChatSummary {
 export interface ChatDetail extends Omit<ChatSummary, 'unread' | 'last_message'> {
   topics: { id: string; name: string; unread: number }[];
   members: { id: string; name: string }[];
+  upload: { max_bytes: number; per_message: number; extensions: string[] };
+}
+
+export interface ChatAttachment {
+  id: string;
+  kind: 'image' | 'video' | 'file';
+  name: string;
+  mime_type: string | null;
+  size: number | null;
+  width: number | null;
+  height: number | null;
+  url: string;
 }
 
 export interface ChatMessage {
@@ -488,6 +525,7 @@ export interface ChatMessage {
   deleted: boolean;
   edited: boolean;
   reply_to: { id: string; author: string; body: string | null } | null;
+  attachments: ChatAttachment[];
   can_delete: boolean;
   created_at: string;
 }

@@ -6,6 +6,7 @@ use App\Enums\InvitationKind;
 use App\Enums\TeamRole;
 use App\Models\CalendarFeed;
 use App\Models\Chat;
+use App\Models\ChatAttachment;
 use App\Models\ChatMember;
 use App\Models\ChatMessage;
 use App\Models\ChatReadState;
@@ -58,7 +59,7 @@ class ModelIsolationTest extends TestCase
         EventResponseLog::class, Opponent::class, Notice::class, CalendarFeed::class,
         NotificationPreference::class, League::class, CrossNomination::class, TrainingGroup::class, TrainingGroupMember::class,
         RefereeLicense::class, Task::class, TaskAssignment::class, Poll::class, PollTeam::class, PollOption::class, PollVote::class,
-        Chat::class, ChatMember::class, ChatTopic::class, ChatMessage::class, ChatReadState::class,
+        Chat::class, ChatAttachment::class, ChatMember::class, ChatTopic::class, ChatMessage::class, ChatReadState::class,
     ];
 
     public function test_every_tenant_model_is_listed_here(): void
@@ -121,6 +122,8 @@ class ModelIsolationTest extends TestCase
             ChatMember::create(['chat_id' => $chat->id, 'tenant_member_id' => $member->id]);
             $topic = ChatTopic::create(['chat_id' => $chat->id, 'name' => 'Allgemein']);
             $message = ChatMessage::create(['chat_id' => $chat->id, 'topic_id' => $topic->id, 'author_id' => $member->id, 'body' => 'Hallo']);
+            $stored = StoredFile::create(['storage_key' => 'c', 'mime_type' => 'application/pdf', 'size_bytes' => 1, 'purpose' => 'chat_attachment']);
+            ChatAttachment::create(['chat_id' => $chat->id, 'message_id' => $message->id, 'file_id' => $stored->id, 'kind' => 'file', 'name' => 'plan.pdf']);
             ChatReadState::create(['chat_id' => $chat->id, 'tenant_member_id' => $member->id, 'last_read_message_id' => $message->id]);
             NotificationPreference::create(['tenant_member_id' => $member->id, 'category' => 'notice', 'push' => false, 'email' => false]);
         });

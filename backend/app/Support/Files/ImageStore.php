@@ -10,8 +10,8 @@ use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Stores uploaded pictures (profile pictures, logos): re-encoded with GD,
- * scaled down to at most 512 px and saved as WebP. Re-encoding drops EXIF
+ * Stores uploaded pictures (profile pictures, logos, chat pictures):
+ * re-encoded with GD, scaled down (512 px by default) and saved as WebP. Re-encoding drops EXIF
  * data (location!) and anything that is not image data.
  */
 class ImageStore
@@ -20,7 +20,7 @@ class ImageStore
 
     public function __construct(private TenantContext $tenants) {}
 
-    public function store(UploadedFile $upload, string $purpose, ?string $uploadedBy): StoredFile
+    public function store(UploadedFile $upload, string $purpose, ?string $uploadedBy, int $maxSize = self::MAX_SIZE): StoredFile
     {
         $source = @imagecreatefromstring((string) file_get_contents($upload->getRealPath()));
         if ($source === false) {
@@ -28,7 +28,7 @@ class ImageStore
         }
 
         [$width, $height] = [imagesx($source), imagesy($source)];
-        $scale = min(1, self::MAX_SIZE / max($width, $height));
+        $scale = min(1, $maxSize / max($width, $height));
         $newWidth = max(1, (int) round($width * $scale));
         $newHeight = max(1, (int) round($height * $scale));
 

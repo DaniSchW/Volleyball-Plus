@@ -40,4 +40,16 @@ return [
     */
     'push_hosts' => ['fcm.googleapis.com', 'push.services.mozilla.com', 'push.apple.com', 'notify.windows.com'],
 
+    /*
+    | Chat attachments. The real limit is the smallest of this and PHP's
+    | upload_max_filesize / post_max_size (on ALL-INKL set in the KAS under
+    | PHP settings). Pictures are scaled down and re-encoded (drops the
+    | location data), videos and documents are stored as uploaded.
+    */
+    'chat_upload' => [
+        'max_mb' => (int) env('CHAT_UPLOAD_MAX_MB', 50),
+        'image_max_px' => 1600,
+        'per_message' => 10,
+    ],
+
 ];

@@ -125,6 +125,8 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
         Route::patch('chat-topics/{topic}', [ChatController::class, 'updateTopic']);
         Route::get('chats/{chat}/messages', [ChatController::class, 'messages'])->middleware('throttle:120,1');
         Route::post('chats/{chat}/messages', [ChatController::class, 'send'])->middleware('throttle:30,1');
+        Route::post('chats/{chat}/attachments', [ChatController::class, 'upload'])->middleware('throttle:60,1');
+        Route::get('chat-attachments/{attachment}', [ChatController::class, 'attachment']);
         Route::patch('chat-messages/{message}', [ChatController::class, 'updateMessage']);
         Route::delete('chat-messages/{message}', [ChatController::class, 'destroyMessage']);
 

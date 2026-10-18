@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\LeagueController;
 use App\Http\Controllers\Api\LogoController;
+use App\Http\Controllers\Api\MatchImportController;
 use App\Http\Controllers\Api\MemberController;
 use App\Http\Controllers\Api\NoticeController;
 use App\Http\Controllers\Api\NotificationPreferenceController;
@@ -75,6 +76,9 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
         Route::post('teams/{team}/cross-nominations', [CrossNominationController::class, 'store']);
         Route::patch('cross-nominations/{nomination}', [CrossNominationController::class, 'update']);
         Route::delete('cross-nominations/{nomination}', [CrossNominationController::class, 'destroy']);
+
+        Route::post('teams/{team}/match-import/preview', [MatchImportController::class, 'preview']);
+        Route::post('teams/{team}/match-import', [MatchImportController::class, 'store']);
 
         Route::get('teams/{team}/statistics', [StatisticsController::class, 'team']);
         Route::get('teams/{team}/statistics/persons/{person}', [StatisticsController::class, 'person']);

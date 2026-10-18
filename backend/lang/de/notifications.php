@@ -20,6 +20,7 @@ return [
         'body' => ':when – bitte sag zu oder ab.',
         'body_deadline' => ':when – Antwort bitte bis :deadline.',
     ],
+    'imported' => ['title' => '{1} :team: 1 neuer Termin im Spielplan|[2,*] :team: :count neue Termine im Spielplan', 'body' => 'Als Nächstes: :title, :when'],
     'notice' => ['title' => 'Neue Info: :title'],
     'adult' => [
         'guardian_title' => ':name verwaltet das Profil jetzt selbst',

@@ -141,6 +141,7 @@ Vorlage: Beim ersten Aufruf wird der Standard-Ligabaum angelegt (1. Bundesliga, 
 | Feld | Typ | Hinweis |
 |---|---|---|
 | name | text | „Herren 1“, „U18 männlich“ |
+| import_name | text null | ✅ Name des Teams in Spielplan-Dateien des Verbands (z. B. „SSV Ulm 1846 2“), beim Import gemerkt |
 | gender | enum `men`, `women`, `mixed` | Geschlechtsart |
 | is_youth | bool | Jugendteam (U12 … U20): von Hierarchie, Quernominierung und Spielerauswahl ausgenommen |
 | league_id | → leagues null | ✅ Liga aus dem Ligabaum |
@@ -239,7 +240,7 @@ Ein täglicher Job (`app:generate-series`) erzeugt daraus Einzeltermine rolliere
 | series_exception | bool | Einzeltermin wurde abweichend bearbeitet |
 | training_group_id | → training_groups null | ✅ nur Trainings eines Teams |
 | opponent_id | → opponent null | nur `match` |
-| import_key | text null | *(Phase 5)* Herkunft eines importierten Spiels (UID aus .ics bzw. Spielnummer aus CSV); unique je Team, damit ein erneuter Import aktualisiert statt doppelt anlegt |
+| import_key | text null | ✅ Herkunft eines importierten Spiels (UID aus .ics bzw. Spielnummer aus CSV); unique je Team, damit ein erneuter Import aktualisiert statt doppelt anlegt |
 | is_home | bool null | Heim-/Auswärtsspiel |
 | scope | enum `team`, `tenant` | `tenant` = vom Admin für alle Teams |
 | status | enum `scheduled`, `cancelled` | |

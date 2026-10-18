@@ -367,3 +367,46 @@ describe('roster', () => {
     await waitFor(() => expect(sent).toEqual({ person_id: 'p2', role: 'player' }));
   });
 });
+
+describe('schedule import', () => {
+  it('previews a file and imports the chosen matches', async () => {
+    let sent: FormData | null = null;
+    const team = { id: 't1', name: 'Herren 1', gender: 'men', is_youth: false, league_name: null, color: null, can_manage: true, can_invite: true, can_see: true };
+    const row = (key: string, extra: Record<string, unknown>) => ({
+      key, role: 'away', title: 'Spiel gegen TG Biberach', opponent: 'TG Biberach', starts_at: '2026-11-22T13:00:00Z', ends_at: '2026-11-22T15:00:00Z',
+      location_name: 'Wilhelm-Leger Halle', address: null, details: null, past: false, status: 'new', changes: [], existing_id: null, selected: true, ...extra,
+    });
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/teams/t1': { body: { data: team } },
+      'POST /t/ssv-ulm/teams/t1/match-import/preview': {
+        body: { data: {
+          names: [{ name: 'SSV Ulm 1846', count: 16 }, { name: 'TG Biberach', count: 2 }], own_name: 'SSV Ulm 1846', skipped: 0, missing: [],
+          rows: [
+            row('uid:a', {}),
+            row('uid:b', { title: 'Spiel gegen SC Göggingen', status: 'update', changes: ['starts_at', 'ends_at'] }),
+            row('uid:c', { title: 'Spiel gegen VSG Illertal', status: 'same', selected: false }),
+          ],
+        } },
+      },
+      'POST /t/ssv-ulm/teams/t1/match-import': (init) => {
+        sent = init.body as FormData;
+        return { body: { data: { created: 1, updated: 0 } } };
+      },
+    });
+    renderAt('/ssv-ulm/teams/t1/import');
+
+    const input = (await screen.findByText('Datei auswählen')).querySelector('input')!;
+    fireEvent.change(input, { target: { files: [new File(['BEGIN:VCALENDAR'], 'plan.ics', { type: 'text/calendar' })] } });
+
+    expect(await screen.findByText('geändert: Uhrzeit')).toBeInTheDocument();
+    expect(screen.getByText('schon vorhanden, unverändert')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('checkbox', { name: /SC Göggingen/ }));
+    fireEvent.click(screen.getByRole('button', { name: '1 Termin übernehmen' }));
+
+    await waitFor(() => expect(sent).not.toBeNull());
+    expect(sent!.getAll('keys[]')).toEqual(['uid:a']);
+    expect(sent!.get('own_name')).toBe('SSV Ulm 1846');
+    expect(await screen.findByText('Fertig: 1 neu, 0 aktualisiert.')).toBeInTheDocument();
+  });
+});

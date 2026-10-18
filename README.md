@@ -48,4 +48,5 @@ Phase 2 (Termine & Zu-/Absagen) umgesetzt: Trainings als Serie, Spieltage mit Ge
 Phase 3 (Benachrichtigungen) umgesetzt: Web-Push (Android, Desktop, iOS ab 16.4 als Home-Bildschirm-App) mit Installationshinweis für iPhone, E-Mail-Benachrichtigungen, Einstellungen pro Kategorie, Erinnerung 24 h vor der Antwortfrist, Meldungen zu neuen und geänderten Terminen, Absagen und Infos, Mails zur Ablösung mit 18 und bei SSL-Problemen.
 Phase 4 (Training) umgesetzt: admin-pflegbarer Ligabaum mit Vorlage, Team-Hierarchie aus der Liga, Quernominierung von unten nach oben mit Geschlechtsregel und Freigabezeitpunkt (Team-Standard, im Termin änderbar), Trainingsgruppen mit eigenen Trainings, Schiedsrichter-Lizenz mit Ablaufhinweis, Zusagen nach Position für Trainer.
 Phase 6 (Statistik) umgesetzt: Zusagequoten je Team mit frei wählbarem Zeitraum (Schnellwahl 4 Wochen/Saison), Filter nach Terminart, Balkendiagramm für Trainer und Admins, Einzeltermine mit Antwortzeitpunkt; Spieler sehen nur die eigene Quote, Betreuer keine.
-Offen: Phase 5 – Spielplan-Import je Mannschaft (.ics und CSV), wartet auf Beispieldateien.
+Phase 5 (Spielplan-Import) umgesetzt: Spieltage je Mannschaft aus .ics/.ical oder SAMS-CSV mit Vorschau, Heim/Auswärts, Halle, Schiedsgericht-Terminen und Abgleich beim erneuten Import.
+Nächster Schritt: Phase 7 – Aufgaben, Helferdienste, Umfragen.

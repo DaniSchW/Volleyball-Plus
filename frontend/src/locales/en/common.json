@@ -465,5 +465,39 @@
     "answeredAt": "answered {{date}}",
     "noAnswer": "no answer",
     "afterDeadline": "after the deadline"
+  },
+  "import": {
+    "open": "Import schedule",
+    "title": "Import schedule – {{team}}",
+    "hint": "Upload a calendar file (.ics/.ical) or the CSV schedule from SAMS. You first see a preview and choose which matches to take over. Later you can import the updated file again – changed matches are updated instead of added twice.",
+    "chooseFile": "Choose file",
+    "otherFile": "Other file",
+    "ownName": "The team’s name in the file",
+    "ownNameHint": "Decides home/away and which matches belong to the team. Remembered for the next import.",
+    "found_one": "{{count}} date found",
+    "found_other": "{{count}} dates found",
+    "skipped_one": "{{count}} entry concerns other teams and is ignored.",
+    "skipped_other": "{{count}} entries concern other teams and are ignored.",
+    "missing": "No longer in the file",
+    "missingHint": "These imported matches are missing from the new file. They are not cancelled automatically – please check.",
+    "done": "Done: {{created}} new, {{updated}} updated.",
+    "submit_one": "Take over {{count}} date",
+    "submit_other": "Take over {{count}} dates",
+    "backToTeam": "Back to team",
+    "past": "past",
+    "status": {
+      "new": "new",
+      "update": "changed: {{what}}",
+      "same": "already there, unchanged",
+      "cancelled": "cancelled in the app – left as is"
+    },
+    "fields": {
+      "starts_at": "time",
+      "ends_at": "time",
+      "location_name": "hall",
+      "address": "hall",
+      "is_home": "home/away",
+      "opponent_id": "opponent"
+    }
   }
 }

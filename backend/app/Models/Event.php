@@ -21,7 +21,7 @@ class Event extends Model
     protected $fillable = [
         'type', 'response_mode', 'scope', 'title', 'description', 'starts_at', 'ends_at', 'meet_at',
         'rsvp_deadline', 'location_name', 'address', 'max_participants', 'series_id', 'series_exception',
-        'opponent_id', 'is_home', 'status', 'created_by', 'cross_nomination_opens_at', 'training_group_id',
+        'opponent_id', 'is_home', 'status', 'created_by', 'cross_nomination_opens_at', 'training_group_id', 'import_key',
     ];
 
     protected $attributes = [

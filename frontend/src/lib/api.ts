@@ -386,3 +386,30 @@ export interface HistoryRow {
   responded_at: string | null;
   after_deadline: boolean;
 }
+
+// ---- schedule import ----
+
+export interface ImportRow {
+  key: string;
+  role: 'home' | 'away' | 'referee' | 'unknown';
+  title: string;
+  opponent: string | null;
+  starts_at: string;
+  ends_at: string;
+  location_name: string | null;
+  address: string | null;
+  details: string | null;
+  past: boolean;
+  status: 'new' | 'update' | 'same' | 'cancelled';
+  changes: string[];
+  existing_id: string | null;
+  selected: boolean;
+}
+
+export interface ImportPreview {
+  names: { name: string; count: number }[];
+  own_name: string | null;
+  rows: ImportRow[];
+  missing: { id: string; title: string; starts_at: string }[];
+  skipped: number;
+}

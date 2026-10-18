@@ -20,6 +20,7 @@ return [
         'body' => ':when – please accept or decline.',
         'body_deadline' => ':when – please reply by :deadline.',
     ],
+    'imported' => ['title' => '{1} :team: 1 new date in the schedule|[2,*] :team: :count new dates in the schedule', 'body' => 'Next: :title, :when'],
     'notice' => ['title' => 'New notice: :title'],
     'adult' => [
         'guardian_title' => ':name now manages the profile',

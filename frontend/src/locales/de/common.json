@@ -465,5 +465,39 @@
     "answeredAt": "geantwortet {{date}}",
     "noAnswer": "keine Antwort",
     "afterDeadline": "nach der Frist"
+  },
+  "import": {
+    "open": "Spielplan importieren",
+    "title": "Spielplan importieren – {{team}}",
+    "hint": "Kalenderdatei (.ics/.ical) oder CSV-Spielplan aus SAMS hochladen. Du siehst zuerst eine Vorschau und wählst, welche Spiele übernommen werden. Später kannst du die aktualisierte Datei erneut importieren – geänderte Spiele werden angepasst statt doppelt angelegt.",
+    "chooseFile": "Datei auswählen",
+    "otherFile": "Andere Datei",
+    "ownName": "So heißt das Team in der Datei",
+    "ownNameHint": "Danach richten sich Heim/Auswärts und welche Spiele zum Team gehören. Wird für den nächsten Import gemerkt.",
+    "found_one": "{{count}} Termin gefunden",
+    "found_other": "{{count}} Termine gefunden",
+    "skipped_one": "{{count}} Eintrag betrifft andere Teams und wird ignoriert.",
+    "skipped_other": "{{count}} Einträge betreffen andere Teams und werden ignoriert.",
+    "missing": "Nicht mehr in der Datei",
+    "missingHint": "Diese importierten Spiele fehlen in der neuen Datei. Sie werden nicht automatisch abgesagt – bitte prüfen.",
+    "done": "Fertig: {{created}} neu, {{updated}} aktualisiert.",
+    "submit_one": "{{count}} Termin übernehmen",
+    "submit_other": "{{count}} Termine übernehmen",
+    "backToTeam": "Zum Team",
+    "past": "vergangen",
+    "status": {
+      "new": "neu",
+      "update": "geändert: {{what}}",
+      "same": "schon vorhanden, unverändert",
+      "cancelled": "in der App abgesagt – bleibt unverändert"
+    },
+    "fields": {
+      "starts_at": "Uhrzeit",
+      "ends_at": "Uhrzeit",
+      "location_name": "Halle",
+      "address": "Halle",
+      "is_home": "Heim/Auswärts",
+      "opponent_id": "Gegner"
+    }
   }
 }

@@ -23,6 +23,7 @@ export function TeamPage() {
   const { t } = useTranslation();
   const { teamId = '' } = useParams();
   const tp = useTenantPath();
+  const slug = useTenantSlug();
   const me = useTenantMe();
   const [tab, setTab] = useState<Tab>('roster');
   const queryClient = useQueryClient();
@@ -76,7 +77,16 @@ export function TeamPage() {
           <Settings team={team.data} settings={team.data.settings} />
         </>
       )}
-      {tab === 'events' && <EventFeed teamId={team.data.id} />}
+      {tab === 'events' && (
+        <>
+          {team.data.can_invite && (
+            <Link to={`/${slug}/teams/${team.data.id}/import`} className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium">
+              📥 {t('import.open')}
+            </Link>
+          )}
+          <EventFeed teamId={team.data.id} />
+        </>
+      )}
     </div>
   );
 }

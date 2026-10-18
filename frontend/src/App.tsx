@@ -9,6 +9,7 @@ import { JoinPage } from './pages/JoinPage';
 import { LoginConfirmPage } from './pages/LoginConfirmPage';
 import { LoginPage } from './pages/LoginPage';
 import { LeaguesPage } from './pages/LeaguesPage';
+import { MatchImportPage } from './pages/MatchImportPage';
 import { MembersPage } from './pages/MembersPage';
 import { NoTenantPage } from './pages/NoTenantPage';
 import { PersonPage } from './pages/PersonPage';
@@ -35,6 +36,7 @@ export const routes: RouteObject[] = [
       { path: 'events/:eventId/edit', element: <EventFormPage /> },
       { path: 'teams', element: <TeamsPage /> },
       { path: 'teams/:teamId', element: <TeamPage /> },
+      { path: 'teams/:teamId/import', element: <MatchImportPage /> },
       { path: 'persons/:personId', element: <PersonPage /> },
       { path: 'profile', element: <ProfilePage /> },
       { path: 'members', element: <MembersPage /> },

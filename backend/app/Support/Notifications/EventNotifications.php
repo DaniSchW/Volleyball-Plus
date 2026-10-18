@@ -6,6 +6,7 @@ use App\Enums\NotificationCategory;
 use App\Models\Event;
 use App\Models\EventInvitee;
 use App\Models\EventResponse;
+use App\Models\Team;
 use App\Models\TenantMember;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
@@ -24,6 +25,26 @@ class EventNotifications
     public function created(Event $event, ?TenantMember $actor, bool $series = false): void
     {
         $this->send($event, NotificationCategory::EventNew, $series ? 'series_new' : 'event_new', $actor);
+    }
+
+    /**
+     * A schedule import: one message for the team instead of one per match.
+     *
+     * @param  Collection<int, Event>  $events
+     */
+    public function imported(Team $team, Collection $events, ?TenantMember $actor): void
+    {
+        $upcoming = $events->filter(fn (Event $e) => $e->ends_at->isFuture())->sortBy('starts_at');
+        if ($upcoming->isEmpty()) {
+            return;
+        }
+        $first = $upcoming->first();
+        $persons = EventInvitee::query()->whereIn('event_id', $upcoming->pluck('id'))->distinct()->pluck('person_id');
+
+        $this->notifier->toPersons(NotificationCategory::EventNew, $persons, fn (string $locale) => [
+            'title' => trans_choice('notifications.imported.title', $upcoming->count(), ['count' => $upcoming->count(), 'team' => $team->name], $locale),
+            'body' => __('notifications.imported.body', ['when' => $this->notifier->when($first->starts_at, $locale), 'title' => $first->title], $locale),
+        ], '/teams/'.$team->id, $actor);
     }
 
     public function changed(Event $event, ?TenantMember $actor): void

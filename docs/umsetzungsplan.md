@@ -40,7 +40,7 @@ Gebaut wird in GitHub Actions (Composer-Install, Frontend-Build, Tests). Das fer
 | Datenbank | MySQL 8, InnoDB, `utf8mb4` | Vorgabe Hosting |
 | Warteschlange | Laravel-Queue mit `database`-Treiber, abgearbeitet per Cron (`schedule:run` → `queue:work --stop-when-empty`) | kein Redis, keine dauerhaft laufenden Prozesse nötig |
 | Mail | Laravel-Mailer: Standard **`sendmail`/PHP-`mail()`**, umschaltbar auf **SMTP** in den Einstellungen | Vorgabe Abteilung |
-| Push | `minishlink/web-push` (VAPID) | kostenlos; Android/Desktop und iOS ≥ 16.4 als installierte PWA |
+| Push | `minishlink/web-push` (VAPID, ohne gmp/bcmath) | kostenlos; Android/Desktop und iOS ≥ 16.4 als installierte PWA |
 | Bilder | Intervention Image (GD/Imagick) → WebP, max. 512 px | kleine Logos/Profilbilder, EXIF entfernen |
 | Frontend | React 18 + Vite + `vite-plugin-pwa`, Tailwind CSS, Radix UI | Mobile-first-SPA, wird statisch ausgeliefert |
 | Daten-Fetching | TanStack Query (`useInfiniteQuery`) | echtes Infinite Scroll, sofortige Anzeige der Zu-/Absage |
@@ -50,7 +50,7 @@ Gebaut wird in GitHub Actions (Composer-Install, Frontend-Build, Tests). Das fer
 | Kalender | ICS-Feed pro Person (Token-URL) | kostenloser Kalender-Sync |
 | Tests | PHPUnit/Pest (API, Mandantentrennung, Rechte), Vitest, Playwright (Mobile) | |
 
-**Anforderungen an das Hosting:** PHP 8.5 mit `openssl`, `pdo_mysql`, `mbstring`, `gd` oder `imagick`, `gmp` oder `bcmath` (für Web-Push), `curl`; SSL-Zertifikat. Bevorzugt: Document Root auf `backend/public/`; Ausweichlösung: eine `.htaccess` im Hauptverzeichnis leitet alle Anfragen nach `public/` um und sperrt den Rest. Cron: entweder als URL-Aufruf der geheimen Adresse `/cron/<token>` (ALL-INKL, externe Cron-Dienste) oder als Befehl `php artisan schedule:run`.
+**Anforderungen an das Hosting:** PHP 8.5 mit `openssl`, `pdo_mysql`, `mbstring`, `gd` oder `imagick`, `curl`; SSL-Zertifikat. Bevorzugt: Document Root auf `backend/public/`; Ausweichlösung: eine `.htaccess` im Hauptverzeichnis leitet alle Anfragen nach `public/` um und sperrt den Rest. Cron: entweder als URL-Aufruf der geheimen Adresse `/cron/<token>` (ALL-INKL, externe Cron-Dienste) oder als Befehl `php artisan schedule:run`.
 
 ## 3. Mandantenfähigkeit (Multi-Tenant)
 
@@ -141,7 +141,7 @@ volleyball-plus/
 | **0 – Fundament** ✅ | Laravel + React-Gerüst, CI, Mandanten-Scope & Tests, i18n-Grundgerüst, HTTPS-Erzwingung & SSL-Selbstprüfung, Mail per `mail()`/SMTP, Cron-Ersatz-URL, Deploy-Paket, **Einrichtungsassistent im Browser** (ohne SSH), automatische DB-Updates per Cron | lauffähiges Gerüst auf dem Hosting |
 | **1 – Login & Struktur** ✅ | Erstes Admin-Konto, Magic Link (mail()/SMTP), gleitende 90-Tage-Session, Abteilung, Teams, Personen, Rollen, **Einladungslinks**, Eltern-Verknüpfung, Profil inkl. Bild, Sprachwahl | Spieler können per Link beitreten |
 | **2 – Termine & Zu-/Absage (MVP)** ✅ | Terminarten, Serien, Fristen, Startseite mit Infinite Scroll, Info-Termine, abteilungsweite Termine, drei Logo-Ebenen, Wegbeschreibung, Infobereich, ICS-Feed | **erste produktiv nutzbare Version** |
-| **3 – Benachrichtigungen** | Web-Push, iOS-Installationshinweis, Frist-Erinnerungen, Einstellungen pro Kategorie | |
+| **3 – Benachrichtigungen** ✅ | Web-Push, iOS-Installationshinweis, Frist-Erinnerungen, Einstellungen pro Kategorie | |
 | **4 – Training** | Teilnehmermaximum, Mindestteilnehmer (gelb), Trainingsgruppen, Ligabaum, Hierarchie, Geschlechtsregel, Quernominierung mit Team-Standard & Termin-Override, SR-Lizenz, Positionsanzeige | |
 | **5 – Statistik** | Quoten mit Sichtbarkeitsregeln, frei wählbarer Zeitraum, Balkendiagramm, Helfer-Statistik | |
 | **6 – Aufgaben, Helferdienste, Umfragen** | Aufgaben zu Terminen, Helfertermine, Umfragen pro Team und teamübergreifend | |
@@ -175,3 +175,4 @@ volleyball-plus/
 - Registrierung ausschließlich über Einladungslinks; Login-Links gehen nur an bestehende Mitglieder.
 - Profil: Standardangaben sehen alle Mitglieder; Details (Telefon, E-Mail, Adresse, Geburtstag) nur per Freigabe der Person – Trainer ihrer Teams, Admins und Eltern sehen sie immer.
 - Sichtbarkeit der Zu-/Absagen (Namen oder nur Anzahl) legt der Trainer pro Team fest.
+- Benachrichtigungen (Phase 3): Kategorien neue Termine, Änderungen/Absagen, Erinnerung, neue Infos. Standard: Push für alles, E-Mail nur bei Änderungen/Absagen; pro Kategorie und Abteilung im Profil einstellbar. Erinnerung einmal 24 h vor der Frist (sonst vor Beginn) an alle ohne Antwort. Eine neue Trainingsreihe wird einmal gemeldet, nicht je Termin. Versand über die Warteschlange im Cron-Lauf, also bis zu einer Cron-Runde verzögert.

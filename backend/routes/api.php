@@ -10,7 +10,9 @@ use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\LogoController;
 use App\Http\Controllers\Api\MemberController;
 use App\Http\Controllers\Api\NoticeController;
+use App\Http\Controllers\Api\NotificationPreferenceController;
 use App\Http\Controllers\Api\PersonController;
+use App\Http\Controllers\Api\PushController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Api\TenantMeController;
@@ -28,6 +30,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('me', [AccountController::class, 'update']);
     Route::get('me/sessions', [AccountController::class, 'sessions']);
     Route::delete('me/sessions/{session}', [AccountController::class, 'revokeSession']);
+
+    Route::get('push/key', [PushController::class, 'key']);
+    Route::post('push/subscriptions', [PushController::class, 'subscribe']);
+    Route::delete('push/subscriptions', [PushController::class, 'unsubscribe']);
 });
 
 Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
@@ -86,6 +92,9 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
         Route::get('opponents', [LogoController::class, 'opponents']);
         Route::post('opponents', [LogoController::class, 'storeOpponent']);
         Route::post('opponents/{opponent}/logo', [LogoController::class, 'uploadOpponentLogo']);
+
+        Route::get('notification-preferences', [NotificationPreferenceController::class, 'index']);
+        Route::put('notification-preferences', [NotificationPreferenceController::class, 'update']);
 
         Route::get('calendar', [CalendarController::class, 'show']);
         Route::post('calendar/reset', [CalendarController::class, 'reset']);

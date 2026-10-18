@@ -31,9 +31,6 @@ class Requirements
             $checks[] = self::item('ext', ['name' => $extension], extension_loaded($extension), true);
         }
 
-        // Needed later for Web-Push encryption.
-        $checks[] = self::item('ext', ['name' => 'bcmath / gmp'], extension_loaded('bcmath') || extension_loaded('gmp'), false);
-
         foreach (['storage/app', 'storage/framework', 'storage/logs', 'bootstrap/cache'] as $dir) {
             $checks[] = self::item('writable', ['path' => 'backend/'.$dir], is_writable(base_path($dir)), true);
         }

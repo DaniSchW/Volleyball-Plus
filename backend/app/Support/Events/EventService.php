@@ -11,9 +11,11 @@ use App\Models\EventTeam;
 use App\Models\Opponent;
 use App\Models\Team;
 use App\Models\TenantMember;
+use App\Support\Notifications\EventNotifications;
 use App\Support\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -32,6 +34,7 @@ class EventService
         private InviteeSync $invitees,
         private SeriesGenerator $series,
         private TenantContext $tenants,
+        private EventNotifications $notifications,
     ) {}
 
     /**
@@ -41,7 +44,7 @@ class EventService
      */
     public function create(array $data, Collection $teams, EventScope $scope, TenantMember $creator, ?array $repeat): Event
     {
-        return DB::transaction(function () use ($data, $teams, $scope, $creator, $repeat) {
+        $event = DB::transaction(function () use ($data, $teams, $scope, $creator, $repeat) {
             $attributes = $this->attributes($data);
 
             if ($repeat !== null) {
@@ -56,6 +59,11 @@ class EventService
 
             return $event;
         });
+
+        // A new series is announced once, not with every date.
+        $this->notifications->created($event, $creator, series: $repeat !== null);
+
+        return $event;
     }
 
     /**
@@ -64,13 +72,18 @@ class EventService
      *
      * @param  array<string, mixed>  $data
      */
-    public function update(Event $event, array $data): Event
+    public function update(Event $event, array $data, ?TenantMember $actor = null): Event
     {
         $event->fill($this->attributes($data, $event));
         if ($event->series_id !== null && $event->isDirty()) {
             $event->series_exception = true;
         }
+        $relevant = $event->isDirty(EventNotifications::RELEVANT_FIELDS);
         $event->save();
+
+        if ($relevant && ! $event->isCancelled()) {
+            $this->notifications->changed($event, $actor);
+        }
 
         return $event;
     }
@@ -81,7 +94,7 @@ class EventService
      * @param  array<string, mixed>  $data
      * @param  array{weekdays: list<int>, interval_weeks?: int, ends_on?: ?string}  $repeat
      */
-    public function updateSeries(EventSeries $series, array $data, array $repeat): EventSeries
+    public function updateSeries(EventSeries $series, array $data, array $repeat, ?TenantMember $actor = null): EventSeries
     {
         $attributes = $this->attributes($data);
         $tz = $this->tenants->get()->timezone;
@@ -105,20 +118,55 @@ class EventService
 
         DB::transaction(fn () => $this->series->update($series));
 
+        $next = $this->nextOf($series);
+        if ($next !== null) {
+            $this->notifications->seriesChanged($next, $actor);
+        }
+
         return $series;
     }
 
-    public function cancel(Event $event): void
+    /** Ends a training series; upcoming dates are cancelled. */
+    public function endSeries(EventSeries $series, ?TenantMember $actor = null): void
     {
+        $next = $this->nextOf($series);
+        $this->series->end($series);
+
+        if ($next !== null) {
+            $this->notifications->seriesEnded($next, $actor);
+        }
+    }
+
+    public function cancel(Event $event, ?TenantMember $actor = null): void
+    {
+        $wasCancelled = $event->isCancelled();
         $event->forceFill([
             'status' => EventStatus::Cancelled,
             'series_exception' => $event->series_id !== null ? true : $event->series_exception,
         ])->save();
+
+        if (! $wasCancelled) {
+            $this->notifications->cancelled($event, $actor);
+        }
     }
 
-    public function restore(Event $event): void
+    public function restore(Event $event, ?TenantMember $actor = null): void
     {
+        $wasCancelled = $event->isCancelled();
         $event->forceFill(['status' => EventStatus::Scheduled])->save();
+
+        if ($wasCancelled) {
+            $this->notifications->restored($event, $actor);
+        }
+    }
+
+    private function nextOf(EventSeries $series): ?Event
+    {
+        return $series->events()
+            ->where('starts_at', '>', Carbon::now())
+            ->where('status', EventStatus::Scheduled)
+            ->orderBy('starts_at')
+            ->first();
     }
 
     /**

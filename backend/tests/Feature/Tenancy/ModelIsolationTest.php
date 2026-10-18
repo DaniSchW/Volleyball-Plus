@@ -15,6 +15,7 @@ use App\Models\Invitation;
 use App\Models\InvitationUse;
 use App\Models\MinorPermission;
 use App\Models\Notice;
+use App\Models\NotificationPreference;
 use App\Models\Opponent;
 use App\Models\Person;
 use App\Models\PersonAccount;
@@ -39,6 +40,7 @@ class ModelIsolationTest extends TestCase
         TeamMembership::class, Invitation::class, InvitationUse::class, StoredFile::class,
         Event::class, EventSeries::class, EventTeam::class, EventInvitee::class, EventResponse::class,
         EventResponseLog::class, Opponent::class, Notice::class, CalendarFeed::class,
+        NotificationPreference::class,
     ];
 
     public function test_every_tenant_model_is_listed_here(): void
@@ -84,6 +86,7 @@ class ModelIsolationTest extends TestCase
             Opponent::create(['name' => 'TSV Gegner']);
             Notice::create(['scope' => 'tenant', 'title' => 'Info', 'visible_from' => now(), 'visible_until' => now()->addDay()]);
             CalendarFeed::create(['tenant_member_id' => $member->id, 'token_hash' => hash('sha256', 'c'), 'token_encrypted' => 'c']);
+            NotificationPreference::create(['tenant_member_id' => $member->id, 'category' => 'notice', 'push' => false, 'email' => false]);
         });
 
         $this->inTenant($a, function () {

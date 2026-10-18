@@ -21,6 +21,7 @@ class Notice extends Model
             'scope' => EventScope::class,
             'visible_from' => 'datetime',
             'visible_until' => 'datetime',
+            'notified_at' => 'datetime',
         ];
     }
 

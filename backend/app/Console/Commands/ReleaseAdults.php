@@ -2,7 +2,9 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\MemberStatus;
 use App\Enums\PersonRelation;
+use App\Mail\NotificationMail;
 use App\Models\MinorPermission;
 use App\Models\Person;
 use App\Models\PersonAccount;
@@ -11,7 +13,9 @@ use App\Models\Tenant;
 use App\Support\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 /**
  * On their 18th birthday children are released from their parents'
@@ -50,6 +54,8 @@ class ReleaseAdults extends Command
                     return 0;
                 }
 
+                $this->announce($adultIds);
+
                 PersonAccount::query()
                     ->whereIn('person_id', $adultIds)
                     ->where('relation', PersonRelation::Guardian)
@@ -69,5 +75,39 @@ class ReleaseAdults extends Command
         $this->info("Released: {$released}");
 
         return self::SUCCESS;
+    }
+
+    /**
+     * Tells parents and the person (if it has its own login) by mail.
+     *
+     * @param  Collection<int, string>  $personIds
+     */
+    private function announce(Collection $personIds): void
+    {
+        $links = PersonAccount::query()
+            ->whereIn('person_id', $personIds)
+            ->whereNull('ended_at')
+            ->with(['person', 'member.account', 'member.tenant'])
+            ->get();
+
+        foreach ($links as $link) {
+            $member = $link->member;
+            if ($member === null || $member->status !== MemberStatus::Active) {
+                continue;
+            }
+
+            $tenant = $member->tenant;
+            $locale = $member->account->locale ?: $tenant->default_locale;
+            $who = $link->relation === PersonRelation::Guardian ? 'guardian' : 'self';
+            $params = ['name' => $link->person->first_name, 'tenant' => $tenant->name];
+
+            Mail::to($member->account->email)->locale($locale)->queue(new NotificationMail(
+                $tenant,
+                __("notifications.adult.{$who}_title", $params, $locale),
+                __("notifications.adult.{$who}_body", $params, $locale),
+                rtrim((string) config('app.url'), '/').'/'.$tenant->slug.'/persons/'.$link->person_id,
+                settingsHint: false,
+            ));
+        }
     }
 }

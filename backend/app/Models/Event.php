@@ -44,6 +44,7 @@ class Event extends Model
             'rsvp_deadline' => 'datetime',
             'max_participants' => 'integer',
             'series_exception' => 'boolean',
+            'reminder_sent_at' => 'datetime',
             'is_home' => 'boolean',
         ];
     }

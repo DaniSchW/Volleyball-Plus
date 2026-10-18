@@ -51,8 +51,8 @@ Einmalig einlösbar (atomares `UPDATE … WHERE used_at IS NULL`). Der Link öff
 `id`, `account_id`, `token_hash`, `created_at`, `last_seen_at`, `expires_at`, `user_agent`, `ip`, `revoked_at`.
 **Gleitende Laufzeit:** `expires_at = last_seen_at + 90 Tage`; bei Nutzung wird verlängert (Schreibzugriff höchstens einmal pro Tag). Cookie `__Host-vp_session` (HttpOnly, Secure, SameSite=Lax), nur der Hash liegt in der Datenbank.
 
-### 🌐 `push_subscription`
-`id`, `account_id`, `endpoint` (unique), `p256dh`, `auth`, `user_agent`, `created_at`, `last_success_at`.
+### 🌐 `push_subscriptions` ✅
+`id`, `account_id`, `endpoint`, `endpoint_hash` (unique), `public_key` (p256dh), `auth_token`, `user_agent`, `last_success_at`, Zeitstempel. Ein Gerät gehört dem gerade angemeldeten Login und bekommt die Nachrichten aller seiner Abteilungen. Meldet der Push-Dienst ein Gerät als abgemeldet (404/410), wird die Zeile gelöscht. Nur Endpunkte der Browser-Push-Dienste (Google, Mozilla, Apple, Microsoft) werden angenommen.
 
 ---
 
@@ -118,7 +118,7 @@ Unique `(person_id, tenant_member_id)`. Ein Account hat höchstens eine `self`-P
 Regeln:
 - Eine Person gilt als minderjährig, solange eine aktive `guardian`-Verknüpfung besteht; dafür ist das Geburtsdatum Pflicht.
 - Ohne Freigabe in `minor_permission` darf nur das Elternteil handeln; die Eltern haben immer die alleinige Entscheidung über das Profil.
-- **Zum 18. Geburtstag** setzt ein täglicher Job (`app:release-adults`) `ended_at` an allen `guardian`-Verknüpfungen und löscht `minor_permission`; ab dann verwaltet die Person ihr Profil allein. Hat sie noch keinen eigenen Login, lädt sie ein Trainer/Admin per Personen-Link ein. *(Benachrichtigungsmails folgen mit Phase 3.)*
+- **Zum 18. Geburtstag** setzt ein täglicher Job (`app:release-adults`) `ended_at` an allen `guardian`-Verknüpfungen und löscht `minor_permission`; ab dann verwaltet die Person ihr Profil allein. Hat sie noch keinen eigenen Login, lädt sie ein Trainer/Admin per Personen-Link ein. Eltern und Person bekommen dazu eine E-Mail.
 
 ### 🏢 `referee_license` – Schiedsrichter-Lizenz
 `person_id`, `level` (text, z. B. „D“, „C“, „BK“), `license_number` null, `valid_until` date. Wird Trainern im Kader angezeigt, inkl. Hinweis bei Ablauf < 60 Tage.
@@ -297,7 +297,8 @@ Helferdienste = `event.type = helper` mit Aufgaben → Helfer-Statistik aus `tas
 ## 7. Infobereich
 
 ### 🏢 `notices` ✅
-`scope` enum `team`, `tenant`, `team_id` null, `title`, `body`, `visible_from`, `visible_until`, `created_by`.
+`scope` enum `team`, `tenant`, `team_id` null, `title`, `body`, `visible_from`, `visible_until`, `notified_at`, `created_by`.
+`notified_at`: wann die Info gemeldet wurde – gemeldet wird, sobald sie sichtbar wird (auch bei vorausgeplanten Infos).
 Trainer: `scope = team` für eigene Teams; Admin: zusätzlich `tenant`.
 
 ---
@@ -366,8 +367,16 @@ Rechte: lesen = Trainer + Admin, schreiben = nur Admin.
 ### 🌐 `jobs` / `failed_jobs`
 Laravel-Warteschlange (Treiber `database`) für Mails, Push und Erinnerungen; abgearbeitet per Cron.
 
-### 🏢 `notification_preference`
-`tenant_member_id`, `channel` enum `push`, `email`, `category` enum `new_event`, `event_changed`, `deadline_reminder`, `chat`, `poll`, `task`, `enabled` bool.
+### 🏢 `notification_preferences` ✅
+`tenant_member_id`, `category` enum `event_new`, `event_changed`, `reminder`, `notice` (später `chat`, `poll`, `task`), `push` bool, `email` bool; unique (`tenant_member_id`, `category`).
+Gespeichert werden nur Abweichungen vom Standard: Push für alles an, E-Mail nur bei `event_changed` (Änderungen und Absagen).
+
+**Wer bekommt was:** Benachrichtigt werden die Logins hinter den eingeladenen Personen – der eigene Login (bei Kindern nur mit Freigabe „eigener Login“) und die Eltern; jeder Login einmal, in seiner Sprache. Wer die Änderung gemacht hat, bekommt keine Nachricht. Vergangene Termine bleiben stumm.
+- Neuer Termin; eine neue Trainingsreihe nur einmal (nicht je Termin).
+- Änderung von Zeit, Treffpunkt oder Ort; Absage; „findet doch statt“; Reihe geändert oder beendet (je eine Nachricht).
+- Erinnerung einmalig 24 h vor der Frist (ohne Frist: vor Beginn) an alle ohne Antwort; nicht bei Terminen, die erst innerhalb dieser 24 h angelegt wurden (`events.reminder_sent_at`).
+- Neue Info, sobald sie sichtbar wird.
+- Ohne Einstellungsmöglichkeit per E-Mail: Ablösung mit 18 (an Eltern und Person), fehlgeschlagene SSL-Prüfung (an alle Admins).
 
 ### 🏢 `calendar_feeds` ✅
 `tenant_member_id`, `token_hash`, `created_at`, `revoked_at` – ICS-Abo-URL ohne Login.

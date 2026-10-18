@@ -1,6 +1,6 @@
 # Installation auf dem Webhosting (ohne SSH)
 
-Voraussetzungen: PHP 8.5 (mindestens 8.3) mit `pdo_mysql`, `openssl`, `mbstring`, `gd`, `intl`, `curl`, `bcmath`; MySQL 8; SSL-Zertifikat für die Domain (z. B. Let's Encrypt im Kundenmenü des Hosters). SSH wird **nicht** benötigt – alles läuft über FTP und den Browser.
+Voraussetzungen: PHP 8.5 (mindestens 8.3) mit `pdo_mysql`, `openssl`, `mbstring`, `gd`, `intl`, `curl`; MySQL 8; SSL-Zertifikat für die Domain (z. B. Let's Encrypt im Kundenmenü des Hosters). SSH wird **nicht** benötigt – alles läuft über FTP und den Browser.
 
 ## Kurzfassung für ALL-INKL
 
@@ -50,7 +50,9 @@ Die Abschlussseite des Assistenten zeigt beides an:
 
 Ideal ist ein Aufruf jede Minute. Seltener (z. B. alle 5 Minuten) funktioniert auch – Mails und Erinnerungen gehen dann entsprechend verzögert raus, tägliche Aufgaben laufen trotzdem zuverlässig.
 
-Der Cronjob verschickt Mails und Push-Nachrichten, legt Serientermine an, spielt Datenbank-Updates ein und prüft täglich das SSL-Zertifikat.
+Der Cronjob verschickt Mails und Push-Nachrichten (auch die Erinnerungen vor Antwortfristen), legt Serientermine an, spielt Datenbank-Updates ein und prüft täglich das SSL-Zertifikat.
+
+**Push-Nachrichten** brauchen keine Einrichtung: Die Schlüssel (VAPID) erzeugt die App beim ersten Bedarf selbst und speichert sie verschlüsselt in der Datenbank. Der Server muss nur ausgehende HTTPS-Verbindungen zu den Push-Diensten von Google, Mozilla, Apple und Microsoft aufbauen dürfen (bei ALL-INKL der Fall). Wird der `APP_KEY` geändert, entstehen neue Schlüssel und alle Geräte müssen Push im Profil neu aktivieren.
 
 ## 6. Updates
 

@@ -31,6 +31,9 @@ $task = fn (string $command) => Schedule::call(fn () => Artisan::call($command))
 // Applies database changes after an update was uploaded via FTP.
 $task('app:migrate-pending');
 
+// Reminders and notice announcements; queued here and sent by queue:work below.
+$task('app:send-notifications');
+
 $task('queue:work --stop-when-empty --max-time=25');
 
 $task('security:check-ssl')->when(fn () => SslCheck::isDue());

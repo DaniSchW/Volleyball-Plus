@@ -18,7 +18,6 @@ use App\Support\Auth\Permissions;
 use App\Support\Events\EventPresenter;
 use App\Support\Events\EventService;
 use App\Support\Events\RsvpService;
-use App\Support\Events\SeriesGenerator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -111,9 +110,9 @@ class EventController extends Controller
 
         if ($request->boolean('series') && $event->series_id !== null) {
             $data = $request->validate($this->rules(creating: true) + ['repeat' => ['required', 'array']]);
-            $events->updateSeries($event->series, $data, $data['repeat']);
+            $events->updateSeries($event->series, $data, $data['repeat'], $member);
         } else {
-            $events->update($event, $request->validate($this->rules(creating: false)));
+            $events->update($event, $request->validate($this->rules(creating: false)), $member);
         }
 
         return response()->json(['data' => $this->presenter->detail($event->refresh(), $member)]);
@@ -121,19 +120,21 @@ class EventController extends Controller
 
     public function cancel(Request $request, Event $event, EventService $events): JsonResponse
     {
-        abort_unless($this->permissions->canManageEvent($this->current->get(), $event), 403);
+        $member = $this->current->get();
+        abort_unless($this->permissions->canManageEvent($member, $event), 403);
 
-        $request->boolean('restore') ? $events->restore($event) : $events->cancel($event);
+        $request->boolean('restore') ? $events->restore($event, $member) : $events->cancel($event, $member);
 
         return response()->json(['data' => $this->presenter->detail($event->refresh(), $this->current->get())]);
     }
 
     /** Ends a training series: upcoming dates are cancelled. */
-    public function endSeries(Event $event, SeriesGenerator $generator): JsonResponse
+    public function endSeries(Event $event, EventService $events): JsonResponse
     {
-        abort_unless($this->permissions->canManageEvent($this->current->get(), $event) && $event->series_id !== null, 403);
+        $member = $this->current->get();
+        abort_unless($this->permissions->canManageEvent($member, $event) && $event->series_id !== null, 403);
 
-        $generator->end($event->series);
+        $events->endSeries($event->series, $member);
 
         return response()->json(['message' => 'ok']);
     }

@@ -33,4 +33,11 @@ return [
         'warn_days' => (int) env('SSL_CHECK_WARN_DAYS', 14),
     ],
 
+    /*
+    | Push messages are only sent to the push services of the browsers
+    | (Chrome/Android, Firefox, Safari/iOS, Edge). Host names must end
+    | with one of these.
+    */
+    'push_hosts' => ['fcm.googleapis.com', 'push.services.mozilla.com', 'push.apple.com', 'notify.windows.com'],
+
 ];

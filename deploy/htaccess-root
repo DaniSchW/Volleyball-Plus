@@ -1,0 +1,20 @@
+# Only needed if the hosting does NOT allow setting the document root to
+# backend/public. Upload this file as ".htaccess" into the folder the domain
+# points to (the one containing backend/). It forwards every request into
+# backend/public, so .env, vendor/, storage/ etc. are never reachable.
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Never serve anything over plain HTTP.
+    RewriteCond %{HTTPS} !=on
+    RewriteCond %{HTTP:X-Forwarded-Proto} !=https
+    RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    RewriteCond %{REQUEST_URI} !^/backend/public/
+    RewriteRule ^(.*)$ backend/public/$1 [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    Require all denied
+</IfModule>

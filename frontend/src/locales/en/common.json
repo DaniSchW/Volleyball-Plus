@@ -1,0 +1,39 @@
+{
+  "app": {
+    "name": "Volleyball Plus"
+  },
+  "menu": {
+    "open": "Open menu",
+    "close": "Close menu",
+    "events": "Events",
+    "chat": "Chat",
+    "polls": "Polls",
+    "tasks": "Tasks",
+    "stats": "Statistics",
+    "cash": "Cash box",
+    "halls": "Halls",
+    "profile": "Profile",
+    "language": "Language"
+  },
+  "home": {
+    "infoArea": "Notices",
+    "noNotices": "No notices at the moment.",
+    "upcoming": "Upcoming events",
+    "noEvents": "No upcoming events."
+  },
+  "tenant": {
+    "notFound": "This department does not exist.",
+    "loading": "Loading …",
+    "choose": "Please open the app via your department's link."
+  },
+  "languages": {
+    "de": "Deutsch",
+    "en": "English"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again."
+  },
+  "placeholder": {
+    "comingSoon": "This section will follow in one of the next versions."
+  }
+}

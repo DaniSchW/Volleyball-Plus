@@ -1,0 +1,39 @@
+{
+  "app": {
+    "name": "Volleyball Plus"
+  },
+  "menu": {
+    "open": "Menü öffnen",
+    "close": "Menü schließen",
+    "events": "Termine",
+    "chat": "Chat",
+    "polls": "Umfragen",
+    "tasks": "Aufgaben",
+    "stats": "Statistik",
+    "cash": "Kasse",
+    "halls": "Hallen",
+    "profile": "Profil",
+    "language": "Sprache"
+  },
+  "home": {
+    "infoArea": "Infos",
+    "noNotices": "Aktuell keine Hinweise.",
+    "upcoming": "Anstehende Termine",
+    "noEvents": "Keine anstehenden Termine."
+  },
+  "tenant": {
+    "notFound": "Diese Abteilung gibt es nicht.",
+    "loading": "Lädt …",
+    "choose": "Bitte rufe die App über den Link deiner Abteilung auf."
+  },
+  "languages": {
+    "de": "Deutsch",
+    "en": "English"
+  },
+  "errors": {
+    "generic": "Etwas ist schiefgelaufen. Bitte versuche es erneut."
+  },
+  "placeholder": {
+    "comingSoon": "Dieser Bereich folgt in einer der nächsten Versionen."
+  }
+}

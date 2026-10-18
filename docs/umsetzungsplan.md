@@ -129,6 +129,7 @@ volleyball-plus/
 │  ├─ src/features/         events, chat, cash, polls, stats, halls, profile, invites …
 │  ├─ src/locales/de|en
 │  └─ src/sw.ts             Service Worker (Push, Offline-Shell)
+├─ deploy/                  Paket-Skript, .htaccess für Hosting ohne wählbaren Document Root
 ├─ .github/workflows/       Tests, Build, Deploy-Paket
 └─ docs/
 ```
@@ -137,8 +138,8 @@ volleyball-plus/
 
 | Phase | Inhalt | Ergebnis |
 |---|---|---|
-| **0 – Fundament** | Laravel + React-Gerüst, CI, Mandanten-Scope & Tests, i18n-Grundgerüst, HTTPS-Erzwingung & SSL-Selbstprüfung, Setup-Assistent, Deploy-Paket | lauffähiges Gerüst auf dem Hosting |
-| **1 – Login & Struktur** | Magic Link (mail()/SMTP), gleitende 90-Tage-Session, Abteilung, Teams, Personen, Rollen, **Einladungslinks**, Eltern-Verknüpfung, Profil inkl. Bild, Sprachwahl | Spieler können per Link beitreten |
+| **0 – Fundament** ✅ | Laravel + React-Gerüst, CI, Mandanten-Scope & Tests, i18n-Grundgerüst, HTTPS-Erzwingung & SSL-Selbstprüfung, Mail per `mail()`/SMTP, Cron-Ersatz-URL, Deploy-Paket | lauffähiges Gerüst auf dem Hosting |
+| **1 – Login & Struktur** | Einrichtungsassistent im Browser (für Hosting ohne SSH), Magic Link (mail()/SMTP), gleitende 90-Tage-Session, Abteilung, Teams, Personen, Rollen, **Einladungslinks**, Eltern-Verknüpfung, Profil inkl. Bild, Sprachwahl | Spieler können per Link beitreten |
 | **2 – Termine & Zu-/Absage (MVP)** | Terminarten, Serien, Fristen, Startseite mit Infinite Scroll, Info-Termine, abteilungsweite Termine, drei Logo-Ebenen, Wegbeschreibung, Infobereich, ICS-Feed | **erste produktiv nutzbare Version** |
 | **3 – Benachrichtigungen** | Web-Push, iOS-Installationshinweis, Frist-Erinnerungen, Einstellungen pro Kategorie | |
 | **4 – Training** | Teilnehmermaximum, Mindestteilnehmer (gelb), Trainingsgruppen, Ligabaum, Hierarchie, Geschlechtsregel, Quernominierung mit Team-Standard & Termin-Override, SR-Lizenz, Positionsanzeige | |

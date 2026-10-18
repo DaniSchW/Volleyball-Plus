@@ -13,9 +13,10 @@ import { LogoUpload } from '../components/LogoUpload';
 import { RefereeBadge } from '../components/team/RefereeBadge';
 import { TeamBaseData } from '../components/team/TeamBaseData';
 import { TeamGuests } from '../components/team/TeamGuests';
+import { TeamStatistics } from '../components/team/TeamStatistics';
 import { TrainingGroups } from '../components/team/TrainingGroups';
 
-type Tab = 'roster' | 'events' | 'groups' | 'guests' | 'invitations' | 'settings';
+type Tab = 'roster' | 'events' | 'statistics' | 'groups' | 'guests' | 'invitations' | 'settings';
 
 export function TeamPage() {
   const { t } = useTranslation();
@@ -32,7 +33,7 @@ export function TeamPage() {
 
   const managed = team.data.can_invite;
   const tabs: Tab[] = [
-    'roster', 'events', 'groups',
+    'roster', 'events', 'statistics', 'groups',
     ...(managed && !team.data.is_youth ? (['guests'] as Tab[]) : []),
     ...(managed ? (['invitations'] as Tab[]) : []),
     ...(team.data.can_manage ? (['settings'] as Tab[]) : []),
@@ -58,6 +59,7 @@ export function TeamPage() {
         </div>
       )}
       {tab === 'roster' && <Roster team={team.data} />}
+      {tab === 'statistics' && <TeamStatistics team={team.data} />}
       {tab === 'groups' && <TrainingGroups team={team.data} />}
       {tab === 'guests' && <TeamGuests team={team.data} />}
       {tab === 'invitations' && <Invitations team={team.data} />}

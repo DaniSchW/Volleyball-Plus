@@ -116,7 +116,8 @@
       "settings": "Settings",
       "groups": "Groups",
       "guests": "Guests",
-      "events": "Events"
+      "events": "Events",
+      "statistics": "Statistics"
     },
     "empty": "Nobody in the team yet.",
     "role": "Role",
@@ -431,5 +432,30 @@
     "noLeague": "– none –",
     "rank": "Rank",
     "hint": "Rank: order when several own teams play in the same league (1 = highest)."
+  },
+  "stats": {
+    "period": "Period",
+    "types": "Event types",
+    "from": "From",
+    "to": "To",
+    "presets": {
+      "last_4_weeks": "Last 4 weeks",
+      "season": "Season",
+      "custom": "Custom"
+    },
+    "comparison": "Acceptance rate of all players",
+    "own": "Your acceptance rate",
+    "summary_one": "{{from}} – {{to}}: {{count}} event with replies",
+    "summary_other": "{{from}} – {{to}}: {{count}} events with replies",
+    "empty": "No past events with replies in this period.",
+    "onlyTrainers": "Only trainers and admins see the rates – players see their own.",
+    "explain": "Rate = accepted divided by events the person was invited to (cancelled events do not count). Tap to see the single events.",
+    "accepted": "accepted {{yes}} of {{invited}}",
+    "late_one": "{{count}}× after deadline",
+    "late_other": "{{count}}× after deadline",
+    "former": "no longer in the team",
+    "answeredAt": "answered {{date}}",
+    "noAnswer": "no answer",
+    "afterDeadline": "after the deadline"
   }
 }

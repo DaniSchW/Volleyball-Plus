@@ -344,3 +344,39 @@ export interface TrainingGroup {
   name: string;
   person_ids: string[];
 }
+
+// ---- statistics ----
+
+export interface Period {
+  from: string;
+  to: string;
+}
+
+export interface StatisticsRow {
+  person: { id: string; name: string; primary_position: Position | null };
+  is_guest: boolean;
+  is_current: boolean;
+  invited: number;
+  yes: number;
+  maybe: number;
+  no: number;
+  open: number;
+  late: number;
+  rate: number;
+}
+
+export interface TeamStatistics {
+  period: Period;
+  presets: { last_4_weeks: Period; season: Period };
+  types: EventType[];
+  can_see_all: boolean;
+  event_count: number;
+  rows: StatisticsRow[];
+}
+
+export interface HistoryRow {
+  event: { id: string; title: string; type: EventType; starts_at: string };
+  status: RsvpStatus | null;
+  responded_at: string | null;
+  after_deadline: boolean;
+}

@@ -116,7 +116,8 @@
       "settings": "Einstellungen",
       "groups": "Gruppen",
       "guests": "Gäste",
-      "events": "Termine"
+      "events": "Termine",
+      "statistics": "Statistik"
     },
     "empty": "Noch niemand im Team.",
     "role": "Rolle",
@@ -431,5 +432,30 @@
     "noLeague": "– keine –",
     "rank": "Rang",
     "hint": "Rang: Reihenfolge, wenn mehrere eigene Teams in derselben Liga spielen (1 = höchstes)."
+  },
+  "stats": {
+    "period": "Zeitraum",
+    "types": "Terminarten",
+    "from": "Von",
+    "to": "Bis",
+    "presets": {
+      "last_4_weeks": "Letzte 4 Wochen",
+      "season": "Saison",
+      "custom": "Frei wählen"
+    },
+    "comparison": "Zusagequote aller Spieler",
+    "own": "Deine Zusagequote",
+    "summary_one": "{{from}} – {{to}}: {{count}} Termin mit Rückmeldung",
+    "summary_other": "{{from}} – {{to}}: {{count}} Termine mit Rückmeldung",
+    "empty": "Keine vergangenen Termine mit Rückmeldung in diesem Zeitraum.",
+    "onlyTrainers": "Quoten sehen nur Trainer und Admins – für Spieler die eigene.",
+    "explain": "Quote = Zusagen geteilt durch Termine, zu denen eingeladen war (abgesagte Termine zählen nicht). Antippen zeigt die einzelnen Termine.",
+    "accepted": "{{yes}} von {{invited}} zugesagt",
+    "late_one": "{{count}}× nach Frist",
+    "late_other": "{{count}}× nach Frist",
+    "former": "nicht mehr im Team",
+    "answeredAt": "geantwortet {{date}}",
+    "noAnswer": "keine Antwort",
+    "afterDeadline": "nach der Frist"
   }
 }

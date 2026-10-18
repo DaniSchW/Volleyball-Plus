@@ -306,3 +306,34 @@ describe('league tree', () => {
     expect(sent).toEqual({ name: 'Regionalliga Süd', parent_id: 'l4' });
   });
 });
+
+describe('statistics', () => {
+  it('shows the rate per player and switches the period', async () => {
+    const team = { id: 't1', name: 'Herren 1', gender: 'men', is_youth: false, league_name: null, color: null, can_manage: true, can_invite: true, can_see: true };
+    const stats = (from: string) => ({
+      period: { from, to: '2026-10-25' },
+      presets: { last_4_weeks: { from: '2026-09-27', to: '2026-10-25' }, season: { from: '2026-07-01', to: '2026-10-25' } },
+      types: ['training', 'match', 'extra'], can_see_all: true, event_count: 3,
+      rows: [
+        { person: { id: 'p1', name: 'Paul Spieler', primary_position: null }, is_guest: false, is_current: true, invited: 3, yes: 3, maybe: 0, no: 0, open: 0, late: 0, rate: 100 },
+        { person: { id: 'p2', name: 'Mia Mit', primary_position: null }, is_guest: false, is_current: true, invited: 3, yes: 1, maybe: 1, no: 1, open: 0, late: 1, rate: 33 },
+      ],
+    });
+    const fetchMock = mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/teams/t1': { body: { data: team } },
+      'GET /t/ssv-ulm/teams/t1/statistics?types%5B%5D=training&types%5B%5D=match&types%5B%5D=extra': { body: { data: stats('2026-07-01') } },
+      'GET /t/ssv-ulm/teams/t1/statistics?from=2026-09-27&to=2026-10-25&types%5B%5D=training&types%5B%5D=match&types%5B%5D=extra': { body: { data: stats('2026-09-27') } },
+    });
+    renderAt('/ssv-ulm/teams/t1');
+
+    fireEvent.click(await screen.findByRole('tab', { name: 'Statistik' }));
+    expect(await screen.findByText('Zusagequote aller Spieler')).toBeInTheDocument();
+    expect(screen.getByText('33 %')).toBeInTheDocument();
+    expect(screen.getByText(/1 von 3 zugesagt · \? 1 · ✕ 1 · 1× nach Frist/)).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Letzte 4 Wochen' }));
+    await waitFor(() => expect(screen.getByText(/27\.09\.2026 – 25\.10\.2026/)).toBeInTheDocument());
+    expect(fetchMock.mock.calls.filter(([url]) => String(url).includes('/statistics')).length).toBe(2);
+  });
+});

@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\NoticeController;
 use App\Http\Controllers\Api\NotificationPreferenceController;
 use App\Http\Controllers\Api\PersonController;
 use App\Http\Controllers\Api\PushController;
+use App\Http\Controllers\Api\StatisticsController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Api\TenantMeController;
@@ -74,6 +75,9 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
         Route::post('teams/{team}/cross-nominations', [CrossNominationController::class, 'store']);
         Route::patch('cross-nominations/{nomination}', [CrossNominationController::class, 'update']);
         Route::delete('cross-nominations/{nomination}', [CrossNominationController::class, 'destroy']);
+
+        Route::get('teams/{team}/statistics', [StatisticsController::class, 'team']);
+        Route::get('teams/{team}/statistics/persons/{person}', [StatisticsController::class, 'person']);
 
         Route::get('teams/{team}/training-groups', [TrainingGroupController::class, 'index']);
         Route::post('teams/{team}/training-groups', [TrainingGroupController::class, 'store']);

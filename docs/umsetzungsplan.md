@@ -18,7 +18,7 @@ Status: **Vorschlag zur Freigabe** – Rahmenbedingung: Hosting mit **PHP und SQ
  │   ├─ index.html, assets/  (gebautes Frontend)      │
  │   └─ index.php      → Laravel-API  /api/v1/…       │
  │                                                    │
- │  Cronjob jede Minute: php artisan schedule:run     │
+ │  Cronjob jede Minute: URL /cron/<token> (ALL-INKL) │
  │   → Mail-/Push-Warteschlange, Serientermine,       │
  │     Frist-Erinnerungen, SSL-Selbstprüfung          │
  └───────┬───────────────────────┬────────────────────┘
@@ -50,7 +50,7 @@ Gebaut wird in GitHub Actions (Composer-Install, Frontend-Build, Tests). Das fer
 | Kalender | ICS-Feed pro Person (Token-URL) | kostenloser Kalender-Sync |
 | Tests | PHPUnit/Pest (API, Mandantentrennung, Rechte), Vitest, Playwright (Mobile) | |
 
-**Anforderungen an das Hosting:** PHP 8.5 mit `openssl`, `pdo_mysql`, `mbstring`, `gd` oder `imagick`, `gmp` oder `bcmath` (für Web-Push), `curl`; SSL-Zertifikat. Bevorzugt: Document Root auf `backend/public/` und Cronjob im Minutentakt. **Ausweichlösungen**, falls das nicht geht: (a) eine `.htaccess` im Hauptverzeichnis leitet alle Anfragen nach `public/` um und sperrt den Rest; (b) ohne Cron ruft ein externer Cron-Dienst eine geheime URL `/cron/<token>` auf, notfalls werden fällige Jobs am Ende normaler Seitenaufrufe abgearbeitet.
+**Anforderungen an das Hosting:** PHP 8.5 mit `openssl`, `pdo_mysql`, `mbstring`, `gd` oder `imagick`, `gmp` oder `bcmath` (für Web-Push), `curl`; SSL-Zertifikat. Bevorzugt: Document Root auf `backend/public/`; Ausweichlösung: eine `.htaccess` im Hauptverzeichnis leitet alle Anfragen nach `public/` um und sperrt den Rest. Cron: entweder als URL-Aufruf der geheimen Adresse `/cron/<token>` (ALL-INKL, externe Cron-Dienste) oder als Befehl `php artisan schedule:run`.
 
 ## 3. Mandantenfähigkeit (Multi-Tenant)
 
@@ -165,8 +165,8 @@ volleyball-plus/
 - Kinder werden mit 18 automatisch vom Elternkonto gelöst; Eltern bestimmen, was das Kind selbst einstellen darf.
 - Über einen Einladungslink ist man automatisch im Team.
 - Kein SSH: Einrichtung per Browser-Assistent (geschützt durch Einrichtungscode aus einer Datei, die nur per FTP lesbar ist), Updates per FTP-Upload, Datenbank-Migrationen automatisch per Cron.
+- Hosting bei **ALL-INKL**: Cronjobs rufen dort eine Webadresse auf → Hauptweg ist `/cron/{token}`. Geplante Aufgaben dürfen daher nicht von einer exakten Minute abhängen und müssen in das Zeitlimit eines Webaufrufs passen.
 - Entwicklung auf `main`.
 
-**Noch offen (blockiert nicht, Ausweichlösung siehe Abschnitt 2):**
-1. Lässt sich beim Hosting der Document Root auf einen Unterordner setzen?
-2. Gibt es Cronjobs im Minutentakt (sonst externer Cron-Dienst über die geheime Cron-Adresse)?
+**Noch offen (blockiert nicht):**
+1. Kürzestes Cron-Intervall im ALL-INKL-Tarif (ideal: jede Minute).

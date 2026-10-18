@@ -67,9 +67,9 @@ return [
         'env_manual' => 'The file backend/.env could not be written. Save the following content as backend/.env and upload it via FTP. The app becomes active only after that. Then delete the file backend/storage/app/setup-code.txt.',
         'env_secret' => 'The content contains passwords – do not share it.',
         'cron_heading' => 'Set up the cron job',
-        'cron_intro' => 'Create a cron job in your hosting control panel that runs every minute. It sends mail, creates recurring events, applies database updates and checks the SSL certificate daily.',
-        'cron_command' => 'Command for the cron job:',
-        'cron_url' => 'If your hoster can only call web addresses or offers no cron jobs at all (then e.g. via cron-job.org), have this secret address called every minute:',
+        'cron_intro' => 'Create a cron job in your hosting control panel that runs every minute (or as often as possible). It sends mail, creates recurring events, applies database updates and checks the SSL certificate daily.',
+        'cron_command' => 'Alternative for hosters whose cron jobs run commands:',
+        'cron_url' => 'Web address for the cron job – at ALL-INKL enter it in KAS under Tools → Cronjobs in the field “Log / Path” (keep it secret):',
         'open_app' => 'Open department',
     ],
 ];

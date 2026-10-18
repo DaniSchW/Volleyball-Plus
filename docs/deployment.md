@@ -2,6 +2,17 @@
 
 Voraussetzungen: PHP 8.5 (mindestens 8.3) mit `pdo_mysql`, `openssl`, `mbstring`, `gd`, `intl`, `curl`, `bcmath`; MySQL 8; SSL-Zertifikat für die Domain (z. B. Let's Encrypt im Kundenmenü des Hosters). SSH wird **nicht** benötigt – alles läuft über FTP und den Browser.
 
+## Kurzfassung für ALL-INKL
+
+Alle Einstellungen im **KAS** (Technische Verwaltung):
+
+1. **Domain**: beim Bearbeiten der Domain als Ziel den Ordner `…/volleyball-plus/backend/public` eintragen, PHP-Version 8.5 wählen und das kostenlose Let's-Encrypt-Zertifikat (SSL-Schutz) aktivieren.
+2. **Datenbank**: unter *Datenbanken* eine MySQL-Datenbank anlegen; Server ist in der Regel `localhost`.
+3. **Hochladen** per FTP (Schritte 1–4 unten), dann den Einrichtungsassistenten im Browser aufrufen.
+4. **Cronjob**: unter *Tools → Cronjobs* einen Cronjob anlegen, im Feld *Log / Path* die geheime Adresse von der Abschlussseite des Assistenten eintragen (`https://deine-domain.de/cron/<token>`) und das kürzeste angebotene Intervall wählen. ALL-INKL ruft dabei eine Webadresse auf – genau dafür ist diese Adresse da. Falls das Paket keine Cronjobs enthält, lassen sie sich im Mitgliederbereich als Option dazubuchen.
+
+> Die Menüpunkte im KAS können sich ändern; maßgeblich ist die [Anleitung von ALL-INKL zu Cronjobs](https://all-inkl.com/en/support/tutorials/kas/tools/cronjobs/setup_479.html).
+
 ## 1. Paket holen
 
 Jeder Push auf `main` baut in GitHub Actions ein fertiges Paket: Repository → *Actions* → letzter Lauf von **CI** → Artefakt **volleyball-plus** herunterladen und entpacken.
@@ -32,8 +43,10 @@ Im Kundenmenü des Hosters eine MySQL-Datenbank mit Benutzer anlegen (Zeichensat
 
 Die Abschlussseite des Assistenten zeigt beides an:
 
-- **Cronjob im Kundenmenü** (jede Minute): `php …/backend/artisan schedule:run`
-- **oder**, falls der Hoster nur Webadressen aufrufen kann bzw. gar keine Cronjobs anbietet: die geheime Adresse `https://deine-domain.de/cron/<token>` minütlich aufrufen lassen, z. B. über cron-job.org.
+- **Webadresse** `https://deine-domain.de/cron/<token>` – für Hoster, deren Cronjobs eine URL aufrufen (z. B. ALL-INKL), oder einen externen Dienst wie cron-job.org. Die Adresse geheim halten.
+- **oder Befehl** `php …/backend/artisan schedule:run` – für Hoster, deren Cronjobs Befehle ausführen.
+
+Ideal ist ein Aufruf jede Minute. Seltener (z. B. alle 5 Minuten) funktioniert auch – Mails und Erinnerungen gehen dann entsprechend verzögert raus, tägliche Aufgaben laufen trotzdem zuverlässig.
 
 Der Cronjob verschickt Mails und Push-Nachrichten, legt Serientermine an, spielt Datenbank-Updates ein und prüft täglich das SSL-Zertifikat.
 

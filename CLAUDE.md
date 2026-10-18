@@ -6,6 +6,7 @@ Fachliche Grundlage: `docs/spezifikation.md`, Entscheidungen in `docs/umsetzungs
 
 - Läuft auf klassischem Webhosting: PHP 8.5 + MySQL 8. Keine dauerhaft laufenden Prozesse, keine WebSockets, kein Redis. Hintergrundarbeit über Laravel-Queue (`database`) + Scheduler per Cron.
 - Kein SSH beim Hosting: Alles, was beim Betrieb nötig ist, muss über Browser (Einrichtungsassistent `/install`, später Admin-Bereich) oder Cron laufen. Neue Migrationen spielt `app:migrate-pending` per Cron automatisch ein.
+- Hoster ALL-INKL: Der Cron ruft `/cron/{token}` per HTTP auf (Zeitlimit eines Webaufrufs, evtl. seltener als minütlich). Regeln dazu stehen oben in `backend/routes/console.php` und werden von `SslCheckScheduleTest` geprüft.
 - Lokal ist PHP 8.3 installiert – Code muss auf 8.3 und 8.5 laufen (Laravel 13 verlangt ≥ 8.3).
 - Kommunikation mit dem Nutzer und Doku auf Deutsch; Code, Kommentare und Commit-Betreff-Präfixe englisch/deutsch wie im Bestand.
 

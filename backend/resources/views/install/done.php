@@ -25,10 +25,10 @@ ob_start();
 <section>
   <h2><?= $t('cron_heading') ?></h2>
   <p><?= $t('cron_intro') ?></p>
-  <p><?= $t('cron_command') ?></p>
-  <code class="block"><?= e($cron_command) ?></code>
-  <p style="margin-top:12px"><?= $t('cron_url') ?></p>
+  <p><?= $t('cron_url') ?></p>
   <code class="block"><?= e($cron_url) ?></code>
+  <p style="margin-top:12px"><?= $t('cron_command') ?></p>
+  <code class="block"><?= e($cron_command) ?></code>
 </section>
 
 <a class="button" href="<?= e($tenant_url) ?>"><?= $t('open_app') ?></a>

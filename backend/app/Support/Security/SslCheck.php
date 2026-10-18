@@ -2,6 +2,7 @@
 
 namespace App\Support\Security;
 
+use App\Models\Setting;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Http;
 use Throwable;
@@ -18,6 +19,17 @@ class SslCheck
         private int $port = 443,
         private int $warnDays = 14,
     ) {}
+
+    /**
+     * Due once a day: 24 hours after the last stored result (or never run).
+     */
+    public static function isDue(?CarbonImmutable $now = null): bool
+    {
+        $last = Setting::read('security.ssl_check')['checked_at'] ?? null;
+
+        return $last === null
+            || CarbonImmutable::parse($last)->addDay()->lessThanOrEqualTo($now ?? CarbonImmutable::now());
+    }
 
     public static function fromConfig(): self
     {

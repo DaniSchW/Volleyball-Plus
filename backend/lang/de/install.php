@@ -67,9 +67,9 @@ return [
         'env_manual' => 'Die Datei backend/.env konnte nicht geschrieben werden. Speichere den folgenden Inhalt als backend/.env und lade sie per FTP hoch. Erst danach ist die App aktiv. Lösche anschließend die Datei backend/storage/app/setup-code.txt.',
         'env_secret' => 'Der Inhalt enthält Passwörter – nicht weitergeben.',
         'cron_heading' => 'Cronjob einrichten',
-        'cron_intro' => 'Lege im Kundenmenü deines Hosters einen Cronjob an, der jede Minute läuft. Er verschickt Mails, legt Serientermine an, spielt Updates der Datenbank ein und prüft täglich das SSL-Zertifikat.',
-        'cron_command' => 'Befehl für den Cronjob:',
-        'cron_url' => 'Falls dein Hoster nur Webadressen aufrufen kann oder gar keine Cronjobs anbietet (dann z. B. über cron-job.org), diese geheime Adresse minütlich aufrufen lassen:',
+        'cron_intro' => 'Lege im Kundenmenü deines Hosters einen Cronjob an, der jede Minute läuft (oder so oft wie möglich). Er verschickt Mails, legt Serientermine an, spielt Updates der Datenbank ein und prüft täglich das SSL-Zertifikat.',
+        'cron_command' => 'Alternative bei Hostern, deren Cronjobs Befehle ausführen:',
+        'cron_url' => 'Webadresse für den Cronjob – bei ALL-INKL im KAS unter Tools → Cronjobs im Feld „Log / Path“ eintragen (geheim halten):',
         'open_app' => 'Zur Abteilung',
     ],
 ];

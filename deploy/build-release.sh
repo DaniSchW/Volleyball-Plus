@@ -19,6 +19,7 @@ tar -C "$ROOT/backend" \
   --exclude './tests' --exclude './storage/logs/*.log' --exclude './database/*.sqlite' \
   --exclude './.phpunit.cache' --exclude './.phpunit.result.cache' --exclude './phpunit.xml' \
   --exclude './storage/framework/cache/data/*' --exclude './storage/framework/views/*.php' \
+  --exclude './storage/app/setup-code.txt' \
   -cf - . | tar -C "$STAGE/backend" -xf -
 
 (cd "$STAGE/backend" && composer install --no-dev --prefer-dist --optimize-autoloader --no-interaction --quiet)

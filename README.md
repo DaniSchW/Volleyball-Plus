@@ -28,7 +28,7 @@ docs/       Spezifikation, Plan, Datenmodell, Installation
 cd backend
 composer install
 cp .env.example .env          # lokal: DB_CONNECTION=sqlite, FORCE_HTTPS=false
-php artisan key:generate
+php artisan key:generate      # ohne APP_KEY startet stattdessen der Einrichtungsassistent
 php artisan migrate
 php artisan serve
 
@@ -42,5 +42,5 @@ Tests: `cd backend && php artisan test` und `cd frontend && npm test`.
 
 ## Status
 
-Phase 0 (Fundament) umgesetzt: Mandantentrennung, HTTPS-Erzwingung und SSL-Selbstprüfung, Mailversand per PHP `mail()`/SMTP, Cron/Queue, i18n DE/EN, App-Gerüst mit Menü oben rechts, CI und Upload-Paket.
+Phase 0 (Fundament) umgesetzt: Mandantentrennung, HTTPS-Erzwingung und SSL-Selbstprüfung, Mailversand per PHP `mail()`/SMTP, Cron/Queue, i18n DE/EN, App-Gerüst mit Menü oben rechts, CI und Upload-Paket, Einrichtungsassistent im Browser (kein SSH nötig).
 Nächster Schritt: Phase 1 – Login per Magic Link, Teams, Personen, Rollen, Einladungslinks.

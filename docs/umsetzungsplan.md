@@ -30,7 +30,7 @@ Status: **Vorschlag zur Freigabe** – Rahmenbedingung: Hosting mit **PHP und SQ
              Web-Push: VAPID direkt aus PHP, ohne Drittanbieter
 ```
 
-Gebaut wird in GitHub Actions (Composer-Install, Frontend-Build, Tests). Das fertige Paket wird per SFTP/FTP oder `rsync` auf das Hosting übertragen – auf dem Server müssen weder Node.js noch Composer laufen.
+Gebaut wird in GitHub Actions (Composer-Install, Frontend-Build, Tests). Das fertige Paket wird per FTP auf das Hosting übertragen – auf dem Server müssen weder Node.js noch Composer laufen, **SSH ist nicht nötig**: Die Einrichtung übernimmt ein Assistent im Browser (`/install`), Datenbank-Updates spielt der Cronjob nach jedem Upload automatisch ein.
 
 ## 2. Technologie-Stack
 
@@ -138,8 +138,8 @@ volleyball-plus/
 
 | Phase | Inhalt | Ergebnis |
 |---|---|---|
-| **0 – Fundament** ✅ | Laravel + React-Gerüst, CI, Mandanten-Scope & Tests, i18n-Grundgerüst, HTTPS-Erzwingung & SSL-Selbstprüfung, Mail per `mail()`/SMTP, Cron-Ersatz-URL, Deploy-Paket | lauffähiges Gerüst auf dem Hosting |
-| **1 – Login & Struktur** | Einrichtungsassistent im Browser (für Hosting ohne SSH), Magic Link (mail()/SMTP), gleitende 90-Tage-Session, Abteilung, Teams, Personen, Rollen, **Einladungslinks**, Eltern-Verknüpfung, Profil inkl. Bild, Sprachwahl | Spieler können per Link beitreten |
+| **0 – Fundament** ✅ | Laravel + React-Gerüst, CI, Mandanten-Scope & Tests, i18n-Grundgerüst, HTTPS-Erzwingung & SSL-Selbstprüfung, Mail per `mail()`/SMTP, Cron-Ersatz-URL, Deploy-Paket, **Einrichtungsassistent im Browser** (ohne SSH), automatische DB-Updates per Cron | lauffähiges Gerüst auf dem Hosting |
+| **1 – Login & Struktur** | Erstes Admin-Konto, Magic Link (mail()/SMTP), gleitende 90-Tage-Session, Abteilung, Teams, Personen, Rollen, **Einladungslinks**, Eltern-Verknüpfung, Profil inkl. Bild, Sprachwahl | Spieler können per Link beitreten |
 | **2 – Termine & Zu-/Absage (MVP)** | Terminarten, Serien, Fristen, Startseite mit Infinite Scroll, Info-Termine, abteilungsweite Termine, drei Logo-Ebenen, Wegbeschreibung, Infobereich, ICS-Feed | **erste produktiv nutzbare Version** |
 | **3 – Benachrichtigungen** | Web-Push, iOS-Installationshinweis, Frist-Erinnerungen, Einstellungen pro Kategorie | |
 | **4 – Training** | Teilnehmermaximum, Mindestteilnehmer (gelb), Trainingsgruppen, Ligabaum, Hierarchie, Geschlechtsregel, Quernominierung mit Team-Standard & Termin-Override, SR-Lizenz, Positionsanzeige | |
@@ -164,8 +164,9 @@ volleyball-plus/
 - Zu-/Absage mit „Vielleicht“; Pflicht-Grund und Sichtbarkeit der Gründe für Mitspieler stellt der Trainer pro Team ein.
 - Kinder werden mit 18 automatisch vom Elternkonto gelöst; Eltern bestimmen, was das Kind selbst einstellen darf.
 - Über einen Einladungslink ist man automatisch im Team.
+- Kein SSH: Einrichtung per Browser-Assistent (geschützt durch Einrichtungscode aus einer Datei, die nur per FTP lesbar ist), Updates per FTP-Upload, Datenbank-Migrationen automatisch per Cron.
 - Entwicklung auf `main`.
 
 **Noch offen (blockiert nicht, Ausweichlösung siehe Abschnitt 2):**
 1. Lässt sich beim Hosting der Document Root auf einen Unterordner setzen?
-2. Gibt es Cronjobs im Minutentakt und SSH-Zugang (für das Hochladen per `rsync` statt FTP)?
+2. Gibt es Cronjobs im Minutentakt (sonst externer Cron-Dienst über die geheime Cron-Adresse)?

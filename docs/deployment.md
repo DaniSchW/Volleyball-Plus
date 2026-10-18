@@ -1,54 +1,47 @@
-# Installation auf dem Webhosting
+# Installation auf dem Webhosting (ohne SSH)
 
-Voraussetzungen: PHP 8.5 (mit `pdo_mysql`, `openssl`, `mbstring`, `gd`, `intl`, `bcmath`), MySQL 8, SSL-Zertifikat für die Domain (z. B. Let's Encrypt im Kundenmenü des Hosters).
+Voraussetzungen: PHP 8.5 (mindestens 8.3) mit `pdo_mysql`, `openssl`, `mbstring`, `gd`, `intl`, `curl`, `bcmath`; MySQL 8; SSL-Zertifikat für die Domain (z. B. Let's Encrypt im Kundenmenü des Hosters). SSH wird **nicht** benötigt – alles läuft über FTP und den Browser.
 
 ## 1. Paket holen
 
-Jeder Push auf `main` baut in GitHub Actions ein fertiges Paket: Repository → *Actions* → letzter Lauf von **CI** → Artefakt **volleyball-plus** herunterladen. Alternativ lokal: `./deploy/build-release.sh` → `release/volleyball-plus.zip`.
+Jeder Push auf `main` baut in GitHub Actions ein fertiges Paket: Repository → *Actions* → letzter Lauf von **CI** → Artefakt **volleyball-plus** herunterladen und entpacken.
 
 Das Paket enthält `backend/` inklusive aller PHP-Abhängigkeiten und der fertig gebauten App. Auf dem Server muss nichts gebaut werden.
 
-## 2. Hochladen
+## 2. Datenbank anlegen
 
-Inhalt des Pakets per SFTP/FTP in einen Ordner auf dem Webspace laden, z. B. `volleyball-plus/`.
+Im Kundenmenü des Hosters eine MySQL-Datenbank mit Benutzer anlegen (Zeichensatz `utf8mb4`, Sortierung `utf8mb4_unicode_ci`). Server, Datenbankname, Benutzer und Passwort notieren.
 
-**Startverzeichnis der Domain** (Document Root) im Kundenmenü auf `volleyball-plus/backend/public` setzen.
+## 3. Hochladen per FTP
 
-> Geht das beim Hoster nicht: Domain auf `volleyball-plus/` zeigen lassen und die mitgelieferte Datei `htaccess-root.txt` dort als `.htaccess` speichern. Sie leitet alle Aufrufe nach `backend/public` weiter, sodass `.env`, `vendor/` und `storage/` nie erreichbar sind.
+1. Inhalt des Pakets in einen Ordner auf dem Webspace laden, z. B. `volleyball-plus/`.
+2. **Startverzeichnis der Domain** (Document Root) im Kundenmenü auf `volleyball-plus/backend/public` setzen.
+   > Geht das beim Hoster nicht: Domain auf `volleyball-plus/` zeigen lassen und die mitgelieferte Datei `htaccess-root.txt` dort als `.htaccess` speichern. Sie leitet alle Aufrufe nach `backend/public` weiter, sodass `.env`, `vendor/` und `storage/` nie erreichbar sind.
+3. Für die Ordner `backend/storage` (mit allen Unterordnern) und `backend/bootstrap/cache` im FTP-Programm Schreibrechte für PHP setzen (meist `755`, falls das nicht reicht `775`).
 
-## 3. Datenbank und Konfiguration
+## 4. Einrichtung im Browser
 
-1. Im Kundenmenü eine MySQL-Datenbank anlegen (Zeichensatz `utf8mb4`, Sortierung `utf8mb4_unicode_ci`).
-2. `backend/.env.example` als `backend/.env` kopieren und ausfüllen:
-   - `APP_URL=https://deine-domain.de`
-   - `APP_ENV=production`, `APP_DEBUG=false`
-   - `DB_HOST`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`
-   - `MAIL_MAILER=phpmail` (Standard, PHP `mail()`) oder `smtp` mit `MAIL_HOST`, `MAIL_PORT`, `MAIL_USERNAME`, `MAIL_PASSWORD`, `MAIL_SCHEME`
-   - `MAIL_FROM_ADDRESS` – eine Adresse deiner Domain, sonst landen Mails im Spam
-   - `FORCE_HTTPS=true` (nie abschalten)
-   - Terminiert der Hoster SSL in einem Proxy vor PHP (die App meldet dann „nur über HTTPS“ trotz https-Adresse): `TRUSTED_PROXIES=*`
-3. Mit SSH im Ordner `backend/`:
-   ```sh
-   php artisan key:generate
-   php artisan migrate --force
-   php artisan config:cache && php artisan route:cache
-   php artisan security:check-ssl
-   ```
-   Ohne SSH: Diese Schritte übernimmt später der Einrichtungsassistent im Browser (folgt mit Phase 1).
-4. Ordner `backend/storage` und `backend/bootstrap/cache` müssen für PHP beschreibbar sein.
+1. `https://deine-domain.de` aufrufen – die App leitet automatisch zum Einrichtungsassistenten (`/install`).
+2. Der Assistent prüft die Voraussetzungen (HTTPS, PHP-Version, Erweiterungen, Schreibrechte). Rot markierte Punkte zuerst beheben.
+3. **Einrichtungscode:** Der Assistent legt die Datei `backend/storage/app/setup-code.txt` an. Diese per FTP öffnen und den Code eintragen. So kann niemand Fremdes eine frisch hochgeladene Installation übernehmen.
+4. Adresse, Datenbank, Mailversand (Standard: PHP `mail()`, optional SMTP) und die erste Abteilung eintragen und **Jetzt einrichten** klicken.
+5. Der Assistent legt die Tabellen und die Abteilung an und schreibt `backend/.env` (inklusive App-Schlüssel und Cron-Token). Danach ist er nicht mehr erreichbar.
+   > Kann PHP die Datei `backend/.env` nicht schreiben, zeigt der Assistent ihren Inhalt an. Dann diesen Text als `.env` speichern, per FTP nach `backend/` hochladen und `backend/storage/app/setup-code.txt` löschen.
 
-## 4. Cronjob
+## 5. Cronjob
 
-Im Kundenmenü einen Cronjob **jede Minute** anlegen:
+Die Abschlussseite des Assistenten zeigt beides an:
 
-```
-php /pfad/zu/volleyball-plus/backend/artisan schedule:run
-```
+- **Cronjob im Kundenmenü** (jede Minute): `php …/backend/artisan schedule:run`
+- **oder**, falls der Hoster nur Webadressen aufrufen kann bzw. gar keine Cronjobs anbietet: die geheime Adresse `https://deine-domain.de/cron/<token>` minütlich aufrufen lassen, z. B. über cron-job.org.
 
-Er verschickt Mails und Push-Nachrichten, legt Serientermine an und prüft täglich das SSL-Zertifikat.
+Der Cronjob verschickt Mails und Push-Nachrichten, legt Serientermine an, spielt Datenbank-Updates ein und prüft täglich das SSL-Zertifikat.
 
-> Kein Cron verfügbar: In `.env` `CRON_TOKEN` auf einen langen Zufallswert setzen und bei einem externen Cron-Dienst (z. B. cron-job.org) die URL `https://deine-domain.de/cron/<CRON_TOKEN>` minütlich aufrufen lassen.
+## 6. Updates
 
-## 5. Updates
+Neues Paket herunterladen und per FTP über die bestehenden Dateien hochladen. `backend/.env` und die Inhalte von `backend/storage/` sind nicht im Paket und bleiben erhalten. Neue Datenbank-Änderungen spielt der Cronjob innerhalb einer Minute automatisch ein.
 
-Neues Paket hochladen (die `.env` und `backend/storage/` bleiben erhalten), danach `php artisan migrate --force` und `php artisan config:cache && php artisan route:cache`.
+## Hinweise
+
+- **„Zugriff nur über HTTPS“ trotz https-Adresse:** Der Hoster beendet SSL dann in einem Proxy vor PHP. Proxies in privaten Netzen werden automatisch erkannt. Nutzt der Proxy öffentliche Adressen, in `backend/.env` `TRUSTED_PROXIES=*` ergänzen.
+- `FORCE_HTTPS` in `.env` nie auf `false` setzen.

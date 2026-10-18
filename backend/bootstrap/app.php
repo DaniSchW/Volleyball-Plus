@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\ForceHttps;
+use App\Http\Middleware\RedirectIfNotInstalled;
 use App\Http\Middleware\ResolveTenant;
 use App\Http\Middleware\SecurityHeaders;
 use App\Http\Middleware\SetLocale;
@@ -8,6 +9,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -16,6 +18,9 @@ return Application::configure(basePath: dirname(__DIR__))
         apiPrefix: 'api/v1',
         commands: __DIR__.'/../routes/console.php',
         health: '/up',
+        then: function () {
+            Route::group([], base_path('routes/install.php'));
+        },
     )
     ->withMiddleware(function (Middleware $middleware): void {
         // Runs after TrustProxies (config/trustedproxy.php), so HTTPS terminated
@@ -23,6 +28,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->append(ForceHttps::class);
         $middleware->append(SecurityHeaders::class);
         $middleware->append(SetLocale::class);
+        // Global, so it runs before session/cookie handling, which needs an app key.
+        $middleware->append(RedirectIfNotInstalled::class);
 
         $middleware->alias(['tenant' => ResolveTenant::class]);
     })

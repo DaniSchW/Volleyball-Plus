@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Schedule;
 | long-running worker process is needed on shared hosting.
 */
 
+// Applies database changes after an update was uploaded via FTP.
+Schedule::command('app:migrate-pending')->everyMinute()->withoutOverlapping();
+
 Schedule::command('queue:work --stop-when-empty --max-time=50')
     ->everyMinute()
     ->withoutOverlapping();

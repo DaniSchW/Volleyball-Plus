@@ -1,5 +1,6 @@
 <?php
 
+use App\Console\Commands\GenerateSeries;
 use App\Console\Commands\ReleaseAdults;
 use App\Support\Security\SslCheck;
 use Illuminate\Support\Facades\Artisan;
@@ -36,3 +37,6 @@ $task('security:check-ssl')->when(fn () => SslCheck::isDue());
 
 // Children are released from their parents' accounts on their 18th birthday.
 $task('app:release-adults')->when(fn () => ReleaseAdults::isDue());
+
+// Keeps about six months of training dates ahead for every series.
+$task('app:generate-series')->when(fn () => GenerateSeries::isDue());

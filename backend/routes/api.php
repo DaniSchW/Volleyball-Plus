@@ -2,10 +2,14 @@
 
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\CalendarController;
+use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\FileController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\InvitationController;
+use App\Http\Controllers\Api\LogoController;
 use App\Http\Controllers\Api\MemberController;
+use App\Http\Controllers\Api\NoticeController;
 use App\Http\Controllers\Api\PersonController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
@@ -32,6 +36,8 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
     Route::post('auth/login', [AuthController::class, 'requestLink']);
     Route::get('invitations/{token}', [InvitationController::class, 'showPublic']);
     Route::post('invitations/{token}/accept', [InvitationController::class, 'accept']);
+    Route::get('logo', [LogoController::class, 'showTenantLogo']);
+    Route::get('calendar/{token}', [CalendarController::class, 'feed'])->middleware('throttle:60,1');
 
     // Members of the department.
     Route::middleware('member')->group(function () {
@@ -62,5 +68,26 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
         Route::patch('members/{member}', [MemberController::class, 'update']);
 
         Route::get('files/{file}', FileController::class);
+
+        Route::get('events', [EventController::class, 'index']);
+        Route::post('events', [EventController::class, 'store']);
+        Route::get('events/{event}', [EventController::class, 'show']);
+        Route::patch('events/{event}', [EventController::class, 'update']);
+        Route::post('events/{event}/cancel', [EventController::class, 'cancel']);
+        Route::post('events/{event}/end-series', [EventController::class, 'endSeries']);
+        Route::post('events/{event}/responses', [EventController::class, 'respond']);
+
+        Route::get('notices', [NoticeController::class, 'index']);
+        Route::post('notices', [NoticeController::class, 'store']);
+        Route::delete('notices/{notice}', [NoticeController::class, 'destroy']);
+
+        Route::post('logo', [LogoController::class, 'uploadTenantLogo']);
+        Route::post('teams/{team}/logo', [LogoController::class, 'uploadTeamLogo']);
+        Route::get('opponents', [LogoController::class, 'opponents']);
+        Route::post('opponents', [LogoController::class, 'storeOpponent']);
+        Route::post('opponents/{opponent}/logo', [LogoController::class, 'uploadOpponentLogo']);
+
+        Route::get('calendar', [CalendarController::class, 'show']);
+        Route::post('calendar/reset', [CalendarController::class, 'reset']);
     });
 });

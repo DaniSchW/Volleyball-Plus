@@ -4,9 +4,18 @@ namespace Tests\Feature\Tenancy;
 
 use App\Enums\InvitationKind;
 use App\Enums\TeamRole;
+use App\Models\CalendarFeed;
+use App\Models\Event;
+use App\Models\EventInvitee;
+use App\Models\EventResponse;
+use App\Models\EventResponseLog;
+use App\Models\EventSeries;
+use App\Models\EventTeam;
 use App\Models\Invitation;
 use App\Models\InvitationUse;
 use App\Models\MinorPermission;
+use App\Models\Notice;
+use App\Models\Opponent;
 use App\Models\Person;
 use App\Models\PersonAccount;
 use App\Models\StoredFile;
@@ -28,6 +37,8 @@ class ModelIsolationTest extends TestCase
     private const MODELS = [
         Team::class, TenantMember::class, Person::class, PersonAccount::class, MinorPermission::class,
         TeamMembership::class, Invitation::class, InvitationUse::class, StoredFile::class,
+        Event::class, EventSeries::class, EventTeam::class, EventInvitee::class, EventResponse::class,
+        EventResponseLog::class, Opponent::class, Notice::class, CalendarFeed::class,
     ];
 
     public function test_every_tenant_model_is_listed_here(): void
@@ -58,6 +69,21 @@ class ModelIsolationTest extends TestCase
             ]);
             InvitationUse::create(['invitation_id' => $invitation->id, 'tenant_member_id' => $member->id, 'person_id' => $person->id]);
             StoredFile::create(['storage_key' => 'k', 'mime_type' => 'image/webp', 'size_bytes' => 1, 'purpose' => 'avatar']);
+            $series = EventSeries::create([
+                'team_id' => $team->id, 'title' => 'Training', 'weekdays' => [2], 'starts_on' => '2026-11-03',
+                'start_time' => '19:30:00', 'end_time' => '21:30:00',
+            ]);
+            $event = Event::create([
+                'type' => 'training', 'title' => 'Training', 'starts_at' => '2026-11-03 18:30:00', 'ends_at' => '2026-11-03 20:30:00',
+                'series_id' => $series->id,
+            ]);
+            EventTeam::create(['event_id' => $event->id, 'team_id' => $team->id]);
+            EventInvitee::query()->firstOrCreate(['event_id' => $event->id, 'person_id' => $person->id]);
+            EventResponse::create(['event_id' => $event->id, 'person_id' => $person->id, 'status' => 'yes', 'responded_at' => now()]);
+            EventResponseLog::create(['event_id' => $event->id, 'person_id' => $person->id, 'new_status' => 'yes']);
+            Opponent::create(['name' => 'TSV Gegner']);
+            Notice::create(['scope' => 'tenant', 'title' => 'Info', 'visible_from' => now(), 'visible_until' => now()->addDay()]);
+            CalendarFeed::create(['tenant_member_id' => $member->id, 'token_hash' => hash('sha256', 'c'), 'token_encrypted' => 'c']);
         });
 
         $this->inTenant($a, function () {

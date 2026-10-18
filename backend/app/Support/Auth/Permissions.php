@@ -2,8 +2,10 @@
 
 namespace App\Support\Auth;
 
+use App\Enums\EventScope;
 use App\Enums\PersonRelation;
 use App\Enums\TeamRole;
+use App\Models\Event;
 use App\Models\Person;
 use App\Models\PersonAccount;
 use App\Models\Team;
@@ -240,5 +242,45 @@ class Permissions
         }
 
         return $this->isAdmin($member) || $this->isTrainerOfPerson($member, $person);
+    }
+
+    // ---- events ----
+
+    /** Create and manage events of a team: admins, trainers and organizers. */
+    public function canManageEventsOf(TenantMember $member, Team $team): bool
+    {
+        return $this->canInviteToTeam($member, $team);
+    }
+
+    /**
+     * Department-wide events only by admins; team events by anybody who
+     * manages events of one of its teams.
+     */
+    public function canManageEvent(TenantMember $member, Event $event): bool
+    {
+        if ($this->isAdmin($member)) {
+            return true;
+        }
+        if ($event->scope === EventScope::Tenant) {
+            return false;
+        }
+
+        return $event->teams->contains(fn (Team $team) => $this->canManageEventsOf($member, $team));
+    }
+
+    /**
+     * Accept/decline for a person: for oneself, as parent for the child, or
+     * as a child when the parents allow it.
+     */
+    public function canRespondFor(TenantMember $member, Person $person): bool
+    {
+        if (! $this->actsFor($member, $person)) {
+            return false;
+        }
+        if ($this->isGuardianOf($member, $person) || ! $person->hasGuardians()) {
+            return true;
+        }
+
+        return (bool) $person->minorPermission?->can_rsvp;
     }
 }

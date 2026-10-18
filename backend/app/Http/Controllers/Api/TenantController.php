@@ -17,6 +17,7 @@ class TenantController extends Controller
 
         return response()->json(['data' => [
             'slug' => $tenant->slug,
+            'logo_url' => $tenant->logo_file_id ? '/api/v1/t/'.$tenant->slug.'/logo' : null,
             'name' => $tenant->name,
             'default_locale' => $tenant->default_locale,
         ]]);

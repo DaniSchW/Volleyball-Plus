@@ -6,10 +6,10 @@ Voraussetzungen: PHP 8.5 (mindestens 8.3) mit `pdo_mysql`, `openssl`, `mbstring`
 
 Alle Einstellungen im **KAS** (Technische Verwaltung):
 
-1. **Domain**: PHP-Version 8.5 wählen und das kostenlose Let's-Encrypt-Zertifikat (SSL-Schutz) aktivieren. Das Ziel der Domain bleibt ihr eigener Ordner (z. B. `/volleyorga.de/`).
+1. **Subdomain**: unter *Domain → Subdomains* die Subdomain `app.volleyorga.de` anlegen. Als Ziel einen eigenen, leeren Ordner wählen (z. B. `/app.volleyorga.de/`, **nicht** innerhalb des Ordners der Hauptdomain), PHP-Version 8.5 einstellen und das kostenlose Let's-Encrypt-Zertifikat (SSL-Schutz) für die Subdomain aktivieren. Das Zertifikat der Hauptdomain gilt nicht automatisch für die Subdomain.
 2. **Datenbank**: unter *Datenbanken* eine MySQL-Datenbank anlegen; Server ist in der Regel `localhost`.
-3. **Hochladen**: die ZIP-Datei in den Ordner der Domain laden und **dort entpacken** – fertig, nichts verschieben (Schritt 3 unten). Dann den Einrichtungsassistenten im Browser aufrufen.
-4. **Cronjob**: unter *Tools → Cronjobs* einen Cronjob anlegen, im Feld *Log / Path* die geheime Adresse von der Abschlussseite des Assistenten eintragen (`https://volleyorga.de/cron/<token>`) und das kürzeste angebotene Intervall wählen. ALL-INKL ruft dabei eine Webadresse auf – genau dafür ist diese Adresse da. Falls das Paket keine Cronjobs enthält, lassen sie sich im Mitgliederbereich als Option dazubuchen.
+3. **Hochladen**: die ZIP-Datei in den Ordner der Domain laden und **dort entpacken** – fertig, nichts verschieben (Schritt 3 unten), also in den Ordner der Subdomain. Dann den Einrichtungsassistenten im Browser aufrufen.
+4. **Cronjob**: unter *Tools → Cronjobs* einen Cronjob anlegen, im Feld *Log / Path* die geheime Adresse von der Abschlussseite des Assistenten eintragen (`https://app.volleyorga.de/cron/<token>`) und das kürzeste angebotene Intervall wählen. ALL-INKL ruft dabei eine Webadresse auf – genau dafür ist diese Adresse da. Falls das Paket keine Cronjobs enthält, lassen sie sich im Mitgliederbereich als Option dazubuchen.
 
 > Die Menüpunkte im KAS können sich ändern; maßgeblich ist die [Anleitung von ALL-INKL zu Cronjobs](https://all-inkl.com/en/support/tutorials/kas/tools/cronjobs/setup_479.html).
 
@@ -31,27 +31,27 @@ Im Kundenmenü des Hosters eine MySQL-Datenbank mit Benutzer anlegen (Zeichensat
 
 ## 3. Hochladen per FTP
 
-1. `volleyorga.zip` in den Ordner laden, auf den die Domain zeigt (ihr Hauptordner), und **dort entpacken** – z. B. mit dem Entpacken-Befehl des FTP-Programms oder des Dateimanagers beim Hoster. Alternativ vorher am PC entpacken und den Inhalt (`.htaccess`, `backend/`, `INSTALLATION.md`) hochladen; die versteckte Datei `.htaccess` muss dabei mitkommen.
+1. `volleyorga.zip` in den Ordner laden, auf den die (Sub-)Domain zeigt (bei `app.volleyorga.de` z. B. `/app.volleyorga.de/`), und **dort entpacken** – z. B. mit dem Entpacken-Befehl des FTP-Programms oder des Dateimanagers beim Hoster. Alternativ vorher am PC entpacken und den Inhalt (`.htaccess`, `backend/`, `INSTALLATION.md`) hochladen; die versteckte Datei `.htaccess` muss dabei mitkommen.
 2. Andere Dateien im Hauptordner (z. B. eine Platzhalter-`index.html` des Hosters) stören nicht – die `.htaccess` leitet alles in die App.
    > Wer mag, kann stattdessen das Startverzeichnis der Domain direkt auf `backend/public` setzen; die `.htaccess` im Hauptordner wird dann einfach nicht benutzt.
 3. Für die Ordner `backend/storage` (mit allen Unterordnern) und `backend/bootstrap/cache` im FTP-Programm Schreibrechte für PHP setzen (meist `755`, falls das nicht reicht `775`).
 
 ## 4. Einrichtung im Browser
 
-1. `https://volleyorga.de` aufrufen – die App leitet automatisch zum Einrichtungsassistenten (`/install`).
+1. `https://app.volleyorga.de` aufrufen – die App leitet automatisch zum Einrichtungsassistenten (`/install`).
 2. Der Assistent prüft die Voraussetzungen (HTTPS, PHP-Version, Erweiterungen, Schreibrechte). Rot markierte Punkte zuerst beheben.
 3. **Einrichtungscode:** Der Assistent legt die Datei `backend/storage/app/setup-code.txt` an. Diese per FTP öffnen und den Code eintragen. So kann niemand Fremdes eine frisch hochgeladene Installation übernehmen.
 4. Adresse, Datenbank, Mailversand (Standard: PHP `mail()`, optional SMTP), die erste Abteilung und **dein Admin-Konto** (Name, E-Mail) eintragen und **Jetzt einrichten** klicken.
 5. Der Assistent legt die Tabellen und die Abteilung an und schreibt `backend/.env` (inklusive App-Schlüssel und Cron-Token). Danach ist er nicht mehr erreichbar.
    > Kann PHP die Datei `backend/.env` nicht schreiben, zeigt der Assistent ihren Inhalt an. Dann diesen Text als `.env` speichern, per FTP nach `backend/` hochladen und `backend/storage/app/setup-code.txt` löschen.
 
-6. Über **Zur Anmeldung** auf der Abschlussseite (oder `https://volleyorga.de/<kürzel>/login`) deine E-Mail-Adresse eingeben und den Anmeldelink aus dem Postfach öffnen. Danach legst du Teams an und verteilst Einladungslinks – andere Wege in die App gibt es nicht.
+6. Über **Zur Anmeldung** auf der Abschlussseite (oder `https://app.volleyorga.de/<kürzel>/login`) deine E-Mail-Adresse eingeben und den Anmeldelink aus dem Postfach öffnen. Danach legst du Teams an und verteilst Einladungslinks – andere Wege in die App gibt es nicht.
 
 ## 5. Cronjob
 
 Die Abschlussseite des Assistenten zeigt beides an:
 
-- **Webadresse** `https://volleyorga.de/cron/<token>` – für Hoster, deren Cronjobs eine URL aufrufen (z. B. ALL-INKL), oder einen externen Dienst wie cron-job.org. Die Adresse geheim halten.
+- **Webadresse** `https://app.volleyorga.de/cron/<token>` – für Hoster, deren Cronjobs eine URL aufrufen (z. B. ALL-INKL), oder einen externen Dienst wie cron-job.org. Die Adresse geheim halten.
 - **oder Befehl** `php …/backend/artisan schedule:run` – für Hoster, deren Cronjobs Befehle ausführen.
 
 Ideal ist ein Aufruf jede Minute. Seltener (z. B. alle 5 Minuten) funktioniert auch – Mails und Erinnerungen gehen dann entsprechend verzögert raus, tägliche Aufgaben laufen trotzdem zuverlässig.

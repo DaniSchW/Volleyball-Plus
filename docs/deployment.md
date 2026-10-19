@@ -6,18 +6,24 @@ Voraussetzungen: PHP 8.5 (mindestens 8.3) mit `pdo_mysql`, `openssl`, `mbstring`
 
 Alle Einstellungen im **KAS** (Technische Verwaltung):
 
-1. **Domain**: beim Bearbeiten der Domain als Ziel den Ordner `…/volleyball-plus/backend/public` eintragen, PHP-Version 8.5 wählen und das kostenlose Let's-Encrypt-Zertifikat (SSL-Schutz) aktivieren.
+1. **Domain**: PHP-Version 8.5 wählen und das kostenlose Let's-Encrypt-Zertifikat (SSL-Schutz) aktivieren. Das Ziel der Domain bleibt ihr eigener Ordner (z. B. `/volleyball.example.de/`).
 2. **Datenbank**: unter *Datenbanken* eine MySQL-Datenbank anlegen; Server ist in der Regel `localhost`.
-3. **Hochladen** per FTP (Schritte 1–4 unten), dann den Einrichtungsassistenten im Browser aufrufen.
+3. **Hochladen**: die ZIP-Datei in den Ordner der Domain laden und **dort entpacken** – fertig, nichts verschieben (Schritt 3 unten). Dann den Einrichtungsassistenten im Browser aufrufen.
 4. **Cronjob**: unter *Tools → Cronjobs* einen Cronjob anlegen, im Feld *Log / Path* die geheime Adresse von der Abschlussseite des Assistenten eintragen (`https://deine-domain.de/cron/<token>`) und das kürzeste angebotene Intervall wählen. ALL-INKL ruft dabei eine Webadresse auf – genau dafür ist diese Adresse da. Falls das Paket keine Cronjobs enthält, lassen sie sich im Mitgliederbereich als Option dazubuchen.
 
 > Die Menüpunkte im KAS können sich ändern; maßgeblich ist die [Anleitung von ALL-INKL zu Cronjobs](https://all-inkl.com/en/support/tutorials/kas/tools/cronjobs/setup_479.html).
 
 ## 1. Paket holen
 
-Jeder Push auf `main` baut in GitHub Actions ein fertiges Paket: Repository → *Actions* → letzter Lauf von **CI** → Artefakt **volleyball-plus** herunterladen und entpacken.
+Jeder Push auf `main` baut in GitHub Actions ein fertiges Paket: Repository → *Actions* → letzter Lauf von **CI** → Artefakt **volleyball-plus** herunterladen. (GitHub packt das Artefakt noch einmal in eine ZIP-Datei; darin liegt `volleyball-plus.zip`.)
 
-Das Paket enthält `backend/` inklusive aller PHP-Abhängigkeiten und der fertig gebauten App. Auf dem Server muss nichts gebaut werden.
+`volleyball-plus.zip` enthält ohne zusätzlichen Oberordner:
+
+- `.htaccess` – leitet jeden Aufruf nach `backend/public` weiter (und HTTP auf HTTPS), sodass `.env`, `vendor/`, `storage/` usw. nie aus dem Netz erreichbar sind,
+- `backend/` inklusive aller PHP-Abhängigkeiten und der fertig gebauten App,
+- `INSTALLATION.md` – diese Anleitung (wird ebenfalls nicht ausgeliefert).
+
+Auf dem Server muss nichts gebaut oder verschoben werden.
 
 ## 2. Datenbank anlegen
 
@@ -25,9 +31,9 @@ Im Kundenmenü des Hosters eine MySQL-Datenbank mit Benutzer anlegen (Zeichensat
 
 ## 3. Hochladen per FTP
 
-1. Inhalt des Pakets in einen Ordner auf dem Webspace laden, z. B. `volleyball-plus/`.
-2. **Startverzeichnis der Domain** (Document Root) im Kundenmenü auf `volleyball-plus/backend/public` setzen.
-   > Geht das beim Hoster nicht: Domain auf `volleyball-plus/` zeigen lassen und die mitgelieferte Datei `htaccess-root.txt` dort als `.htaccess` speichern. Sie leitet alle Aufrufe nach `backend/public` weiter, sodass `.env`, `vendor/` und `storage/` nie erreichbar sind.
+1. `volleyball-plus.zip` in den Ordner laden, auf den die Domain zeigt (ihr Hauptordner), und **dort entpacken** – z. B. mit dem Entpacken-Befehl des FTP-Programms oder des Dateimanagers beim Hoster. Alternativ vorher am PC entpacken und den Inhalt (`.htaccess`, `backend/`, `INSTALLATION.md`) hochladen; die versteckte Datei `.htaccess` muss dabei mitkommen.
+2. Andere Dateien im Hauptordner (z. B. eine Platzhalter-`index.html` des Hosters) stören nicht – die `.htaccess` leitet alles in die App.
+   > Wer mag, kann stattdessen das Startverzeichnis der Domain direkt auf `backend/public` setzen; die `.htaccess` im Hauptordner wird dann einfach nicht benutzt.
 3. Für die Ordner `backend/storage` (mit allen Unterordnern) und `backend/bootstrap/cache` im FTP-Programm Schreibrechte für PHP setzen (meist `755`, falls das nicht reicht `775`).
 
 ## 4. Einrichtung im Browser
@@ -58,7 +64,7 @@ Der Cronjob verschickt Mails und Push-Nachrichten (auch die Erinnerungen vor Ant
 
 ## 6. Updates
 
-Neues Paket herunterladen und per FTP über die bestehenden Dateien hochladen. `backend/.env` und die Inhalte von `backend/storage/` sind nicht im Paket und bleiben erhalten. Neue Datenbank-Änderungen spielt der Cronjob innerhalb einer Minute automatisch ein.
+Neues Paket im Hauptordner der Domain über die bestehenden Dateien entpacken (bzw. hochladen) und vorhandene Dateien überschreiben lassen. `backend/.env` und die Inhalte von `backend/storage/` sind nicht im Paket und bleiben erhalten. Neue Datenbank-Änderungen spielt der Cronjob innerhalb einer Minute automatisch ein.
 
 ## Hinweise
 

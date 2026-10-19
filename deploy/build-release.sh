@@ -2,11 +2,14 @@
 # Builds an upload-ready package in release/volleyball-plus.zip:
 # backend with production dependencies + the built PWA in backend/public.
 # Nothing needs to be built on the hosting itself.
+#
+# The zip has no wrapping folder: unzipped into the folder the domain points
+# to it yields .htaccess (forwards everything to backend/public) + backend/.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 OUT="$ROOT/release"
-STAGE="$OUT/volleyball-plus"
+STAGE="$OUT/package"
 
 rm -rf "$OUT"
 mkdir -p "$STAGE"
@@ -26,8 +29,9 @@ tar -C "$ROOT/backend" \
 # If composer had to clone packages from source, drop their git history.
 find "$STAGE/backend/vendor" -name .git -type d -prune -exec rm -rf {} +
 
-cp "$ROOT/deploy/htaccess-root" "$STAGE/htaccess-root.txt"
+cp "$ROOT/deploy/htaccess-root" "$STAGE/.htaccess"
 cp "$ROOT/docs/deployment.md" "$STAGE/INSTALLATION.md"
 
-(cd "$OUT" && zip -qr volleyball-plus.zip volleyball-plus)
+# Zip the contents (incl. .htaccess), not the folder.
+(cd "$STAGE" && zip -qr "$OUT/volleyball-plus.zip" .)
 echo "Package: $OUT/volleyball-plus.zip"

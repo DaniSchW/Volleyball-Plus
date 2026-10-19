@@ -1,10 +1,12 @@
-# Only needed if the hosting does NOT allow setting the document root to
-# backend/public. Upload this file as ".htaccess" into the folder the domain
-# points to (the one containing backend/). It forwards every request into
-# backend/public, so .env, vendor/, storage/ etc. are never reachable.
+# Lies in the folder the domain points to (next to backend/). Forwards every
+# request into backend/public, so .env, vendor/, storage/ etc. are never
+# reachable – the package can be unzipped directly into the domain folder.
 
 <IfModule mod_rewrite.c>
     RewriteEngine On
+
+    # Certificate checks (Let's Encrypt) stay reachable over plain HTTP.
+    RewriteRule ^\.well-known/acme-challenge/ - [L]
 
     # Never serve anything over plain HTTP.
     RewriteCond %{HTTPS} !=on

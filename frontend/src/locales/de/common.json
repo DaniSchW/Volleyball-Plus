@@ -718,5 +718,50 @@
     "deleteOwnHint": "Dein Profil wird mit Teams, Zu-/Absagen, Aufgaben, Abstimmungen, Lizenz und Bild endgültig gelöscht, und du verlierst den Zugang zu dieser Abteilung. Chat-Nachrichten bleiben ohne Namen stehen, Kassenbuchungen ohne Bezug zu dir. Das lässt sich nicht rückgängig machen.",
     "confirmLabel": "Zum Bestätigen „{{name}}“ eingeben",
     "deleteNow": "Endgültig löschen"
+  },
+  "start": {
+    "tagline": "Team-Organisation für Volleyballabteilungen – Termine, Zu- und Absagen, Chat, Kasse und mehr.",
+    "yourClubs": "Deine Vereine",
+    "noClub": "Du bist noch in keinem Verein. Lass dich von deinem Trainer per Link einladen.",
+    "logout": "Abmelden ({{email}})",
+    "loginIntro": "Melde dich mit deiner E-Mail-Adresse an. Du bekommst einen Link, mit dem du zu deinem Verein kommst.",
+    "registerHint": "Euer Verein nutzt VolleyOrga noch nicht?",
+    "register": "Verein registrieren"
+  },
+  "register": {
+    "title": "Verein registrieren",
+    "intro": "Meldet die Volleyballabteilung eures Vereins an. Nach unserer Freigabe bekommst du als Admin eine E-Mail und legst eure Teams an.",
+    "club": "Verein",
+    "clubName": "Name",
+    "clubNamePlaceholder": "z. B. SSV Ulm 1846 Volleyball",
+    "slug": "Kürzel für eure Adresse",
+    "slugHint": "Eure Adresse: {{url}} – nur Kleinbuchstaben, Ziffern und Bindestriche.",
+    "city": "Ort",
+    "you": "Du als Admin",
+    "youHint": "Du verwaltest den Verein in der App und lädst Trainer und Spieler ein.",
+    "firstName": "Vorname",
+    "lastName": "Nachname",
+    "gender": "Geschlecht",
+    "note": "Nachricht an uns (optional)",
+    "accept": "Ich bin berechtigt, die Volleyballabteilung dieses Vereins anzumelden, und bin mit der Speicherung der Angaben einverstanden.",
+    "submit": "Registrierung absenden"
+  },
+  "platform": {
+    "title": "Plattform-Verwaltung",
+    "hint": "Neue Vereine freigeben, Vereine sperren oder wieder aktivieren. Inhalte der Vereine sind hier nicht sichtbar.",
+    "status": {
+      "pending": "Warten auf Freigabe",
+      "active": "Aktiv",
+      "suspended": "Gesperrt"
+    },
+    "none": "Keine.",
+    "counts": "{{members}} Mitglieder, {{teams}} Teams",
+    "registeredAt": "angemeldet {{date}}",
+    "approve": "Freigeben",
+    "reject": "Ablehnen",
+    "rejectConfirm": "Anmeldung von „{{name}}“ ablehnen und löschen?",
+    "suspend": "Sperren",
+    "suspendConfirm": "„{{name}}“ sperren? Niemand aus dem Verein kann sich dann anmelden; die Daten bleiben erhalten.",
+    "reactivate": "Wieder aktivieren"
   }
 }

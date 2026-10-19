@@ -8,7 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * A department (Abteilung) – the root of all tenant-scoped data.
+ * A club's volleyball department – the root of all tenant-scoped data.
+ * Many clubs share one installation; each is fully separate.
  */
 class Tenant extends Model
 {
@@ -22,6 +23,17 @@ class Tenant extends Model
         'season_start_month',
         'mail_from_name',
         'status',
+        'city',
+        'contact_name',
+        'contact_email',
+        'registration_note',
+        'approved_at',
+    ];
+
+    /** Paths at the top level of the app that can never be a club's slug. */
+    public const RESERVED_SLUGS = [
+        'api', 'app', 'assets', 'cron', 'icons', 'install', 'login', 'logout', 'platform', 'plattform',
+        'register', 'registrieren', 'admin', 'sw', 'manifest', 'workbox', 'favicon', 'robots', 'up', 'health',
     ];
 
     protected $attributes = [
@@ -36,6 +48,7 @@ class Tenant extends Model
         return [
             'status' => TenantStatus::class,
             'season_start_month' => 'integer',
+            'approved_at' => 'datetime',
         ];
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Tenant;
 use App\Support\Install\Installation;
 use App\Support\Install\Installer;
 use App\Support\Install\InstallException;
@@ -10,6 +11,7 @@ use App\Support\Install\SetupCode;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 
 /**
  * Browser-based installation for hosting without SSH. Runs without session
@@ -99,7 +101,7 @@ class InstallController extends Controller
             'smtp_username' => ['nullable', 'string', 'max:255'],
             'smtp_password' => ['nullable', 'string', 'max:255'],
             'tenant_name' => ['required', 'string', 'max:120'],
-            'tenant_slug' => ['required', 'regex:/^[a-z0-9]+(-[a-z0-9]+)*$/', 'min:2', 'max:64'],
+            'tenant_slug' => ['required', 'regex:/^[a-z0-9]+(-[a-z0-9]+)*$/', 'min:2', 'max:64', Rule::notIn(Tenant::RESERVED_SLUGS)],
             'admin_first_name' => ['required', 'string', 'max:80'],
             'admin_last_name' => ['required', 'string', 'max:80'],
             'admin_gender' => ['required', 'in:male,female'],

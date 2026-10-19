@@ -40,7 +40,7 @@ class Installer
 
         $tenant = Tenant::on(self::CONNECTION)->firstOrCreate(
             ['slug' => $input['tenant_slug']],
-            ['name' => $input['tenant_name'], 'mail_from_name' => $input['tenant_name']],
+            ['name' => $input['tenant_name'], 'mail_from_name' => $input['tenant_name'], 'approved_at' => now()],
         );
         $this->createAdmin($tenant, $input);
 
@@ -74,6 +74,8 @@ class Installer
     {
         app(TenantContext::class)->run($tenant, function () use ($input) {
             $account = Account::on(self::CONNECTION)->firstOrCreate(['email' => mb_strtolower(trim($input['admin_email']))]);
+            // Whoever installs runs the platform: approves clubs that register.
+            $account->forceFill(['is_platform_admin' => true])->save();
 
             $member = TenantMember::on(self::CONNECTION)->firstOrCreate(['account_id' => $account->id]);
             $member->forceFill(['is_admin' => true, 'status' => MemberStatus::Active])->save();
@@ -182,7 +184,7 @@ class Installer
             'MAIL_USERNAME' => $smtp ? ($input['smtp_username'] ?? null) : null,
             'MAIL_PASSWORD' => $smtp ? ($input['smtp_password'] ?? null) : null,
             'MAIL_FROM_ADDRESS' => $input['mail_from_address'],
-            'MAIL_FROM_NAME' => $input['tenant_name'],
+            'MAIL_FROM_NAME' => 'VolleyOrga',
         ];
     }
 }

@@ -93,7 +93,24 @@ export interface TenantInfo {
 export interface Account {
   email: string;
   locale: string;
+  /** Runs the platform: approves clubs that register. */
+  is_platform_admin: boolean;
   tenants: { slug: string; name: string }[];
+}
+
+export interface PlatformClub {
+  id: string;
+  slug: string;
+  name: string;
+  city: string | null;
+  status: 'pending' | 'active' | 'suspended';
+  contact_name: string | null;
+  contact_email: string | null;
+  note: string | null;
+  created_at: string | null;
+  approved_at: string | null;
+  members: number;
+  teams: number;
 }
 
 export type TeamRole = 'player' | 'trainer' | 'organizer';

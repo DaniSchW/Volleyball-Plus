@@ -18,6 +18,7 @@ use App\Http\Controllers\Api\MemberController;
 use App\Http\Controllers\Api\NoticeController;
 use App\Http\Controllers\Api\NotificationPreferenceController;
 use App\Http\Controllers\Api\PersonController;
+use App\Http\Controllers\Api\PlatformController;
 use App\Http\Controllers\Api\PollController;
 use App\Http\Controllers\Api\PushController;
 use App\Http\Controllers\Api\StatisticsController;
@@ -32,6 +33,9 @@ Route::get('health', HealthController::class);
 
 // Magic link redemption (login or invitation confirmation).
 Route::post('auth/consume', [AuthController::class, 'consume'])->middleware('throttle:20,1');
+// Start page: login without a club in the URL, registration of a new club.
+Route::post('auth/login', [AuthController::class, 'requestGlobalLink']);
+Route::post('clubs/register', [PlatformController::class, 'register'])->middleware('throttle:5,60');
 
 // The account across departments.
 Route::middleware('auth')->group(function () {
@@ -40,6 +44,12 @@ Route::middleware('auth')->group(function () {
     Route::patch('me', [AccountController::class, 'update']);
     Route::get('me/sessions', [AccountController::class, 'sessions']);
     Route::delete('me/sessions/{session}', [AccountController::class, 'revokeSession']);
+
+    Route::get('platform/clubs', [PlatformController::class, 'index']);
+    Route::post('platform/clubs/{id}/approve', [PlatformController::class, 'approve']);
+    Route::post('platform/clubs/{id}/suspend', [PlatformController::class, 'suspend']);
+    Route::post('platform/clubs/{id}/reactivate', [PlatformController::class, 'reactivate']);
+    Route::delete('platform/clubs/{id}', [PlatformController::class, 'reject']);
 
     Route::get('push/key', [PushController::class, 'key']);
     Route::post('push/subscriptions', [PushController::class, 'subscribe']);

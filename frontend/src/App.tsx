@@ -20,12 +20,18 @@ import { StatsPage } from './pages/StatsPage';
 import { TasksPage } from './pages/TasksPage';
 import { NoTenantPage } from './pages/NoTenantPage';
 import { PersonPage } from './pages/PersonPage';
+import { PlatformPage } from './pages/PlatformPage';
+import { RegisterPage } from './pages/RegisterPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { TeamPage } from './pages/TeamPage';
 import { TeamsPage } from './pages/TeamsPage';
 
 export const routes: RouteObject[] = [
   { path: '/', element: <NoTenantPage /> },
+  // Platform level: login from the start page, club registration, platform admins.
+  { path: '/login/confirm', element: <LoginConfirmPage /> },
+  { path: '/register', element: <RegisterPage /> },
+  { path: '/platform', element: <PlatformPage /> },
   // Public pages of a department.
   { path: '/:tenant/login', element: <LoginPage /> },
   { path: '/:tenant/login/confirm', element: <LoginConfirmPage /> },

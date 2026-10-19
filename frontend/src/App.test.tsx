@@ -678,3 +678,66 @@ describe('halls for players', () => {
     expect(screen.queryByRole('button', { name: 'Bearbeiten' })).not.toBeInTheDocument();
   });
 });
+
+describe('platform', () => {
+  it('logs in from the start page', async () => {
+    let sent: Record<string, unknown> = {};
+    mockApi({
+      'GET /me': { status: 401, body: { message: 'Unauthenticated.' } },
+      'POST /auth/login': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { status: 202, body: { message: 'ok' } };
+      },
+    });
+    renderAt('/');
+
+    fireEvent.change(await screen.findByLabelText('E-Mail-Adresse'), { target: { value: 'max@example.org' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Anmeldelink schicken' }));
+    await waitFor(() => expect(sent).toEqual({ email: 'max@example.org' }));
+    expect(screen.getByRole('link', { name: 'Verein registrieren' })).toHaveAttribute('href', '/register');
+  });
+
+  it('registers a club with a suggested short name', async () => {
+    let sent: Record<string, unknown> = {};
+    mockApi({
+      'POST /clubs/register': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { status: 201, body: { message: 'Danke! Wir prüfen die Anmeldung.' } };
+      },
+    });
+    renderAt('/register');
+
+    fireEvent.change(await screen.findByLabelText('Name'), { target: { value: 'TSV Blaubeuren Volleyball' } });
+    expect(screen.getByLabelText('Kürzel für eure Adresse')).toHaveValue('tsv-blaubeuren-volleyball');
+    fireEvent.change(screen.getByLabelText('Vorname'), { target: { value: 'Bea' } });
+    fireEvent.change(screen.getByLabelText('Nachname'), { target: { value: 'Blau' } });
+    fireEvent.change(screen.getByLabelText('E-Mail-Adresse'), { target: { value: 'bea@example.org' } });
+    fireEvent.click(screen.getByRole('checkbox'));
+    fireEvent.click(screen.getByRole('button', { name: 'Registrierung absenden' }));
+
+    await waitFor(() => expect(sent).toMatchObject({ club_name: 'TSV Blaubeuren Volleyball', slug: 'tsv-blaubeuren-volleyball', first_name: 'Bea', accept: true }));
+    expect(await screen.findByText('Danke! Wir prüfen die Anmeldung.')).toBeInTheDocument();
+  });
+
+  it('lets platform admins approve a club', async () => {
+    let approved = false;
+    const club = {
+      id: 'c1', slug: 'tsv-blaubeuren', name: 'TSV Blaubeuren Volleyball', city: 'Blaubeuren', status: 'pending', contact_name: 'Bea Blau',
+      contact_email: 'bea@example.org', note: null, created_at: '2026-10-19T10:00:00Z', approved_at: null, members: 1, teams: 0,
+    };
+    mockApi({
+      'GET /me': { body: { data: { ...ACCOUNT.data, is_platform_admin: true } } },
+      'GET /platform/clubs': { body: { data: [club] } },
+      'POST /platform/clubs/c1/approve': () => {
+        approved = true;
+        return { body: { data: [{ ...club, status: 'active' }] } };
+      },
+    });
+    renderAt('/platform');
+
+    expect(await screen.findByText('Warten auf Freigabe (1)')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Freigeben' }));
+    await waitFor(() => expect(approved).toBe(true));
+    expect(await screen.findByText('Aktiv (1)')).toBeInTheDocument();
+  });
+});

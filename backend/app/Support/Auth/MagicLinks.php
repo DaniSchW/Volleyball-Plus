@@ -45,9 +45,35 @@ class MagicLinks
     }
 
     /**
+     * Login without a club in the URL (start page): one link for the whole
+     * account – afterwards the start page lists the account's clubs. Only
+     * for members of an active club and platform admins.
+     */
+    public function sendGlobalLogin(string $email, Request $request): void
+    {
+        $email = mb_strtolower(trim($email));
+        $account = Account::query()->where('email', $email)->first();
+        if ($account === null || (! $account->is_platform_admin && ! $this->hasActiveClub($account))) {
+            return;
+        }
+
+        $this->send(null, $email, AuthTokenPurpose::Login, null, $request, $account->locale);
+    }
+
+    public function hasActiveClub(Account $account): bool
+    {
+        return TenantMember::withoutGlobalScopes()
+            ->join('tenants', 'tenants.id', '=', 'tenant_members.tenant_id')
+            ->where('tenant_members.account_id', $account->id)
+            ->where('tenant_members.status', MemberStatus::Active)
+            ->where('tenants.status', 'active')
+            ->exists();
+    }
+
+    /**
      * @param  array<string, mixed>|null  $payload
      */
-    public function send(Tenant $tenant, string $email, AuthTokenPurpose $purpose, ?array $payload, Request $request, ?string $locale = null): void
+    public function send(?Tenant $tenant, string $email, AuthTokenPurpose $purpose, ?array $payload, Request $request, ?string $locale = null): void
     {
         $token = Str::random(48);
 
@@ -55,14 +81,14 @@ class MagicLinks
             'email' => mb_strtolower(trim($email)),
             'token_hash' => hash('sha256', $token),
             'purpose' => $purpose,
-            'tenant_id' => $tenant->id,
+            'tenant_id' => $tenant?->id,
             'payload' => $payload,
             'expires_at' => Carbon::now()->addMinutes(config('security.magic_link_minutes')),
             'requested_ip' => $request->ip(),
             'user_agent' => Str::limit((string) $request->userAgent(), 250, ''),
         ]);
 
-        $url = rtrim((string) config('app.url'), '/').'/'.$tenant->slug.'/login/confirm?token='.$token;
+        $url = rtrim((string) config('app.url'), '/').($tenant ? '/'.$tenant->slug : '').'/login/confirm?token='.$token;
 
         // Sent right away (not queued): the person is waiting for it.
         Mail::to($email)->locale($locale ?? app()->getLocale())->send(new MagicLinkMail($tenant, $url, $purpose));

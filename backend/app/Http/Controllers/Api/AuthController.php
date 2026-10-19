@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\AuthTokenPurpose;
 use App\Enums\MemberStatus;
+use App\Enums\TenantStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Account;
 use App\Models\TenantMember;
@@ -42,6 +43,21 @@ class AuthController extends Controller
         return response()->json(['message' => __('auth.link_sent')], 202);
     }
 
+    /** Login from the start page (no club in the URL); same answer either way. */
+    public function requestGlobalLink(Request $request): JsonResponse
+    {
+        $data = $request->validate(['email' => ['required', 'email', 'max:255']]);
+        $email = mb_strtolower(trim($data['email']));
+
+        $limited = ! RateLimiter::attempt('login-email:'.sha1($email), 5, fn () => true, 15 * 60)
+            || ! RateLimiter::attempt('login-ip:'.$request->ip(), 20, fn () => true, 15 * 60);
+        abort_if($limited, 429, __('auth.too_many_requests'));
+
+        $this->links->sendGlobalLogin($email, $request);
+
+        return response()->json(['message' => __('auth.link_sent')], 202);
+    }
+
     /**
      * Redeems a magic link (login or invitation confirmation) and starts the
      * session.
@@ -54,6 +70,15 @@ class AuthController extends Controller
         abort_if($token === null, 422, __('auth.link_invalid'));
 
         $tenant = $token->tenant;
+
+        if ($tenant === null) {
+            $account = Account::query()->where('email', $token->email)->first();
+            abort_if($account === null || (! $account->is_platform_admin && ! $this->links->hasActiveClub($account)), 422, __('auth.link_invalid'));
+            [, $plain] = $this->sessions->start($account, $request);
+
+            return response()->json(['data' => ['tenant' => null]])->withCookie($this->sessions->cookie($plain));
+        }
+        abort_if($tenant->status !== TenantStatus::Active, 422, __('auth.link_invalid'));
 
         $account = $this->tenants->run($tenant, function () use ($token, $joins, $permissions) {
             if ($token->purpose === AuthTokenPurpose::Join) {

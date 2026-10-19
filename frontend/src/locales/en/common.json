@@ -718,5 +718,50 @@
     "deleteOwnHint": "Your profile is deleted for good with teams, replies, tasks, votes, licence and picture, and you lose access to this department. Chat messages stay without your name, cash bookings without reference to you. This cannot be undone.",
     "confirmLabel": "Type “{{name}}” to confirm",
     "deleteNow": "Delete for good"
+  },
+  "start": {
+    "tagline": "Team organisation for volleyball departments – events, replies, chat, cash and more.",
+    "yourClubs": "Your clubs",
+    "noClub": "You are not in a club yet. Ask your trainer for an invitation link.",
+    "logout": "Log out ({{email}})",
+    "loginIntro": "Log in with your e-mail address. You will get a link that takes you to your club.",
+    "registerHint": "Your club does not use VolleyOrga yet?",
+    "register": "Register club"
+  },
+  "register": {
+    "title": "Register club",
+    "intro": "Register your club's volleyball department. After our approval you get an e-mail as admin and add your teams.",
+    "club": "Club",
+    "clubName": "Name",
+    "clubNamePlaceholder": "e.g. SSV Ulm 1846 Volleyball",
+    "slug": "Short name for your address",
+    "slugHint": "Your address: {{url}} – only lower-case letters, digits and hyphens.",
+    "city": "City",
+    "you": "You as admin",
+    "youHint": "You manage the club in the app and invite trainers and players.",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "gender": "Gender",
+    "note": "Message to us (optional)",
+    "accept": "I am entitled to register this club's volleyball department and agree to the storage of the data.",
+    "submit": "Send registration"
+  },
+  "platform": {
+    "title": "Platform administration",
+    "hint": "Approve new clubs, suspend or reactivate clubs. The clubs' contents are not visible here.",
+    "status": {
+      "pending": "Waiting for approval",
+      "active": "Active",
+      "suspended": "Suspended"
+    },
+    "none": "None.",
+    "counts": "{{members}} members, {{teams}} teams",
+    "registeredAt": "registered {{date}}",
+    "approve": "Approve",
+    "reject": "Reject",
+    "rejectConfirm": "Reject and delete the registration of “{{name}}”?",
+    "suspend": "Suspend",
+    "suspendConfirm": "Suspend “{{name}}”? Nobody from the club can log in then; the data is kept.",
+    "reactivate": "Reactivate"
   }
 }

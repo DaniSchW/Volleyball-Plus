@@ -1,6 +1,6 @@
 # Claude Code Anweisung: Team-Organisation-App (Volleyball)
 
-Diese Datei ist eine vollständige fachliche Spezifikation für den Bau einer eigenen Team-Organisation-Web-App (PWA) für eine Volleyball-Abteilung. Sie dient als direkte Arbeitsanweisung für Claude Code. Die App ist eine persönliche Alternative zu SpielerPlus und Spond und wird ausschließlich für die eigene Abteilung gebaut, nicht als allgemeines Produkt.
+Diese Datei ist eine vollständige fachliche Spezifikation für den Bau einer eigenen Team-Organisation-Web-App (PWA) für eine Volleyball-Abteilung. Sie dient als direkte Arbeitsanweisung für Claude Code. Die App ist eine Alternative zu SpielerPlus und Spond. Sie läuft als Plattform (VolleyOrga, `app.volleyorga.de`) für viele Vereine: Jeder Verein nutzt sie für seine Volleyballabteilung – nicht für einen Verein mit mehreren Sportabteilungen.
 
 ## Sprachen
 
@@ -18,7 +18,7 @@ Die App wird von Anfang an zweisprachig gebaut: Deutsch und Englisch als Startsp
 
 - Ein Dach-Account bildet die gesamte Abteilung ab. Darunter existieren mehrere Teams.
 - Ein Spielerprofil ist zentral und kann gleichzeitig mehreren Teams zugeordnet werden (Beispiel: ein Spieler ist gleichzeitig in der U16 männlich, der U18 männlich und der niedrigsten Herrenmannschaft aktiv).
-- Die App wird ausschließlich für die eigene Volleyball-Abteilung gebaut, nicht als allgemeines Produkt für beliebige Vereine.
+- Viele Vereine teilen sich eine Installation; jeder Verein ist ein eigener Mandant (seine Volleyballabteilung). Vereine registrieren sich selbst, der Betreiber der Plattform gibt sie frei. Die Adresse eines Vereins ist `app.volleyorga.de/<kürzel>`.
 
 ## Anmeldung / Login
 

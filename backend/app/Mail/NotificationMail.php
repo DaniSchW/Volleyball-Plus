@@ -18,7 +18,7 @@ class NotificationMail extends Mailable
     use Queueable;
 
     public function __construct(
-        public Tenant $tenant,
+        public ?Tenant $tenant,
         public string $title,
         public string $body,
         public ?string $url = null,
@@ -28,7 +28,7 @@ class NotificationMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            from: new Address((string) config('mail.from.address'), $this->tenant->mail_from_name ?: $this->tenant->name),
+            from: new Address((string) config('mail.from.address'), $this->tenant?->mail_from_name ?: ($this->tenant?->name ?? (string) config('app.name'))),
             subject: $this->title,
         );
     }
@@ -38,7 +38,7 @@ class NotificationMail extends Mailable
         return new Content(
             text: 'mail.notification',
             with: [
-                'footer' => $this->settingsHint
+                'footer' => $this->settingsHint && $this->tenant !== null
                     ? __('notifications.mail.footer', ['url' => rtrim((string) config('app.url'), '/').'/'.$this->tenant->slug.'/profile'])
                     : null,
             ],

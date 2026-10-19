@@ -15,9 +15,9 @@ Alle Einstellungen im **KAS** (Technische Verwaltung):
 
 ## 1. Paket holen
 
-Jeder Push auf `main` baut in GitHub Actions ein fertiges Paket: Repository → *Actions* → letzter Lauf von **CI** → Artefakt **volleyball-plus** herunterladen. (GitHub packt das Artefakt noch einmal in eine ZIP-Datei; darin liegt `volleyball-plus.zip`.)
+Jeder Push auf `main` baut in GitHub Actions ein fertiges Paket: Repository → *Actions* → letzter Lauf von **CI** → Artefakt **volleyorg** herunterladen. (GitHub packt das Artefakt noch einmal in eine ZIP-Datei; darin liegt `volleyorg.zip`.)
 
-`volleyball-plus.zip` enthält ohne zusätzlichen Oberordner:
+`volleyorg.zip` enthält ohne zusätzlichen Oberordner:
 
 - `.htaccess` – leitet jeden Aufruf nach `backend/public` weiter (und HTTP auf HTTPS), sodass `.env`, `vendor/`, `storage/` usw. nie aus dem Netz erreichbar sind,
 - `backend/` inklusive aller PHP-Abhängigkeiten und der fertig gebauten App,
@@ -31,7 +31,7 @@ Im Kundenmenü des Hosters eine MySQL-Datenbank mit Benutzer anlegen (Zeichensat
 
 ## 3. Hochladen per FTP
 
-1. `volleyball-plus.zip` in den Ordner laden, auf den die Domain zeigt (ihr Hauptordner), und **dort entpacken** – z. B. mit dem Entpacken-Befehl des FTP-Programms oder des Dateimanagers beim Hoster. Alternativ vorher am PC entpacken und den Inhalt (`.htaccess`, `backend/`, `INSTALLATION.md`) hochladen; die versteckte Datei `.htaccess` muss dabei mitkommen.
+1. `volleyorg.zip` in den Ordner laden, auf den die Domain zeigt (ihr Hauptordner), und **dort entpacken** – z. B. mit dem Entpacken-Befehl des FTP-Programms oder des Dateimanagers beim Hoster. Alternativ vorher am PC entpacken und den Inhalt (`.htaccess`, `backend/`, `INSTALLATION.md`) hochladen; die versteckte Datei `.htaccess` muss dabei mitkommen.
 2. Andere Dateien im Hauptordner (z. B. eine Platzhalter-`index.html` des Hosters) stören nicht – die `.htaccess` leitet alles in die App.
    > Wer mag, kann stattdessen das Startverzeichnis der Domain direkt auf `backend/public` setzen; die `.htaccess` im Hauptordner wird dann einfach nicht benutzt.
 3. Für die Ordner `backend/storage` (mit allen Unterordnern) und `backend/bootstrap/cache` im FTP-Programm Schreibrechte für PHP setzen (meist `755`, falls das nicht reicht `775`).

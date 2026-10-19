@@ -83,7 +83,7 @@ class InstallerTest extends TestCase
     {
         $this->get('/install')
             ->assertOk()
-            ->assertSee('Volleyball Plus einrichten')
+            ->assertSee('VolleyOrg einrichten')
             ->assertSee('PHP-Erweiterung pdo_mysql')
             ->assertSee('backend/storage/app/setup-code.txt');
 

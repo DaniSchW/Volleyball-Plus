@@ -16,7 +16,7 @@ const ENTRY = 'app.html';
 /** Dev server: answer app navigations (e.g. /ssv-ulm/cash) with app.html. */
 function spaFallback(): Plugin {
   return {
-    name: 'volleyball-plus:spa-fallback',
+    name: 'volleyorg:spa-fallback',
     configureServer(server) {
       server.middlewares.use((req, _res, next) => {
         const url = req.url ?? '/';
@@ -40,8 +40,8 @@ export default defineConfig({
       filename: 'sw.ts',
       includeAssets: ['icons/apple-touch-icon.png', 'icons/favicon.svg'],
       manifest: {
-        name: 'Volleyball Plus',
-        short_name: 'Volleyball+',
+        name: 'VolleyOrg',
+        short_name: 'VolleyOrg',
         description: 'Team-Organisation für Volleyball-Abteilungen',
         lang: 'de',
         start_url: '/',

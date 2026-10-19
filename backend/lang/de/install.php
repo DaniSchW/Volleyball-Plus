@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'title' => 'Einrichtung – Volleyball Plus',
-    'heading' => 'Volleyball Plus einrichten',
+    'title' => 'Einrichtung – VolleyOrg',
+    'heading' => 'VolleyOrg einrichten',
     'intro' => 'Dieser Assistent richtet die App ohne SSH ein: Er prüft den Server, legt die Datenbanktabellen und die erste Abteilung an und schreibt die Konfiguration.',
     'requirements' => 'Voraussetzungen',
     'required' => 'erforderlich',
@@ -71,7 +71,7 @@ return [
         'migration' => 'Die Datenbanktabellen konnten nicht angelegt werden: :message',
     ],
     'done' => [
-        'title' => 'Eingerichtet – Volleyball Plus',
+        'title' => 'Eingerichtet – VolleyOrg',
         'heading' => 'Fertig eingerichtet',
         'env_written' => 'Die Konfiguration wurde gespeichert. Die Datei mit dem Einrichtungscode wurde gelöscht.',
         'env_manual' => 'Die Datei backend/.env konnte nicht geschrieben werden. Speichere den folgenden Inhalt als backend/.env und lade sie per FTP hoch. Erst danach ist die App aktiv. Lösche anschließend die Datei backend/storage/app/setup-code.txt.',

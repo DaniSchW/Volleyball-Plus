@@ -28,7 +28,7 @@ self.addEventListener('push', (event) => {
   try {
     payload = event.data?.json() as PushPayload;
   } catch {
-    payload = { title: event.data?.text() ?? 'Volleyball Plus' };
+    payload = { title: event.data?.text() ?? 'VolleyOrg' };
   }
 
   event.waitUntil(

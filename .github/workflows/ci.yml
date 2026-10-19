@@ -78,6 +78,6 @@ jobs:
       - run: ./deploy/build-release.sh
       - uses: actions/upload-artifact@v4
         with:
-          name: volleyball-plus
-          path: release/volleyball-plus.zip
+          name: volleyorg
+          path: release/volleyorg.zip
           retention-days: 30

@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "danischw/volleyball-plus",
+    "name": "danischw/volleyorg",
     "type": "project",
-    "description": "Volleyball Plus – Team-Organisation für Volleyball-Abteilungen (API)",
+    "description": "VolleyOrg – Team-Organisation für Volleyball-Abteilungen (API)",
     "keywords": [
         "volleyball",
         "team",

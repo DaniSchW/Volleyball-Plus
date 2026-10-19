@@ -32,11 +32,11 @@ class WebRoutesTest extends TestCase
 
     public function test_app_paths_are_served_by_the_pwa(): void
     {
-        file_put_contents($this->entry, '<!doctype html><title>Volleyball Plus</title>');
+        file_put_contents($this->entry, '<!doctype html><title>VolleyOrg</title>');
 
         $this->get('/ssv-ulm/termine')
             ->assertOk()
-            ->assertSee('Volleyball Plus', false)
+            ->assertSee('VolleyOrg', false)
             ->assertHeader('Content-Type', 'text/html; charset=UTF-8');
     }
 

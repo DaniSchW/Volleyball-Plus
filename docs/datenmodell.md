@@ -1,4 +1,4 @@
-# Datenmodell – Volleyball Plus
+# Datenmodell – VolleyOrg
 
 MySQL 8, InnoDB, `utf8mb4_unicode_ci` (E-Mail-Vergleiche damit automatisch ohne Groß-/Kleinschreibung). Laravel-Migrationen. Konventionen:
 

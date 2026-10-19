@@ -16,11 +16,11 @@ class IcsCalendar
      */
     public function render(string $calendarName, Collection $events, string $appUrl, string $tenantSlug): string
     {
-        $host = parse_url($appUrl, PHP_URL_HOST) ?: 'volleyball-plus';
+        $host = parse_url($appUrl, PHP_URL_HOST) ?: 'volleyorg';
         $lines = [
             'BEGIN:VCALENDAR',
             'VERSION:2.0',
-            'PRODID:-//Volleyball Plus//DE',
+            'PRODID:-//VolleyOrg//DE',
             'CALSCALE:GREGORIAN',
             'METHOD:PUBLISH',
             'X-WR-CALNAME:'.$this->escape($calendarName),

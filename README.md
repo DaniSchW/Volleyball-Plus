@@ -1,4 +1,4 @@
-# Volleyball Plus
+# VolleyOrg
 
 Team-Organisations-App (PWA) für Volleyball-Abteilungen – eigene Alternative zu SpielerPlus und Spond.
 Mandantenfähig, zweisprachig (DE/EN), Login per Magic Link.

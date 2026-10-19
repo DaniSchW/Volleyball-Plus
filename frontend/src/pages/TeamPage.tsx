@@ -55,7 +55,7 @@ export function TeamPage() {
               type="button"
               aria-selected={tab === value}
               onClick={() => setTab(value)}
-              className={`min-h-10 shrink-0 grow whitespace-nowrap rounded-md px-3 text-sm ${tab === value ? 'bg-white font-medium shadow-sm' : 'text-slate-600'}`}
+              className={`min-h-10 shrink-0 grow whitespace-nowrap rounded-md px-3 text-sm ${tab === value ? 'bg-brand-700 font-medium text-white shadow-sm' : 'text-slate-600'}`}
             >
               {t(`team.tabs.${value}`)}
             </button>
@@ -350,20 +350,6 @@ function Settings({ team, settings }: { team: Team; settings: TeamSettings }) {
         <div className="grid grid-cols-2 gap-3">
           <Field label={t('settings.minParticipants')} type="number" min={1} max={99} inputMode="numeric" value={form.min_participants ?? ''} onChange={(e) => set('min_participants', num(e.target.value))} />
           <Field label={t('settings.maxParticipants')} type="number" min={1} max={99} inputMode="numeric" value={form.default_max_participants ?? ''} onChange={(e) => set('default_max_participants', num(e.target.value))} />
-        </div>
-      </Card>
-
-      <Card title={t('settings.crossNomination')}>
-        <div className="space-y-3">
-          <Select label={t('settings.crossNominationMode')} value={form.cross_nomination_mode} onChange={(e) => set('cross_nomination_mode', e.target.value as TeamSettings['cross_nomination_mode'])}>
-            {(['immediately', 'hours_before_start', 'after_rsvp_deadline'] as const).map((mode) => (
-              <option key={mode} value={mode}>{t(`settings.crossModes.${mode}`)}</option>
-            ))}
-          </Select>
-          {form.cross_nomination_mode === 'hours_before_start' && (
-            <Field label={t('settings.crossNominationHours')} type="number" min={1} max={336} inputMode="numeric" required value={form.cross_nomination_hours ?? ''} onChange={(e) => set('cross_nomination_hours', num(e.target.value))} />
-          )}
-          <p className="text-xs text-slate-500">{t('settings.crossNominationHint')}</p>
         </div>
       </Card>
 

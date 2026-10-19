@@ -62,6 +62,32 @@ class InvitationController extends Controller
         return response()->json(['data' => $this->present($invitation)], 201);
     }
 
+    /** Admins: open links into the club (no team), e.g. for further admins. */
+    public function departmentIndex(CurrentMember $current): JsonResponse
+    {
+        abort_unless($this->permissions->isAdmin($current->get()), 403);
+
+        $links = Invitation::query()->where('kind', InvitationKind::Department)->whereNull('revoked_at')->latest()->get()
+            ->filter(fn (Invitation $i) => $i->isUsable());
+
+        return response()->json(['data' => $links->map(fn (Invitation $i) => $this->present($i))->values()->all()]);
+    }
+
+    public function storeDepartment(Request $request, CurrentMember $current): JsonResponse
+    {
+        $member = $current->get();
+        abort_unless($this->permissions->isAdmin($member), 403);
+        $data = $request->validate([
+            'admin' => ['required', 'boolean'],
+            'expires_in_days' => ['nullable', 'integer', 'between:1,365'],
+            'max_uses' => ['nullable', 'integer', 'between:1,500'],
+        ]);
+
+        $invitation = $this->invitations->createDepartmentLink($data['admin'], $member, $data['expires_in_days'] ?? null, $data['max_uses'] ?? null);
+
+        return response()->json(['data' => $this->present($invitation)], 201);
+    }
+
     /**
      * Single-use link for an existing profile: a parent for a child, the
      * child's own login, or an adult whose profile was created by a trainer.
@@ -107,6 +133,7 @@ class InvitationController extends Controller
             'relation' => $invitation->relation === PersonRelation::Own ? 'self' : $invitation->relation?->value,
             'person' => $invitation->person ? $invitation->person->first_name.' '.$invitation->person->last_name : null,
             'allows_child' => $invitation->kind === InvitationKind::Team && $invitation->role === TeamRole::Player,
+            'grants_admin' => $invitation->grants_admin,
         ]]);
     }
 
@@ -119,6 +146,8 @@ class InvitationController extends Controller
 
         $loggedIn = $request->user() !== null;
         $isTeam = $invitation->kind === InvitationKind::Team;
+        // Joining the club without a team needs an own profile just like a team link.
+        $needsProfile = $isTeam || $invitation->kind === InvitationKind::Department;
         $child = $isTeam && $request->input('mode') === 'child';
         $latestChildBirthday = Carbon::today()->subDay()->toDateString();
         $earliestChildBirthday = Carbon::today()->subYears(18)->addDay()->toDateString();
@@ -127,9 +156,9 @@ class InvitationController extends Controller
             'email' => [$loggedIn ? 'prohibited' : 'required', 'email', 'max:255'],
             'mode' => [$isTeam ? 'required' : 'prohibited', Rule::in($invitation->role === TeamRole::Player ? ['self', 'child'] : ['self'])],
             // Own profile – only used if the account has none in this department yet.
-            'first_name' => [$isTeam && ! $child && ! $loggedIn ? 'required' : 'nullable', 'string', 'max:80'],
-            'last_name' => [$isTeam && ! $child && ! $loggedIn ? 'required' : 'nullable', 'string', 'max:80'],
-            'gender' => [$isTeam && ! $child && ! $loggedIn ? 'required' : 'nullable', Rule::enum(Gender::class)],
+            'first_name' => [$needsProfile && ! $child && ! $loggedIn ? 'required' : 'nullable', 'string', 'max:80'],
+            'last_name' => [$needsProfile && ! $child && ! $loggedIn ? 'required' : 'nullable', 'string', 'max:80'],
+            'gender' => [$needsProfile && ! $child && ! $loggedIn ? 'required' : 'nullable', Rule::enum(Gender::class)],
             'birthday' => ['nullable', 'date', 'before:today'],
             'child_first_name' => [$child ? 'required' : 'prohibited', 'string', 'max:80'],
             'child_last_name' => [$child ? 'required' : 'prohibited', 'string', 'max:80'],
@@ -139,7 +168,7 @@ class InvitationController extends Controller
             'child_birthday.after_or_equal' => __('invitations.child_must_be_minor'),
         ]);
 
-        if ($loggedIn && $isTeam && ! $child && $this->needsOwnProfileData($request)) {
+        if ($loggedIn && $needsProfile && ! $child && $this->needsOwnProfileData($request)) {
             $request->validate([
                 'first_name' => ['required'], 'last_name' => ['required'], 'gender' => ['required'],
             ]);
@@ -170,6 +199,7 @@ class InvitationController extends Controller
             'kind' => $invitation->kind->value,
             'role' => $invitation->role?->value,
             'relation' => $invitation->relation === PersonRelation::Own ? 'self' : $invitation->relation?->value,
+            'grants_admin' => $invitation->grants_admin,
             'url' => $invitation->url(),
             'use_count' => $invitation->use_count,
             'max_uses' => $invitation->max_uses,

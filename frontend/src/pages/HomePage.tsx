@@ -18,7 +18,7 @@ export function HomePage() {
       <OpenPolls />
       <section aria-labelledby="upcoming-heading">
         <div className="mb-3 flex items-center justify-between gap-3">
-          <h2 id="upcoming-heading" className="text-lg font-semibold">{t('home.upcoming')}</h2>
+          <h2 id="upcoming-heading" className="flex items-center gap-2 text-lg font-semibold"><span aria-hidden="true" className="h-5 w-1.5 rounded-full bg-ball-400" />{t('home.upcoming')}</h2>
           {canCreateEvents(me.data) && (
             <Link to={`/${slug}/events/new`} className="rounded-lg bg-brand-700 px-3 py-2 text-sm font-medium text-white">
               {t('events.create')}

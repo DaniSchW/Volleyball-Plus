@@ -27,7 +27,7 @@ class EventService
 {
     public const EVENT_FIELDS = [
         'type', 'response_mode', 'title', 'description', 'starts_at', 'ends_at', 'meet_at', 'rsvp_deadline',
-        'location_name', 'address', 'max_participants', 'position_limits', 'opponent_id', 'is_home', 'cross_nomination_opens_at', 'training_group_id',
+        'location_name', 'address', 'max_participants', 'min_participants', 'guests_allowed', 'position_limits', 'opponent_id', 'is_home', 'cross_nomination_opens_at', 'training_group_id',
     ];
 
     public function __construct(
@@ -120,6 +120,8 @@ class EventService
                 ? (int) CarbonImmutable::parse($attributes['rsvp_deadline'])->diffInMinutes($start, true) : null,
             'max_participants' => $attributes['max_participants'] ?? null,
             'position_limits' => $attributes['position_limits'] ?? null,
+            'min_participants' => $attributes['min_participants'] ?? null,
+            'guests_allowed' => $attributes['guests_allowed'] ?? true,
             'training_group_id' => $attributes['training_group_id'] ?? null,
         ])->save();
 
@@ -202,6 +204,8 @@ class EventService
                 ? (int) CarbonImmutable::parse($attributes['rsvp_deadline'])->diffInMinutes($start, true) : null,
             'max_participants' => $attributes['max_participants'] ?? null,
             'position_limits' => $attributes['position_limits'] ?? null,
+            'min_participants' => $attributes['min_participants'] ?? null,
+            'guests_allowed' => $attributes['guests_allowed'] ?? true,
             'training_group_id' => $attributes['training_group_id'] ?? null,
             'created_by' => $creator->id,
         ]);
@@ -243,6 +247,7 @@ class EventService
         if ($type !== EventType::Training) {
             $attributes['cross_nomination_opens_at'] = null;
             $attributes['training_group_id'] = null;
+            $attributes['min_participants'] = null;
         }
         if (array_key_exists('title', $attributes) || $existing === null) {
             $opponent = $type === EventType::Match && ! empty($attributes['opponent_id'] ?? $existing?->opponent_id)

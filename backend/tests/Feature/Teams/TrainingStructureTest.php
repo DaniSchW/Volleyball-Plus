@@ -223,42 +223,28 @@ class TrainingStructureTest extends TestCase
         $this->assertArrayNotHasKey($paul, $this->invited($training['id']));
     }
 
-    public function test_guests_accept_only_from_the_team_default_or_event_override(): void
+    public function test_guests_accept_if_allowed_with_the_same_deadline(): void
     {
-        $this->loginAs($this->trainer)->patchJson($this->url('teams/'.$this->teams['H1']->id), [
-            'cross_nomination_mode' => 'hours_before_start', 'cross_nomination_hours' => 24,
-        ])->assertOk();
         $this->nominate($this->paul, 'H2')->assertCreated();
-        $training = $this->training(['max_participants' => 2]);
+        $training = $this->training(['max_participants' => 2, 'rsvp_deadline' => '2026-10-21T12:00']);
 
         $my = $this->loginAs($this->paul)->getJson($this->url('events'))->json('data.0.my.0');
-        $this->assertSame([true, false, '2026-10-21T17:30:00Z'], [$my['is_guest'], $my['can_accept'], $my['guests_open_at']]);
-        $this->respond($this->paul, $training['id'], 'yes')->assertUnprocessable()->assertJsonValidationErrors('status');
-        $this->respond($this->paul, $training['id'], 'no')->assertOk();
-        $this->respond($this->max, $training['id'], 'yes')->assertOk();
-
-        Carbon::setTestNow('2026-10-21 18:00:00');
+        $this->assertSame([true, true], [$my['is_guest'], $my['can_accept']]);
         $this->respond($this->paul, $training['id'], 'yes')->assertOk();
+        $this->respond($this->max, $training['id'], 'yes')->assertOk();
         // Full now (Max + Paul): the trainer cannot accept anymore.
         $this->respond($this->trainer, $training['id'], 'yes')->assertUnprocessable();
 
-        // Per event: guests may accept right away.
-        Carbon::setTestNow('2026-10-19 10:00:00');
-        $other = $this->training(['cross_nomination_opens_at' => '2026-10-19T08:00']);
-        $this->respond($this->paul, $other['id'], 'yes')->assertOk();
-    }
-
-    public function test_guests_fill_up_after_the_reply_deadline(): void
-    {
-        $this->loginAs($this->trainer)->patchJson($this->url('teams/'.$this->teams['H1']->id), ['cross_nomination_mode' => 'after_rsvp_deadline'])->assertOk();
-        $this->nominate($this->paul, 'H2')->assertCreated();
-        $training = $this->training(['rsvp_deadline' => '2026-10-21T12:00']);
-
-        $this->respond($this->paul, $training['id'], 'yes')->assertUnprocessable();
-
+        // Same deadline as for the team's players.
         Carbon::setTestNow('2026-10-21 12:00:00');
-        $this->respond($this->max, $training['id'], 'yes')->assertUnprocessable()->assertJsonPath('errors.status.0', 'Die Rückmeldefrist ist abgelaufen.');
-        $this->respond($this->paul, $training['id'], 'yes')->assertOk();
+        $this->respond($this->paul, $training['id'], 'no')->assertUnprocessable()->assertJsonPath('errors.status.0', 'Die Rückmeldefrist ist abgelaufen.');
+
+        // Per training: guests may not accept, but may decline.
+        Carbon::setTestNow('2026-10-19 10:00:00');
+        $closed = $this->training(['guests_allowed' => false]);
+        $this->respond($this->paul, $closed['id'], 'yes')->assertUnprocessable()->assertJsonPath('errors.status.0', 'Gäste können für dieses Training nicht zusagen.');
+        $this->respond($this->paul, $closed['id'], 'no')->assertOk();
+        $this->assertFalse($this->loginAs($this->paul)->getJson($this->url("events/{$closed['id']}"))->json('data.my.0.can_accept'));
     }
 
     public function test_training_groups_have_their_own_trainings(): void

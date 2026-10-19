@@ -15,7 +15,8 @@
     "halls": "Hallen",
     "profile": "Profil",
     "members": "Mitglieder & Admins",
-    "language": "Sprache"
+    "language": "Sprache",
+    "activity": "Änderungsprotokoll"
   },
   "home": {
     "infoArea": "Infos",
@@ -90,7 +91,9 @@
     "childFirstName": "Vorname des Kindes",
     "parentEmail": "Deine E-Mail-Adresse (Elternteil)",
     "emailHint": "Wir schicken dir einen Link, um die Adresse zu bestätigen.",
-    "submit": "Beitreten"
+    "submit": "Beitreten",
+    "adminHeading": "Einladung als Admin – {{tenant}}",
+    "departmentHeading": "Einladung zu {{tenant}}"
   },
   "teams": {
     "none": "Noch keine Teams.",
@@ -130,7 +133,9 @@
     "searchNone": "Niemand gefunden.",
     "noTeam": "noch in keinem Team",
     "alreadyIn": "Schon im Team",
-    "playsHigher": "Spielt in {{team}} – trainiert hier mit, aber keine Spieltage"
+    "playsHigher": "Spielt in {{team}} – trainiert hier mit, aber keine Spieltage",
+    "addMe": "Mich selbst zuordnen",
+    "addMeHint": "Du spielst oder trainierst selbst in diesem Team?"
   },
   "invitations": {
     "active": "Aktive Einladungslinks",
@@ -160,16 +165,7 @@
     "reasonsVisible": "Mitspieler sehen Absagegründe",
     "training": "Training",
     "minParticipants": "Mindestteilnehmer",
-    "maxParticipants": "Teilnehmermaximum",
-    "crossNomination": "Quernominierung",
-    "crossNominationMode": "Gäste aus anderen Teams dürfen zusagen …",
-    "crossModes": {
-      "immediately": "sofort",
-      "hours_before_start": "ab X Stunden vor Trainingsbeginn",
-      "after_rsvp_deadline": "nach Ablauf der Rückmeldefrist"
-    },
-    "crossNominationHours": "Stunden vor Beginn",
-    "crossNominationHint": "Standard für alle Trainings – im einzelnen Termin änderbar."
+    "maxParticipants": "Teilnehmermaximum"
   },
   "profile": {
     "standard": "Profil",
@@ -235,7 +231,14 @@
   "members": {
     "admin": "Admin",
     "active": "Aktiv",
-    "tenantLogo": "Logo der Abteilung"
+    "tenantLogo": "Logo der Abteilung",
+    "invite": "Per Link einladen",
+    "inviteHint": "Für weitere Admins oder Helfer ohne Team. Alle Admins haben dieselben Rechte – auch Admins entfernen und Daten löschen. Spieler ladet ihr am besten über den Einladungslink des Teams ein.",
+    "inviteAsAdmin": "Als Admin einladen (Link gilt für 1 Person, 14 Tage)",
+    "linkAdmin": "Einladung als Admin",
+    "linkMember": "Einladung in den Verein",
+    "usesOf": "{{used}} von {{max}} genutzt",
+    "usesOpen": "{{used}}× genutzt"
   },
   "calendar": {
     "title": "Kalender-Abo",
@@ -343,7 +346,6 @@
     "restore": "Absage zurücknehmen",
     "endSeries": "Serie beenden",
     "endSeriesConfirm": "Alle kommenden Termine dieser Serie werden abgesagt. Fortfahren?",
-    "guestOpensAt": "Als Gast kannst du ab {{date}} zusagen.",
     "positions": "Zusagen nach Position",
     "positionUnknown": "ohne Position",
     "guest": "Gast",
@@ -351,8 +353,6 @@
     "trainingOptions": "Training",
     "trainingGroup": "Für",
     "wholeTeam": "ganzes Team",
-    "guestsFrom": "Gäste dürfen zusagen ab",
-    "guestsFromHint": "Leer = Standard aus den Team-Einstellungen (Quernominierung).",
     "helperHint": "Z. B. Vereinsfest oder Heimspieltag. Unten im Termin legst du danach die Aufgaben mit Plätzen an, für die sich Helfer eintragen.",
     "positionLimits": "Positions-Soll",
     "positionLimitsHint": "Höchstens so viele Zusagen je Position (leer = ohne Grenze). Wer auf der Hauptposition keinen Platz mehr bekommt, zählt für eine freie Nebenposition.",
@@ -360,7 +360,20 @@
     "positionFull": "voll",
     "acceptAs": "Zusagen als",
     "acceptAsAuto": "automatisch",
-    "acceptedAs": "Zugesagt als {{position}}"
+    "acceptedAs": "Zugesagt als {{position}}",
+    "deadlineHours": "Rückmeldefrist (Stunden vor Beginn)",
+    "deadlineAt": "Antworten bis {{date}}",
+    "minParticipants": "Trainingsminimum (Spieler)",
+    "minParticipantsHint": "Optional – leer = Wert aus den Team-Einstellungen. Darunter wird das Training gelb markiert.",
+    "guestsAllowed": "Gäste dürfen zusagen",
+    "guestsAllowedHint": "Quernominierte Spieler aus anderen Teams; es gilt dieselbe Rückmeldefrist wie für alle.",
+    "hallsOn": "Verfügbare Hallen am {{day}}",
+    "noHallsOn": "Für {{day}} sind keine Hallenzeiten eingetragen.",
+    "ownHallTime": "Eure Hallenzeit",
+    "hallFree": "frei",
+    "hallTaken": "belegt: {{teams}}",
+    "takeHall": "Übernehmen",
+    "guestsNotAllowed": "Gäste können für dieses Training nicht zusagen."
   },
   "notifications": {
     "title": "Benachrichtigungen",
@@ -763,5 +776,38 @@
     "suspend": "Sperren",
     "suspendConfirm": "„{{name}}“ sperren? Niemand aus dem Verein kann sich dann anmelden; die Daten bleiben erhalten.",
     "reactivate": "Wieder aktivieren"
+  },
+  "activity": {
+    "title": "Änderungsprotokoll",
+    "hint": "Was in den letzten 7 Tagen angelegt, geändert oder gelöscht wurde – ältere Einträge werden automatisch entfernt. Nur für Admins.",
+    "none": "Keine Änderungen in den letzten 7 Tagen.",
+    "actions": {
+      "created": "angelegt",
+      "updated": "geändert",
+      "deleted": "gelöscht"
+    },
+    "by": "von {{name}}",
+    "system": "automatisch (System)",
+    "deletedPerson": "gelöschte Person",
+    "types": {
+      "event": "Termin",
+      "event_series": "Terminreihe",
+      "team": "Team",
+      "team_membership": "Teamzuordnung",
+      "person": "Profil",
+      "cash_entry": "Kassenbuchung",
+      "cash_book": "Kasse",
+      "hall": "Halle",
+      "hall_slot": "Hallenzeit",
+      "hall_booking": "Hallenbelegung",
+      "poll": "Umfrage",
+      "task": "Aufgabe",
+      "notice": "Info",
+      "invitation": "Einladung",
+      "tenant_member": "Mitglied",
+      "chat": "Chat",
+      "league": "Liga",
+      "training_group": "Trainingsgruppe"
+    }
   }
 }

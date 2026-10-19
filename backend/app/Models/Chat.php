@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Activity\LogsActivity;
 use App\Support\Tenancy\BelongsToTenant;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
@@ -14,7 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Chat extends Model
 {
-    use BelongsToTenant, HasUlids;
+    use BelongsToTenant, HasUlids, LogsActivity;
 
     public const KIND_TEAM = 'team';
 
@@ -60,5 +61,10 @@ class Chat extends Model
     public function displayName(): string
     {
         return $this->kind === self::KIND_TEAM ? (string) $this->team?->name : (string) $this->name;
+    }
+
+    public function activityLabel(): string
+    {
+        return $this->displayName();
     }
 }

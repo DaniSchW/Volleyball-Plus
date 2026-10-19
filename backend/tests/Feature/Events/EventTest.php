@@ -226,6 +226,14 @@ class EventTest extends TestCase
         $this->respond($this->teammate, $event['id'], $this->personOf($this->teammate), 'yes')->assertJsonPath('data.below_minimum', false);
     }
 
+    public function test_training_with_its_own_minimum(): void
+    {
+        $this->loginAs($this->trainer)->patchJson("/api/v1/t/ssv-ulm/teams/{$this->team->id}", ['min_participants' => 2])->assertOk();
+        $event = $this->create($this->trainer, ['min_participants' => 1]);
+        $this->assertSame([1, 1], [$event['min_participants'], $event['own_min_participants']]);
+        $this->respond($this->player, $event['id'], $this->personOf($this->player), 'yes')->assertJsonPath('data.below_minimum', false);
+    }
+
     public function test_feed_pages_with_a_cursor(): void
     {
         foreach (range(1, 25) as $day) {

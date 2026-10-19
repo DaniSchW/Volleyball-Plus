@@ -6,7 +6,7 @@ return [
     'not_invited' => 'Diese Person ist zu dem Termin nicht eingeladen.',
     'deadline_passed' => 'Die Rückmeldefrist ist abgelaufen.',
     'reason_required' => 'Bitte gib einen Grund an.',
-    'guests_not_open' => 'Als Gast kannst du ab :at zusagen.',
+    'guests_not_allowed' => 'Gäste können für dieses Training nicht zusagen.',
     'position_full' => 'Für :positions sind alle Plätze vergeben.',
     'position_not_yours' => 'Diese Position ist im Profil nicht eingetragen.',
     'positions' => ['setter' => 'Zuspiel', 'opposite' => 'Diagonal', 'middle' => 'Mittelblock', 'outside' => 'Außenangriff', 'libero' => 'Libero', 'universal' => 'Universal'],

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Activity\LogsActivity;
 use App\Support\Tenancy\BelongsToTenant;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class HallSlot extends Model
 {
-    use BelongsToTenant, HasUlids;
+    use BelongsToTenant, HasUlids, LogsActivity;
 
     protected $fillable = ['hall_id', 'weekday', 'start_time', 'end_time', 'courts', 'valid_from', 'valid_until'];
 
@@ -34,5 +35,10 @@ class HallSlot extends Model
     public function hall(): BelongsTo
     {
         return $this->belongsTo(Hall::class);
+    }
+
+    public function activityLabel(): string
+    {
+        return ($this->hall?->name ?? '').' · '.substr((string) $this->start_time, 0, 5).'–'.substr((string) $this->end_time, 0, 5);
     }
 }

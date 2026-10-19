@@ -6,6 +6,7 @@ use App\Enums\EventScope;
 use App\Enums\EventStatus;
 use App\Enums\EventType;
 use App\Enums\ResponseMode;
+use App\Support\Activity\LogsActivity;
 use App\Support\Tenancy\BelongsToTenant;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
@@ -16,11 +17,11 @@ use Illuminate\Support\Carbon;
 
 class Event extends Model
 {
-    use BelongsToTenant, HasUlids;
+    use BelongsToTenant, HasUlids, LogsActivity;
 
     protected $fillable = [
         'type', 'response_mode', 'scope', 'title', 'description', 'starts_at', 'ends_at', 'meet_at',
-        'rsvp_deadline', 'location_name', 'address', 'max_participants', 'position_limits', 'series_id', 'series_exception',
+        'rsvp_deadline', 'location_name', 'address', 'max_participants', 'min_participants', 'guests_allowed', 'position_limits', 'series_id', 'series_exception',
         'opponent_id', 'is_home', 'status', 'created_by', 'cross_nomination_opens_at', 'training_group_id', 'import_key',
     ];
 
@@ -39,6 +40,8 @@ class Event extends Model
             'scope' => EventScope::class,
             'status' => EventStatus::class,
             'position_limits' => 'array',
+            'guests_allowed' => 'boolean',
+            'min_participants' => 'integer',
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
             'meet_at' => 'datetime',
@@ -131,5 +134,19 @@ class Event extends Model
         $address = trim((string) ($this->address ?: $this->location_name));
 
         return $address === '' ? null : 'https://www.google.com/maps/dir/?api=1&destination='.rawurlencode($address);
+    }
+
+    /** @var list<string> */
+    public array $activityIgnore = ['reminder_sent_at', 'task_reminder_sent_at'];
+
+    public function activityLabel(): string
+    {
+        return $this->title.' ('.$this->starts_at?->copy()->setTimezone($this->tenant?->timezone ?? 'Europe/Berlin')->format('d.m.Y H:i').')';
+    }
+
+    /** Dates generated from a series are logged as the series. */
+    public function shouldLogActivity(string $action): bool
+    {
+        return ! ($action === 'created' && $this->series_id !== null);
     }
 }

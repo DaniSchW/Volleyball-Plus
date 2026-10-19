@@ -6,6 +6,14 @@ import { useTenantSlug } from '../../lib/queries';
 import { RsvpControl } from './RsvpControl';
 
 /** Type marker: trophy for match days, nothing for trainings, calendar for other dates. */
+/** Colour per type of event: training, match, extra event, helper service. */
+export const TYPE_COLORS: Record<EventSummary['type'], { stripe: string; chip: string }> = {
+  training: { stripe: 'border-l-emerald-500', chip: 'bg-emerald-100 text-emerald-800' },
+  match: { stripe: 'border-l-orange-500', chip: 'bg-orange-100 text-orange-800' },
+  extra: { stripe: 'border-l-violet-500', chip: 'bg-violet-100 text-violet-800' },
+  helper: { stripe: 'border-l-amber-500', chip: 'bg-amber-100 text-amber-800' },
+};
+
 export function TypeIcon({ type }: { type: EventSummary['type'] }) {
   const { t } = useTranslation();
   if (type === 'training') return null;
@@ -24,13 +32,14 @@ export function EventCard({ event }: { event: EventSummary }) {
 
   return (
     <article
-      className={`rounded-xl border p-4 ${cancelled ? 'border-slate-200 bg-slate-100 opacity-70' : highlight ? 'border-amber-300 bg-amber-50' : 'border-slate-200 bg-white'}`}
+      className={`rounded-xl border border-l-4 p-4 shadow-sm ${TYPE_COLORS[event.type].stripe} ${cancelled ? 'border-slate-200 bg-slate-100 opacity-70' : highlight ? 'border-amber-300 bg-amber-50' : 'border-slate-200 bg-white'}`}
       aria-label={event.title}
     >
       <Link to={`/${slug}/events/${event.id}`} className="block">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-sm text-slate-500">
+            <p className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
+              <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${TYPE_COLORS[event.type].chip}`}>{t(`events.types.${event.type}`)}</span>
               {formatDay(event.starts_at)} · {formatTime(event.starts_at)}–{formatTime(event.ends_at)}
             </p>
             <h3 className={`flex items-center gap-2 text-base font-semibold ${cancelled ? 'line-through' : ''}`}>

@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { api, errorText, patch, type MemberRow } from '../lib/api';
+import { api, del, errorText, patch, post, type Invitation, type MemberRow } from '../lib/api';
 import { useTenant, useTenantPath, useTenantSlug } from '../lib/queries';
 import { LogoUpload } from '../components/LogoUpload';
-import { Card, Loading, Notice, PageTitle, Toggle } from '../components/ui';
+import { Button, Card, Loading, Notice, PageTitle, Toggle } from '../components/ui';
+import { ShareLink } from './TeamPage';
 
 /** Admins: who has a login and who is admin. */
 export function MembersPage() {
@@ -36,6 +37,7 @@ export function MembersPage() {
           void queryClient.invalidateQueries({ queryKey: ['tenant', slug] });
         }}
       />
+      <DepartmentInvitations />
       {update.isError && <Notice tone="error">{errorText(update.error, t('errors.generic'))}</Notice>}
       <Card>
         <ul className="divide-y divide-slate-100">
@@ -56,5 +58,44 @@ export function MembersPage() {
         </ul>
       </Card>
     </div>
+  );
+}
+
+/** Links into the club without a team – for further admins or helpers. */
+function DepartmentInvitations() {
+  const { t } = useTranslation();
+  const slug = useTenantSlug();
+  const tp = useTenantPath();
+  const queryClient = useQueryClient();
+  const key = ['department-invitations', slug];
+  const links = useQuery({ queryKey: key, queryFn: async () => (await api<{ data: Invitation[] }>(tp('department-invitations'))).data });
+  const [admin, setAdmin] = useState(true);
+  const refresh = () => void queryClient.invalidateQueries({ queryKey: key });
+  const create = useMutation({ mutationFn: () => post(tp('department-invitations'), { admin, max_uses: admin ? 1 : null, expires_in_days: 14 }), onSuccess: refresh });
+  const revoke = useMutation({ mutationFn: (id: string) => del(tp(`invitations/${id}`)), onSuccess: refresh });
+
+  return (
+    <Card title={t('members.invite')}>
+      <div className="space-y-3">
+        <p className="text-sm text-slate-600">{t('members.inviteHint')}</p>
+        <Toggle label={t('members.inviteAsAdmin')} checked={admin} onChange={setAdmin} />
+        <Button onClick={() => create.mutate()} disabled={create.isPending}>{t('invitations.createButton')}</Button>
+        {create.isError && <Notice tone="error">{errorText(create.error, t('errors.generic'))}</Notice>}
+        <ul className="divide-y divide-slate-100">
+          {links.data?.map((link) => (
+            <li key={link.id} className="py-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-sm font-medium">{link.grants_admin ? t('members.linkAdmin') : t('members.linkMember')}</span>
+                <button type="button" className="text-sm text-red-700" onClick={() => revoke.mutate(link.id)}>{t('invitations.revoke')}</button>
+              </div>
+              <p className="text-xs text-slate-500">
+                {link.max_uses ? t('members.usesOf', { used: link.use_count, max: link.max_uses }) : t('members.usesOpen', { used: link.use_count })}
+              </p>
+              <ShareLink url={link.url} title={link.grants_admin ? t('members.linkAdmin') : t('members.linkMember')} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    </Card>
   );
 }

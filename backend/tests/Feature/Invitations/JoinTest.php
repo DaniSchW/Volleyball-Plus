@@ -258,4 +258,30 @@ class JoinTest extends TestCase
         // The child can now use the app.
         $this->getJson('/api/v1/t/ssv-ulm/me')->assertOk();
     }
+
+    public function test_admins_invite_further_admins_into_the_club(): void
+    {
+        $admin = $this->member($this->tenant, 'ada@example.org', 'Ada', 'Admin', admin: true, gender: 'female');
+        $this->loginAs($this->trainer)->postJson('/api/v1/t/ssv-ulm/department-invitations', ['admin' => true])->assertForbidden();
+
+        $link = $this->loginAs($admin)->postJson('/api/v1/t/ssv-ulm/department-invitations', ['admin' => true, 'max_uses' => 1])->assertCreated()->json('data');
+        $this->assertTrue($link['grants_admin']);
+        $this->assertSame([$link['id']], array_column($this->loginAs($admin)->getJson('/api/v1/t/ssv-ulm/department-invitations')->json('data'), 'id'));
+        $token = substr($link['url'], strrpos($link['url'], '/') + 1);
+        $this->logout();
+
+        $this->getJson("/api/v1/t/ssv-ulm/invitations/{$token}")->assertOk()->assertJsonPath('data.kind', 'department')->assertJsonPath('data.grants_admin', true);
+        $this->postJson("/api/v1/t/ssv-ulm/invitations/{$token}/accept", ['email' => 'bernd@example.org'])->assertUnprocessable()->assertJsonValidationErrors(['first_name', 'gender']);
+        $this->postJson("/api/v1/t/ssv-ulm/invitations/{$token}/accept", [
+            'email' => 'bernd@example.org', 'first_name' => 'Bernd', 'last_name' => 'Boss', 'gender' => 'male',
+        ])->assertStatus(202);
+        $this->confirmMail()->assertOk();
+
+        $bernd = $this->inTenant($this->tenant, fn () => TenantMember::query()->whereHas('account', fn ($q) => $q->where('email', 'bernd@example.org'))->firstOrFail());
+        $this->assertTrue($bernd->is_admin);
+        // Same rights as every admin: e.g. take away the first admin's role.
+        $this->loginAs($bernd)->patchJson("/api/v1/t/ssv-ulm/members/{$admin->id}", ['is_admin' => false])->assertOk();
+        // The link was for one person.
+        $this->assertSame([], $this->loginAs($bernd)->getJson('/api/v1/t/ssv-ulm/department-invitations')->json('data'));
+    }
 }

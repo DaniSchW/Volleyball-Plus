@@ -33,6 +33,9 @@ export function JoinPage() {
       const inv = invitation.data!;
       const body: Record<string, unknown> = {};
       if (!loggedIn) body.email = form.email;
+      if (inv.kind === 'department') {
+        for (const key of ['first_name', 'last_name', 'gender', 'birthday']) if (form[key]) body[key] = form[key];
+      }
       if (inv.kind === 'team') {
         body.mode = mode;
         const keys = mode === 'child'
@@ -65,7 +68,9 @@ export function JoinPage() {
     accept.mutate();
   };
 
-  const heading = inv.kind === 'team'
+  const heading = inv.kind === 'department'
+    ? (inv.grants_admin ? t('join.adminHeading', { tenant: inv.tenant }) : t('join.departmentHeading', { tenant: inv.tenant }))
+    : inv.kind === 'team'
     ? t('join.teamHeading', { team: inv.team, role: t(`roles.${inv.role}`) })
     : inv.relation === 'guardian'
       ? t('join.guardianHeading', { person: inv.person })
@@ -94,7 +99,7 @@ export function JoinPage() {
             </fieldset>
           )}
 
-          {inv.kind === 'team' && mode === 'self' && (
+          {(inv.kind === 'department' || (inv.kind === 'team' && mode === 'self')) && (
             <>
               <p className="text-xs text-slate-500">{loggedIn ? t('join.profileIfMissing') : null}</p>
               <div className="grid grid-cols-2 gap-3">

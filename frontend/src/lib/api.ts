@@ -232,9 +232,10 @@ export interface PersonSearchResult extends Person {
 
 export interface Invitation {
   id: string;
-  kind: 'team' | 'person';
+  kind: 'team' | 'person' | 'department';
   role: TeamRole | null;
   relation: 'self' | 'guardian' | null;
+  grants_admin: boolean;
   url: string;
   use_count: number;
   max_uses: number | null;
@@ -243,12 +244,13 @@ export interface Invitation {
 
 export interface PublicInvitation {
   tenant: string;
-  kind: 'team' | 'person';
+  kind: 'team' | 'person' | 'department';
   team: string | null;
   role: TeamRole | null;
   relation: 'self' | 'guardian' | null;
   person: string | null;
   allows_child: boolean;
+  grants_admin: boolean;
 }
 
 export interface SessionInfo {
@@ -312,6 +314,9 @@ export interface EventSummary {
   max_participants: number | null;
   /** Positions-Soll: at most n accepted per position. */
   position_limits: Partial<Record<Position, number>> | null;
+  /** Training: own minimum (else the team's). */
+  own_min_participants: number | null;
+  guests_allowed: boolean;
   is_full: boolean;
   min_participants: number | null;
   below_minimum: boolean;

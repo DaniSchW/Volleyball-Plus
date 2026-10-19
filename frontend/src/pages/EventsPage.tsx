@@ -28,7 +28,7 @@ export function EventsPage() {
             type="button"
             aria-selected={past === value}
             onClick={() => setPast(value)}
-            className={`min-h-10 flex-1 rounded-md text-sm ${past === value ? 'bg-white font-medium shadow-sm' : 'text-slate-600'}`}
+            className={`min-h-10 flex-1 rounded-md text-sm ${past === value ? 'bg-brand-700 font-medium text-white shadow-sm' : 'text-slate-600'}`}
           >
             {value ? t('events.past') : t('events.upcoming')}
           </button>

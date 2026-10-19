@@ -4,6 +4,7 @@ namespace Tests\Feature\Tenancy;
 
 use App\Enums\InvitationKind;
 use App\Enums\TeamRole;
+use App\Models\ActivityLog;
 use App\Models\CalendarFeed;
 use App\Models\CashBook;
 use App\Models\CashEntry;
@@ -65,7 +66,7 @@ class ModelIsolationTest extends TestCase
         NotificationPreference::class, League::class, CrossNomination::class, TrainingGroup::class, TrainingGroupMember::class,
         RefereeLicense::class, Task::class, TaskAssignment::class, Poll::class, PollTeam::class, PollOption::class, PollVote::class,
         Chat::class, ChatAttachment::class, ChatMember::class, ChatTopic::class, ChatMessage::class, ChatReadState::class,
-        CashBook::class, CashEntry::class, Hall::class, HallSlot::class, HallBooking::class,
+        ActivityLog::class, CashBook::class, CashEntry::class, Hall::class, HallSlot::class, HallBooking::class,
     ];
 
     public function test_every_tenant_model_is_listed_here(): void
@@ -139,8 +140,15 @@ class ModelIsolationTest extends TestCase
             NotificationPreference::create(['tenant_member_id' => $member->id, 'category' => 'notice', 'push' => false, 'email' => false]);
         });
 
-        $this->inTenant($a, function () {
+        $this->inTenant($a, function () use ($a) {
             foreach (self::MODELS as $model) {
+                if ($model === ActivityLog::class) {
+                    // A's own member and person were logged in A; nothing of B's many changes.
+                    $this->assertSame(ActivityLog::withoutGlobalScopes()->where('tenant_id', $a->id)->count(), ActivityLog::query()->count());
+                    $this->assertSame(0, ActivityLog::query()->where('label', 'like', '%B-Team%')->count());
+
+                    continue;
+                }
                 $own = in_array($model, [TenantMember::class, Person::class, PersonAccount::class], true) ? 1 : 0;
                 $this->assertSame($own, $model::query()->count(), $model);
             }

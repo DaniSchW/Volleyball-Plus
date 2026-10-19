@@ -3,7 +3,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
 import { api, errorText, patch, post, POSITIONS, type EventDetail, type EventType, type Opponent, type Position, type Team, type TrainingGroup } from '../lib/api';
-import { addMinutes, toLocalInput } from '../lib/dates';
+import { addMinutes, formatDay, formatTime, toLocalInput } from '../lib/dates';
+import { HallSuggestions } from '../components/events/HallSuggestions';
 import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
 import { Button, Card, Field, Loading, Notice, PageTitle, Select, Toggle } from '../components/ui';
 
@@ -19,7 +20,8 @@ interface FormState {
   starts_at: string;
   ends_at: string;
   meet_at: string;
-  rsvp_deadline: string;
+  /** Reply deadline in hours before the start (empty = until the start). */
+  deadline_hours: string;
   location_name: string;
   address: string;
   max_participants: string;
@@ -27,11 +29,20 @@ interface FormState {
   opponent_id: string;
   is_home: '' | 'home' | 'away';
   training_group_id: string;
-  guests_from: string;
+  guests_allowed: boolean;
+  min_participants: string;
   repeat: boolean;
   weekdays: number[];
   interval_weeks: number;
   ends_on: string;
+}
+
+/** Start (local input) minus hours → deadline as local input; null without hours. */
+function deadlineFor(startsAt: string, hours: string): string | null {
+  if (hours === '' || !startsAt) return null;
+  const start = new Date(startsAt);
+  if (Number.isNaN(start.getTime())) return null;
+  return toLocalInput(new Date(start.getTime() - Number(hours) * 3600000).toISOString());
 }
 
 function initial(teamId?: string): FormState {
@@ -41,8 +52,8 @@ function initial(teamId?: string): FormState {
   const startLocal = toLocalInput(start.toISOString());
   return {
     type: 'training', title: '', description: '', allTeams: false, team_ids: teamId ? [teamId] : [], response_mode: 'rsvp',
-    starts_at: startLocal, ends_at: addMinutes(startLocal, 120), meet_at: '', rsvp_deadline: '',
-    location_name: '', address: '', max_participants: '', position_limits: {}, opponent_id: '', is_home: '', training_group_id: '', guests_from: '',
+    starts_at: startLocal, ends_at: addMinutes(startLocal, 120), meet_at: '', deadline_hours: '',
+    location_name: '', address: '', max_participants: '', position_limits: {}, opponent_id: '', is_home: '', training_group_id: '', guests_allowed: true, min_participants: '',
     repeat: false, weekdays: [((start.getDay() + 6) % 7) + 1], interval_weeks: 1, ends_on: '',
   };
 }
@@ -52,11 +63,14 @@ function fromEvent(e: EventDetail): FormState {
     ...initial(),
     type: e.type, title: e.title, description: e.description ?? '', allTeams: e.scope === 'tenant', team_ids: e.team_ids,
     response_mode: e.response_mode, starts_at: toLocalInput(e.starts_at), ends_at: toLocalInput(e.ends_at),
-    meet_at: toLocalInput(e.meet_at), rsvp_deadline: toLocalInput(e.rsvp_deadline), location_name: e.location_name ?? '',
+    meet_at: toLocalInput(e.meet_at),
+    deadline_hours: e.rsvp_deadline ? String(Math.round((new Date(e.starts_at).getTime() - new Date(e.rsvp_deadline).getTime()) / 3600000)) : '',
+    location_name: e.location_name ?? '',
     address: e.address ?? '', max_participants: e.max_participants?.toString() ?? '',
     position_limits: Object.fromEntries(Object.entries(e.position_limits ?? {}).map(([k, v]) => [k, String(v)])), opponent_id: e.opponent?.id ?? '',
     is_home: e.is_home === null ? '' : e.is_home ? 'home' : 'away',
-    training_group_id: e.training_group?.id ?? '', guests_from: toLocalInput(e.cross_nomination_opens_at),
+    training_group_id: e.training_group?.id ?? '', guests_allowed: e.guests_allowed,
+    min_participants: e.own_min_participants?.toString() ?? '',
     ...(e.series ? { weekdays: e.series.weekdays, interval_weeks: e.series.interval_weeks, ends_on: e.series.ends_on ?? '' } : {}),
   };
 }
@@ -98,7 +112,7 @@ export function EventFormPage() {
         starts_at: form.starts_at,
         ends_at: form.ends_at,
         meet_at: form.meet_at || null,
-        rsvp_deadline: form.rsvp_deadline || null,
+        rsvp_deadline: deadlineFor(form.starts_at, form.deadline_hours),
         location_name: form.location_name || null,
         address: form.address || null,
         max_participants: form.max_participants ? Number(form.max_participants) : null,
@@ -107,7 +121,8 @@ export function EventFormPage() {
       };
       if (form.type === 'training') {
         body.training_group_id = form.training_group_id || null;
-        body.cross_nomination_opens_at = form.guests_from || null;
+        body.guests_allowed = form.guests_allowed;
+        body.min_participants = form.min_participants ? Number(form.min_participants) : null;
       }
       if (form.type === 'match') {
         body.opponent_id = form.opponent_id || null;
@@ -206,7 +221,19 @@ export function EventFormPage() {
           </div>
           <div className="grid gap-3 sm:grid-cols-2">
             <Field label={t('events.meetAt')} type="datetime-local" value={form.meet_at} onChange={(e) => set('meet_at', e.target.value)} />
-            <Field label={t('events.deadline')} type="datetime-local" value={form.rsvp_deadline} onChange={(e) => set('rsvp_deadline', e.target.value)} hint={t('events.deadlineHint')} />
+            <Field
+              label={t('events.deadlineHours')}
+              type="number"
+              min={0}
+              max={336}
+              inputMode="numeric"
+              placeholder="–"
+              value={form.deadline_hours}
+              onChange={(e) => set('deadline_hours', e.target.value)}
+              hint={deadlineFor(form.starts_at, form.deadline_hours)
+                ? t('events.deadlineAt', { date: `${formatDay(new Date(deadlineFor(form.starts_at, form.deadline_hours)!).toISOString())} ${formatTime(new Date(deadlineFor(form.starts_at, form.deadline_hours)!).toISOString())}` })
+                : t('events.deadlineHint')}
+            />
           </div>
           {canRepeat && !eventId && <Toggle label={t('events.repeat')} checked={form.repeat} onChange={(v) => set('repeat', v)} />}
           {canRepeat && form.repeat && (
@@ -242,13 +269,27 @@ export function EventFormPage() {
           teamId={singleTeam}
           groupId={form.training_group_id}
           onGroupChange={(id) => set('training_group_id', id)}
-          guestsFrom={form.guests_from}
-          onGuestsFromChange={(value) => set('guests_from', value)}
+          guestsAllowed={form.guests_allowed}
+          onGuestsAllowedChange={(value) => set('guests_allowed', value)}
+          minParticipants={form.min_participants}
+          onMinParticipantsChange={(value) => set('min_participants', value)}
         />
       )}
 
       <Card title={t('events.where')}>
         <div className="space-y-3">
+          {form.type === 'training' && (
+            <HallSuggestions
+              teamId={singleTeam}
+              startsAt={form.starts_at}
+              onPick={(hall, times) => setForm((f) => ({
+                ...f,
+                location_name: hall.name,
+                address: hall.address ?? f.address,
+                ...(times ? { starts_at: `${f.starts_at.slice(0, 10)}T${times.start}`, ends_at: `${f.starts_at.slice(0, 10)}T${times.end}` } : {}),
+              }))}
+            />
+          )}
           <Field label={t('events.locationName')} maxLength={120} value={form.location_name} onChange={(e) => set('location_name', e.target.value)} />
           <Field label={t('events.address')} hint={t('events.addressHint')} maxLength={255} value={form.address} onChange={(e) => set('address', e.target.value)} />
         </div>
@@ -291,13 +332,15 @@ export function EventFormPage() {
   );
 }
 
-/** Training group (own trainings for part of the team) and when cross-nominated guests may accept. */
-function TrainingOptions({ teamId, groupId, onGroupChange, guestsFrom, onGuestsFromChange }: {
+/** Training group (own trainings for part of the team), minimum of players, guests. */
+function TrainingOptions({ teamId, groupId, onGroupChange, guestsAllowed, onGuestsAllowedChange, minParticipants, onMinParticipantsChange }: {
   teamId: string | null;
   groupId: string;
   onGroupChange: (id: string) => void;
-  guestsFrom: string;
-  onGuestsFromChange: (value: string) => void;
+  guestsAllowed: boolean;
+  onGuestsAllowedChange: (value: boolean) => void;
+  minParticipants: string;
+  onMinParticipantsChange: (value: string) => void;
 }) {
   const { t } = useTranslation();
   const tp = useTenantPath();
@@ -316,15 +359,19 @@ function TrainingOptions({ teamId, groupId, onGroupChange, guestsFrom, onGuestsF
             {groups.data!.map((group) => <option key={group.id} value={group.id}>{group.name}</option>)}
           </Select>
         )}
-        {!groupId && (
-          <Field
-            label={t('events.guestsFrom')}
-            type="datetime-local"
-            value={guestsFrom}
-            onChange={(e) => onGuestsFromChange(e.target.value)}
-            hint={t('events.guestsFromHint')}
-          />
-        )}
+        <Field
+          label={t('events.minParticipants')}
+          type="number"
+          min={1}
+          max={500}
+          inputMode="numeric"
+          placeholder="–"
+          value={minParticipants}
+          onChange={(e) => onMinParticipantsChange(e.target.value)}
+          hint={t('events.minParticipantsHint')}
+        />
+        {!groupId && <Toggle label={t('events.guestsAllowed')} checked={guestsAllowed} onChange={onGuestsAllowedChange} />}
+        {!groupId && <p className="-mt-2 text-xs text-slate-500">{t('events.guestsAllowedHint')}</p>}
       </div>
     </Card>
   );

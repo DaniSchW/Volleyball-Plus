@@ -27,6 +27,18 @@ class InvitationService
         ]);
     }
 
+    /** Link into the club without a team – e.g. for further admins. */
+    public function createDepartmentLink(bool $admin, TenantMember $creator, ?int $expiresInDays, ?int $maxUses): Invitation
+    {
+        return $this->create([
+            'kind' => InvitationKind::Department,
+            'grants_admin' => $admin,
+            'max_uses' => $maxUses,
+            'expires_at' => $expiresInDays ? Carbon::now()->addDays($expiresInDays) : null,
+            'created_by' => $creator->id,
+        ]);
+    }
+
     /**
      * Single-use link that connects an account to an existing profile: a
      * parent to a child (guardian) or someone to their own profile (self).

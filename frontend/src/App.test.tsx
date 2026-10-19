@@ -259,7 +259,7 @@ describe('notifications', () => {
 });
 
 describe('cross-nominated guests', () => {
-  it('can decline but accept only once places open for guests', async () => {
+  it('guests can decline but not accept when the training does not allow guests', async () => {
     const guestEvent = { ...EVENT, my: [{ ...EVENT.my[0], is_guest: true, can_accept: false, guests_open_at: '2026-10-21T17:30:00Z' }] };
     mockApi({
       'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
@@ -270,7 +270,7 @@ describe('cross-nominated guests', () => {
 
     const card = await screen.findByRole('article', { name: 'Hallentraining' });
     expect(card).toHaveTextContent('als Gast');
-    expect(card).toHaveTextContent(/Als Gast kannst du ab 21\.10\., \d\d:30 zusagen\./);
+    expect(card).toHaveTextContent('Gäste können für dieses Training nicht zusagen.');
     expect(screen.getByRole('button', { name: /Zusage/ })).toBeDisabled();
     expect(screen.getByRole('button', { name: /Absage/ })).toBeEnabled();
   });
@@ -739,5 +739,21 @@ describe('platform', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Freigeben' }));
     await waitFor(() => expect(approved).toBe(true));
     expect(await screen.findByText('Aktiv (1)')).toBeInTheDocument();
+  });
+});
+
+describe('activity log', () => {
+  it('shows admins what changed and by whom', async () => {
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME(true) },
+      'GET /t/ssv-ulm/activity': { body: { data: [
+        { id: 'a1', action: 'updated', type: 'event', label: 'Techniktraining (20.10.2026 19:30)', actor: 'Tom Trainer', by_system: false, created_at: '2026-10-19T08:00:00Z' },
+      ] } },
+    });
+    renderAt('/ssv-ulm/activity');
+
+    expect(await screen.findByText('Techniktraining (20.10.2026 19:30)')).toBeInTheDocument();
+    expect(screen.getByText('geändert')).toBeInTheDocument();
+    expect(screen.getByText('von Tom Trainer')).toBeInTheDocument();
   });
 });

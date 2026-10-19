@@ -2,6 +2,7 @@
 
 use App\Console\Commands\CleanupChatUploads;
 use App\Console\Commands\GenerateSeries;
+use App\Console\Commands\PruneActivity;
 use App\Console\Commands\ReleaseAdults;
 use App\Support\Security\SslCheck;
 use Illuminate\Support\Facades\Artisan;
@@ -47,3 +48,6 @@ $task('app:generate-series')->when(fn () => GenerateSeries::isDue());
 
 // Chat uploads that were never sent are removed after a day.
 $task('app:cleanup-chat-uploads')->when(fn () => CleanupChatUploads::isDue());
+
+// The admins' activity log keeps 7 days.
+$task('app:prune-activity')->when(fn () => PruneActivity::isDue());

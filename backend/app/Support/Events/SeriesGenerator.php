@@ -152,6 +152,8 @@ class SeriesGenerator
             'address' => $series->address,
             'max_participants' => $series->max_participants,
             'position_limits' => $series->position_limits,
+            'min_participants' => $series->min_participants,
+            'guests_allowed' => $series->guests_allowed,
             'training_group_id' => $series->training_group_id,
         ];
     }

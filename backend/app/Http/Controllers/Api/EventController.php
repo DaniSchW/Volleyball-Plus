@@ -262,6 +262,8 @@ class EventController extends Controller
             'opponent_id' => ['sometimes', 'nullable', 'string', Rule::exists('opponents', 'id')->where('tenant_id', $this->current->get()->tenant_id)],
             'is_home' => ['sometimes', 'nullable', 'boolean'],
             'cross_nomination_opens_at' => ['sometimes', 'nullable', 'date'],
+            'guests_allowed' => ['sometimes', 'boolean'],
+            'min_participants' => ['sometimes', 'nullable', 'integer', 'between:1,500'],
             'training_group_id' => ['sometimes', 'nullable', 'string'],
             'repeat' => ['sometimes', 'nullable', 'array'],
             'repeat.weekdays' => ['required_with:repeat', 'array', 'min:1'],

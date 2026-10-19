@@ -19,7 +19,12 @@ export function Card({ title, children, actions }: { title?: ReactNode; children
 }
 
 export function PageTitle({ children }: { children: ReactNode }) {
-  return <h1 className="mb-4 text-xl font-semibold">{children}</h1>;
+  return (
+    <h1 className="mb-4 flex items-center gap-2 text-xl font-semibold">
+      <span aria-hidden="true" className="h-6 w-1.5 shrink-0 rounded-full bg-ball-400" />
+      {children}
+    </h1>
+  );
 }
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primary' | 'secondary' | 'danger' };

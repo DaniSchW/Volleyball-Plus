@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { errorText, post, type EventDetail, type EventSummary, type MyReply, type Position, type RsvpStatus } from '../../lib/api';
-import { formatDateTime } from '../../lib/dates';
 import { useTenantPath } from '../../lib/queries';
 import { Notice } from '../ui';
 
@@ -121,8 +120,8 @@ export function RsvpControl({ event, reply, showName }: { event: EventSummary; r
         </form>
       )}
 
-      {reply.is_guest && !reply.can_accept && reply.guests_open_at && reply.can_respond && (
-        <p className="text-xs text-slate-500">{t('events.guestOpensAt', { date: formatDateTime(reply.guests_open_at) })}</p>
+      {reply.is_guest && !reply.can_accept && reply.can_respond && (
+        <p className="text-xs text-slate-500">{t('events.guestsNotAllowed')}</p>
       )}
       {!reply.can_respond && reply.status === null && event.response_mode === 'rsvp' && event.status === 'scheduled' && (
         <p className="text-xs text-slate-500">{event.deadline_passed ? t('events.deadlinePassed') : t('events.askParents')}</p>

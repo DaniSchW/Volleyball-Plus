@@ -53,9 +53,7 @@ class RsvpService
             throw ValidationException::withMessages(['status' => __('events.deadline_passed')]);
         }
         if ($guest && $status === RsvpStatus::Yes && ! $manager && ! $this->guests->isOpen($event)) {
-            throw ValidationException::withMessages(['status' => __('events.guests_not_open', [
-                'at' => $this->guests->opensAt($event)->copy()->setTimezone($event->tenant->timezone)->locale(app()->getLocale())->isoFormat(__('notifications.date_format')),
-            ])]);
+            throw ValidationException::withMessages(['status' => __('events.guests_not_allowed')]);
         }
 
         $reason = trim((string) $reason) ?: null;

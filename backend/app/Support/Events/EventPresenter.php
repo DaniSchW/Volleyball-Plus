@@ -158,7 +158,7 @@ class EventPresenter
     {
         $yes = $counts['yes'] ?? 0;
         $answered = array_sum($counts);
-        $minimum = $event->type === EventType::Training ? $event->teams->pluck('min_participants')->filter()->max() : null;
+        $minimum = $event->type === EventType::Training ? ($event->min_participants ?? $event->teams->pluck('min_participants')->filter()->max()) : null;
         $canManage = $this->permissions->canManageEvent($viewer, $event);
         $deadlinePassed = $event->deadlinePassed();
 
@@ -193,6 +193,8 @@ class EventPresenter
                 'open' => max(0, $invited - $answered),
             ],
             'max_participants' => $event->max_participants,
+            'own_min_participants' => $event->min_participants,
+            'guests_allowed' => $event->guests_allowed,
             'position_limits' => $event->position_limits,
             'is_full' => $event->max_participants !== null && $yes >= $event->max_participants,
             'min_participants' => $minimum,

@@ -15,7 +15,8 @@
     "halls": "Halls",
     "profile": "Profile",
     "members": "Members & admins",
-    "language": "Language"
+    "language": "Language",
+    "activity": "Activity log"
   },
   "home": {
     "infoArea": "Notices",
@@ -90,7 +91,9 @@
     "childFirstName": "Child's first name",
     "parentEmail": "Your e-mail address (parent)",
     "emailHint": "We will send you a link to confirm the address.",
-    "submit": "Join"
+    "submit": "Join",
+    "adminHeading": "Invitation as admin – {{tenant}}",
+    "departmentHeading": "Invitation to {{tenant}}"
   },
   "teams": {
     "none": "No teams yet.",
@@ -130,7 +133,9 @@
     "searchNone": "Nobody found.",
     "noTeam": "not in a team yet",
     "alreadyIn": "Already in team",
-    "playsHigher": "Plays in {{team}} – trains here, but no match days"
+    "playsHigher": "Plays in {{team}} – trains here, but no match days",
+    "addMe": "Add myself",
+    "addMeHint": "Do you play in or coach this team yourself?"
   },
   "invitations": {
     "active": "Active invitation links",
@@ -160,16 +165,7 @@
     "reasonsVisible": "Teammates see reasons",
     "training": "Training",
     "minParticipants": "Minimum participants",
-    "maxParticipants": "Maximum participants",
-    "crossNomination": "Guest players",
-    "crossNominationMode": "Guests from other teams may accept …",
-    "crossModes": {
-      "immediately": "immediately",
-      "hours_before_start": "from X hours before training",
-      "after_rsvp_deadline": "after the reply deadline"
-    },
-    "crossNominationHours": "Hours before start",
-    "crossNominationHint": "Default for all trainings – can be changed per event."
+    "maxParticipants": "Maximum participants"
   },
   "profile": {
     "standard": "Profile",
@@ -235,7 +231,14 @@
   "members": {
     "admin": "Admin",
     "active": "Active",
-    "tenantLogo": "Department logo"
+    "tenantLogo": "Department logo",
+    "invite": "Invite by link",
+    "inviteHint": "For further admins or helpers without a team. All admins have the same rights – including removing admins and deleting data. Players are best invited with the team's invitation link.",
+    "inviteAsAdmin": "Invite as admin (link for 1 person, 14 days)",
+    "linkAdmin": "Invitation as admin",
+    "linkMember": "Invitation to the club",
+    "usesOf": "{{used}} of {{max}} used",
+    "usesOpen": "used {{used}}×"
   },
   "calendar": {
     "title": "Calendar subscription",
@@ -343,7 +346,6 @@
     "restore": "Undo cancellation",
     "endSeries": "End series",
     "endSeriesConfirm": "All upcoming events of this series will be cancelled. Continue?",
-    "guestOpensAt": "As a guest you can accept from {{date}}.",
     "positions": "Accepted per position",
     "positionUnknown": "no position",
     "guest": "Guest",
@@ -351,8 +353,6 @@
     "trainingOptions": "Training",
     "trainingGroup": "For",
     "wholeTeam": "whole team",
-    "guestsFrom": "Guests may accept from",
-    "guestsFromHint": "Empty = default from the team settings (cross-nomination).",
     "helperHint": "E.g. club party or home match day. Afterwards add the tasks with places in the event for helpers to sign up.",
     "positionLimits": "Positions",
     "positionLimitsHint": "At most this many acceptances per position (empty = no limit). Who finds no place on the main position counts for a free secondary one.",
@@ -360,7 +360,20 @@
     "positionFull": "full",
     "acceptAs": "Accept as",
     "acceptAsAuto": "automatic",
-    "acceptedAs": "Accepted as {{position}}"
+    "acceptedAs": "Accepted as {{position}}",
+    "deadlineHours": "Reply deadline (hours before start)",
+    "deadlineAt": "Replies until {{date}}",
+    "minParticipants": "Training minimum (players)",
+    "minParticipantsHint": "Optional – empty = value from the team settings. Below it the training is marked yellow.",
+    "guestsAllowed": "Guests may accept",
+    "guestsAllowedHint": "Cross-nominated players from other teams; the same reply deadline applies as for everybody.",
+    "hallsOn": "Available halls on {{day}}",
+    "noHallsOn": "No hall times entered for {{day}}.",
+    "ownHallTime": "Your hall time",
+    "hallFree": "free",
+    "hallTaken": "taken: {{teams}}",
+    "takeHall": "Use",
+    "guestsNotAllowed": "Guests cannot accept this training."
   },
   "notifications": {
     "title": "Notifications",
@@ -763,5 +776,38 @@
     "suspend": "Suspend",
     "suspendConfirm": "Suspend “{{name}}”? Nobody from the club can log in then; the data is kept.",
     "reactivate": "Reactivate"
+  },
+  "activity": {
+    "title": "Activity log",
+    "hint": "What was created, changed or deleted in the last 7 days – older entries are removed automatically. Admins only.",
+    "none": "No changes in the last 7 days.",
+    "actions": {
+      "created": "created",
+      "updated": "changed",
+      "deleted": "deleted"
+    },
+    "by": "by {{name}}",
+    "system": "automatically (system)",
+    "deletedPerson": "deleted person",
+    "types": {
+      "event": "Event",
+      "event_series": "Event series",
+      "team": "Team",
+      "team_membership": "Team membership",
+      "person": "Profile",
+      "cash_entry": "Cash booking",
+      "cash_book": "Cash book",
+      "hall": "Hall",
+      "hall_slot": "Hall time",
+      "hall_booking": "Hall booking",
+      "poll": "Poll",
+      "task": "Task",
+      "notice": "Notice",
+      "invitation": "Invitation",
+      "tenant_member": "Member",
+      "chat": "Chat",
+      "league": "League",
+      "training_group": "Training group"
+    }
   }
 }

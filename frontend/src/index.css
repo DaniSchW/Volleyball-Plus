@@ -1,9 +1,17 @@
 @import 'tailwindcss';
 
+/* VolleyOrga colours: court blue as brand, ball yellow as accent. */
 @theme {
   --color-brand-50: #eff6ff;
+  --color-brand-100: #dbeafe;
+  --color-brand-500: #3b82f6;
   --color-brand-600: #2563eb;
   --color-brand-700: #1d4ed8;
+  --color-brand-800: #1e40af;
+  --color-brand-900: #1e3a8a;
+  --color-ball-300: #fde047;
+  --color-ball-400: #facc15;
+  --color-ball-500: #eab308;
 }
 
 html,
@@ -13,7 +21,7 @@ body,
 }
 
 body {
-  background-color: var(--color-slate-50);
+  background-color: #f3f6fb;
   color: var(--color-slate-900);
   -webkit-tap-highlight-color: transparent;
 }

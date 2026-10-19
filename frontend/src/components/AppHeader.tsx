@@ -5,9 +5,24 @@ import { useQueryClient } from '@tanstack/react-query';
 import { patch } from '../lib/api';
 import { changeLanguage, LANGUAGES, type Language } from '../i18n';
 
-export type MenuSection = 'events' | 'teams' | 'chat' | 'polls' | 'tasks' | 'stats' | 'cash' | 'halls' | 'profile' | 'members';
+export type MenuSection = 'events' | 'teams' | 'chat' | 'polls' | 'tasks' | 'stats' | 'cash' | 'halls' | 'profile' | 'members' | 'activity';
 
 const MENU: MenuSection[] = ['events', 'teams', 'chat', 'polls', 'tasks', 'stats', 'cash', 'halls', 'profile'];
+
+/** Icon and colour per menu entry – helps to find things quickly. */
+const ICONS: Record<MenuSection, [string, string]> = {
+  events: ['📅', 'bg-brand-100'],
+  teams: ['👥', 'bg-emerald-100'],
+  chat: ['💬', 'bg-sky-100'],
+  polls: ['🗳️', 'bg-violet-100'],
+  tasks: ['🤝', 'bg-amber-100'],
+  stats: ['📊', 'bg-rose-100'],
+  cash: ['💶', 'bg-lime-100'],
+  halls: ['🏟️', 'bg-orange-100'],
+  profile: ['👤', 'bg-slate-100'],
+  members: ['🔑', 'bg-ball-300/40'],
+  activity: ['🕒', 'bg-slate-100'],
+};
 
 interface Props {
   tenantSlug: string;
@@ -48,16 +63,16 @@ export function AppHeader({ tenantSlug, tenantName, logoUrl, isAdmin, hidden = [
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 pt-[env(safe-area-inset-top)] backdrop-blur">
+    <header className="sticky top-0 z-20 bg-gradient-to-r from-brand-800 via-brand-700 to-brand-500 pt-[env(safe-area-inset-top)] text-white shadow-md">
       <div ref={containerRef} className="relative mx-auto flex h-14 max-w-3xl items-center justify-between px-4">
-        <NavLink to={`/${tenantSlug}`} className="flex min-w-0 items-center gap-2 text-base font-semibold text-slate-900">
-          {logoUrl && <img src={logoUrl} alt="" className="size-8 shrink-0 object-contain" />}
+        <NavLink to={`/${tenantSlug}`} className="flex min-w-0 items-center gap-2 text-base font-semibold text-white">
+          {logoUrl ? <img src={logoUrl} alt="" className="size-8 shrink-0 rounded-md bg-white object-contain p-0.5" /> : <img src="/icons/favicon.svg" alt="" className="size-8 shrink-0" />}
           <span className="truncate">{tenantName}</span>
         </NavLink>
 
         <button
           type="button"
-          className="-mr-2 rounded-lg p-2 text-slate-700 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-brand-600"
+          className="-mr-2 rounded-lg p-2 text-white hover:bg-white/15 focus-visible:outline-2 focus-visible:outline-white"
           aria-expanded={open}
           aria-controls={menuId}
           aria-label={open ? t('menu.close') : t('menu.open')}
@@ -71,18 +86,19 @@ export function AppHeader({ tenantSlug, tenantName, logoUrl, isAdmin, hidden = [
         {open && (
           <nav
             id={menuId}
-            className="absolute right-2 top-full mt-1 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
+            className="absolute right-2 top-full mt-1 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white text-slate-900 shadow-lg"
           >
             <ul className="py-1">
-              {[...MENU, ...(isAdmin ? (['members'] as MenuSection[]) : [])].filter((section) => !hidden.includes(section)).map((section) => (
+              {[...MENU, ...(isAdmin ? (['members', 'activity'] as MenuSection[]) : [])].filter((section) => !hidden.includes(section)).map((section) => (
                 <li key={section}>
                   <NavLink
                     to={`/${tenantSlug}/${section}`}
                     onClick={() => setOpen(false)}
                     className={({ isActive }) =>
-                      `block px-4 py-3 text-sm ${isActive ? 'bg-brand-50 font-medium text-brand-700' : 'text-slate-700 hover:bg-slate-50'}`
+                      `flex items-center gap-3 px-4 py-2.5 text-sm ${isActive ? 'bg-brand-50 font-medium text-brand-700' : 'text-slate-700 hover:bg-slate-50'}`
                     }
                   >
+                    <span aria-hidden="true" className={`flex size-8 items-center justify-center rounded-full text-base ${ICONS[section][1]}`}>{ICONS[section][0]}</span>
                     {t(`menu.${section}`)}
                   </NavLink>
                 </li>

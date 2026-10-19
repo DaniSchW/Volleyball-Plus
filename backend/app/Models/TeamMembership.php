@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\TeamRole;
+use App\Support\Activity\LogsActivity;
 use App\Support\Events\InviteeSync;
 use App\Support\Tenancy\BelongsToTenant;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
@@ -11,7 +12,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TeamMembership extends Model
 {
-    use BelongsToTenant, HasUlids;
+    use BelongsToTenant, HasUlids, LogsActivity;
 
     protected $fillable = ['team_id', 'person_id', 'role', 'joined_at'];
 
@@ -48,5 +49,10 @@ class TeamMembership extends Model
     public function person(): BelongsTo
     {
         return $this->belongsTo(Person::class);
+    }
+
+    public function activityLabel(): string
+    {
+        return trim(($this->person?->first_name ?? '').' '.($this->person?->last_name ?? '')).' → '.($this->team?->name ?? '').' ('.__('roles.'.$this->role->value).')';
     }
 }

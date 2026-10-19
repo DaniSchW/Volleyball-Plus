@@ -9,6 +9,7 @@ import { LoginConfirmPage } from './pages/LoginConfirmPage';
 import { LoginPage } from './pages/LoginPage';
 import { LeaguesPage } from './pages/LeaguesPage';
 import { MatchImportPage } from './pages/MatchImportPage';
+import { ActivityPage } from './pages/ActivityPage';
 import { CashBookPage } from './pages/CashBookPage';
 import { CashPage } from './pages/CashPage';
 import { ChatListPage } from './pages/ChatListPage';
@@ -52,6 +53,7 @@ export const routes: RouteObject[] = [
       { path: 'persons/:personId', element: <PersonPage /> },
       { path: 'profile', element: <ProfilePage /> },
       { path: 'members', element: <MembersPage /> },
+      { path: 'activity', element: <ActivityPage /> },
       { path: 'leagues', element: <LeaguesPage /> },
       { path: 'chat', element: <ChatListPage /> },
       { path: 'chat/:chatId', element: <ChatPage /> },

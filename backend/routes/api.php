@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AccountController;
+use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CalendarController;
 use App\Http\Controllers\Api\CashController;
@@ -80,6 +81,8 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
         Route::get('teams/{team}/invitations', [InvitationController::class, 'index']);
         Route::post('teams/{team}/invitations', [InvitationController::class, 'store']);
         Route::delete('invitations/{invitation}', [InvitationController::class, 'destroy']);
+        Route::get('department-invitations', [InvitationController::class, 'departmentIndex']);
+        Route::post('department-invitations', [InvitationController::class, 'storeDepartment']);
 
         Route::get('leagues', [LeagueController::class, 'index']);
         Route::post('leagues', [LeagueController::class, 'store']);
@@ -118,6 +121,7 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
         Route::post('persons/{person}/invitations', [InvitationController::class, 'storeForPerson']);
 
         Route::get('members', [MemberController::class, 'index']);
+        Route::get('activity', ActivityController::class);
         Route::patch('members/{member}', [MemberController::class, 'update']);
 
         Route::get('files/{file}', FileController::class);

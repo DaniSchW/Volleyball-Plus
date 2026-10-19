@@ -6,7 +6,7 @@ return [
     'not_invited' => 'This person is not invited to the event.',
     'deadline_passed' => 'The reply deadline has passed.',
     'reason_required' => 'Please give a reason.',
-    'guests_not_open' => 'As a guest you can accept from :at.',
+    'guests_not_allowed' => 'Guests cannot accept this training.',
     'position_full' => 'All places for :positions are taken.',
     'position_not_yours' => 'This position is not in the profile.',
     'positions' => ['setter' => 'Setter', 'opposite' => 'Opposite', 'middle' => 'Middle blocker', 'outside' => 'Outside hitter', 'libero' => 'Libero', 'universal' => 'Universal'],

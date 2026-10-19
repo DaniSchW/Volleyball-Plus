@@ -92,9 +92,14 @@ class JoinService
                 $member->forceFill(['status' => MemberStatus::Active])->save();
             }
 
-            $person = $invitation->kind === InvitationKind::Team
-                ? $this->joinTeam($invitation, $member, $data)
-                : $this->connectPerson($invitation, $member);
+            $person = match ($invitation->kind) {
+                InvitationKind::Team => $this->joinTeam($invitation, $member, $data),
+                InvitationKind::Department => $this->ownProfile($member, $data),
+                InvitationKind::Person => $this->connectPerson($invitation, $member),
+            };
+            if ($invitation->kind === InvitationKind::Department && $invitation->grants_admin && ! $member->is_admin) {
+                $member->forceFill(['is_admin' => true])->save();
+            }
 
             $invitation->increment('use_count');
             InvitationUse::create([
@@ -131,6 +136,17 @@ class JoinService
             return $child;
         }
 
+        $person = $this->ownProfile($member, $data);
+        $this->addToTeam($invitation, $person);
+
+        return $person;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    private function ownProfile(TenantMember $member, array $data): Person
+    {
         $person = $member->ownPerson();
         if ($person === null) {
             $person = Person::create([
@@ -142,8 +158,6 @@ class JoinService
             ]);
             PersonAccount::create(['person_id' => $person->id, 'tenant_member_id' => $member->id, 'relation' => PersonRelation::Own]);
         }
-
-        $this->addToTeam($invitation, $person);
 
         return $person;
     }

@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\Gender;
 use App\Enums\PersonRelation;
 use App\Enums\Position;
+use App\Support\Activity\LogsActivity;
 use App\Support\Tenancy\BelongsToTenant;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
@@ -18,7 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Person extends Model
 {
-    use BelongsToTenant, HasUlids, SoftDeletes;
+    use BelongsToTenant, HasUlids, LogsActivity, SoftDeletes;
 
     protected $table = 'persons';
 
@@ -114,5 +115,10 @@ class Person extends Model
     public function sharesField(string $field): bool
     {
         return in_array($field, $this->shared_fields ?? [], true);
+    }
+
+    public function activityLabel(): string
+    {
+        return $this->first_name.' '.$this->last_name;
     }
 }

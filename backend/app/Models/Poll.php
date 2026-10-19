@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\EventScope;
+use App\Support\Activity\LogsActivity;
 use App\Support\Tenancy\BelongsToTenant;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
@@ -15,7 +16,7 @@ use Illuminate\Support\Carbon;
  */
 class Poll extends Model
 {
-    use BelongsToTenant, HasUlids;
+    use BelongsToTenant, HasUlids, LogsActivity;
 
     protected $fillable = ['title', 'description', 'scope', 'multiple_choice', 'anonymous', 'allow_free_text', 'closes_at', 'created_by'];
 

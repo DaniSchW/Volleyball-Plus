@@ -443,3 +443,12 @@ erDiagram
 | Hallenkonflikt | `hall_booking(hall_id, weekday)` |
 | Login | `auth_token(token_hash)`, `session(token_hash)` |
 | Einladungslink | `invitations(token_hash)` |
+
+---
+
+## Ergänzungen 10/2026
+
+- `events` / `event_series`: `min_participants` smallint null (Trainingsminimum je Termin), `guests_allowed` bool (Quernominierte dürfen zusagen; gleiche Frist wie alle).
+- `invitations`: `kind = department` (Einladung in den Verein ohne Team), `grants_admin` bool.
+- 🏢 `activity_log` ✅: `actor_id` (Mitglied, null = System), `action` (`created`/`updated`/`deleted`), `subject_type`, `subject_id`, `label`, `created_at`; Einträge älter als 7 Tage löscht der Cron.
+

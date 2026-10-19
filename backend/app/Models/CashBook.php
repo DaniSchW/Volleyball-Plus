@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Support\Activity\LogsActivity;
 use App\Support\Tenancy\BelongsToTenant;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class CashBook extends Model
 {
-    use BelongsToTenant, HasUlids;
+    use BelongsToTenant, HasUlids, LogsActivity;
 
     public const KIND_TEAM = 'team';
 
@@ -47,5 +48,10 @@ class CashBook extends Model
     public function isDepartment(): bool
     {
         return $this->kind === self::KIND_DEPARTMENT;
+    }
+
+    public function activityLabel(): string
+    {
+        return $this->isDepartment() ? __('cash.department') : ($this->team?->name ?? '');
     }
 }

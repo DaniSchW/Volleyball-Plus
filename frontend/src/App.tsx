@@ -1,5 +1,4 @@
 import { createBrowserRouter, RouterProvider, type RouteObject } from 'react-router';
-import { PLACEHOLDER_SECTIONS } from './components/AppHeader';
 import { TenantLayout } from './components/TenantLayout';
 import { EventFormPage } from './pages/EventFormPage';
 import { EventPage } from './pages/EventPage';
@@ -10,7 +9,10 @@ import { LoginConfirmPage } from './pages/LoginConfirmPage';
 import { LoginPage } from './pages/LoginPage';
 import { LeaguesPage } from './pages/LeaguesPage';
 import { MatchImportPage } from './pages/MatchImportPage';
+import { CashBookPage } from './pages/CashBookPage';
+import { CashPage } from './pages/CashPage';
 import { ChatListPage } from './pages/ChatListPage';
+import { HallsPage } from './pages/HallsPage';
 import { ChatPage } from './pages/ChatPage';
 import { MembersPage } from './pages/MembersPage';
 import { PollsPage } from './pages/PollsPage';
@@ -18,7 +20,6 @@ import { StatsPage } from './pages/StatsPage';
 import { TasksPage } from './pages/TasksPage';
 import { NoTenantPage } from './pages/NoTenantPage';
 import { PersonPage } from './pages/PersonPage';
-import { PlaceholderPage } from './pages/PlaceholderPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { TeamPage } from './pages/TeamPage';
 import { TeamsPage } from './pages/TeamsPage';
@@ -51,7 +52,9 @@ export const routes: RouteObject[] = [
       { path: 'polls', element: <PollsPage /> },
       { path: 'tasks', element: <TasksPage /> },
       { path: 'stats', element: <StatsPage /> },
-      ...PLACEHOLDER_SECTIONS.map((section) => ({ path: section, element: <PlaceholderPage section={section} /> })),
+      { path: 'cash', element: <CashPage /> },
+      { path: 'cash/:bookId', element: <CashBookPage /> },
+      { path: 'halls', element: <HallsPage /> },
     ],
   },
 ];

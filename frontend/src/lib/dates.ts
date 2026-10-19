@@ -43,3 +43,15 @@ export function addMinutes(local: string, minutes: number): string {
   d.setMinutes(d.getMinutes() + minutes);
   return toLocalInput(d.toISOString());
 }
+
+/** ISO weekday (1 = Monday … 7 = Sunday) → "Dienstag" / "Di." */
+export function weekdayName(weekday: number, width: 'long' | 'short' = 'long'): string {
+  // 2024-01-01 was a Monday.
+  return new Intl.DateTimeFormat(locale(), { weekday: width }).format(new Date(2024, 0, weekday));
+}
+
+/** Today as "2026-10-19" in the browser's time zone. */
+export function todayDate(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}

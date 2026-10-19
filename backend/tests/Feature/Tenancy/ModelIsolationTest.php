@@ -5,6 +5,8 @@ namespace Tests\Feature\Tenancy;
 use App\Enums\InvitationKind;
 use App\Enums\TeamRole;
 use App\Models\CalendarFeed;
+use App\Models\CashBook;
+use App\Models\CashEntry;
 use App\Models\Chat;
 use App\Models\ChatAttachment;
 use App\Models\ChatMember;
@@ -18,6 +20,9 @@ use App\Models\EventResponse;
 use App\Models\EventResponseLog;
 use App\Models\EventSeries;
 use App\Models\EventTeam;
+use App\Models\Hall;
+use App\Models\HallBooking;
+use App\Models\HallSlot;
 use App\Models\Invitation;
 use App\Models\InvitationUse;
 use App\Models\League;
@@ -60,6 +65,7 @@ class ModelIsolationTest extends TestCase
         NotificationPreference::class, League::class, CrossNomination::class, TrainingGroup::class, TrainingGroupMember::class,
         RefereeLicense::class, Task::class, TaskAssignment::class, Poll::class, PollTeam::class, PollOption::class, PollVote::class,
         Chat::class, ChatAttachment::class, ChatMember::class, ChatTopic::class, ChatMessage::class, ChatReadState::class,
+        CashBook::class, CashEntry::class, Hall::class, HallSlot::class, HallBooking::class,
     ];
 
     public function test_every_tenant_model_is_listed_here(): void
@@ -125,6 +131,11 @@ class ModelIsolationTest extends TestCase
             $stored = StoredFile::create(['storage_key' => 'c', 'mime_type' => 'application/pdf', 'size_bytes' => 1, 'purpose' => 'chat_attachment']);
             ChatAttachment::create(['chat_id' => $chat->id, 'message_id' => $message->id, 'file_id' => $stored->id, 'kind' => 'file', 'name' => 'plan.pdf']);
             ChatReadState::create(['chat_id' => $chat->id, 'tenant_member_id' => $member->id, 'last_read_message_id' => $message->id]);
+            $book = CashBook::create(['kind' => 'team', 'team_id' => $team->id, 'book_key' => $team->id]);
+            CashEntry::create(['cash_book_id' => $book->id, 'booked_on' => '2026-10-01', 'amount_cents' => 500, 'description' => 'Strafe', 'person_id' => $person->id]);
+            $hall = Hall::create(['name' => 'Halle B']);
+            HallSlot::create(['hall_id' => $hall->id, 'weekday' => 2, 'start_time' => '18:00:00', 'end_time' => '22:00:00']);
+            HallBooking::create(['hall_id' => $hall->id, 'team_id' => $team->id, 'weekday' => 2, 'start_time' => '19:30:00', 'end_time' => '21:30:00']);
             NotificationPreference::create(['tenant_member_id' => $member->id, 'category' => 'notice', 'push' => false, 'email' => false]);
         });
 

@@ -12,3 +12,13 @@ export function trainerTeamIds(me: TenantMe | undefined): string[] {
 function ownTeamRoles(me: TenantMe | undefined) {
   return me?.persons.find((p) => p.relation === 'self')?.teams ?? [];
 }
+
+/** Cash books: admins, trainers and organizers. */
+export function canUseCash(me: TenantMe | undefined): boolean {
+  return canCreateEvents(me);
+}
+
+/** Hall plan: admins and trainers. */
+export function canSeeHalls(me: TenantMe | undefined): boolean {
+  return !!me && (me.is_admin || trainerTeamIds(me).length > 0);
+}

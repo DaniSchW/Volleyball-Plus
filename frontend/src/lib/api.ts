@@ -536,3 +536,86 @@ export interface ChatMessagesPage {
   has_more: boolean;
   server_time: string;
 }
+
+export interface CashSummary {
+  opening: number;
+  carried: number;
+  income: number;
+  expenses: number;
+  closing: number;
+  balance: number;
+}
+
+export interface CashBookInfo {
+  id: string;
+  kind: 'team' | 'department';
+  team_id: string | null;
+  name: string;
+  archived: boolean;
+  opening_balance_cents: number;
+  summary: CashSummary;
+}
+
+export interface CashOverview {
+  books: CashBookInfo[];
+  teams_total: number | null;
+  total: number | null;
+}
+
+export interface CashEntry {
+  id: string;
+  booked_on: string;
+  amount_cents: number;
+  category: string | null;
+  description: string;
+  person: { id: string; name: string } | null;
+  created_by: string | null;
+  created_at: string | null;
+  cancelled_at: string | null;
+  cancelled_by: string | null;
+  balance_after: number | null;
+}
+
+export interface CashBookDetail extends CashBookInfo {
+  entries: CashEntry[];
+  categories: string[];
+  persons: { id: string; name: string }[];
+}
+
+export interface HallSlot {
+  id: string;
+  weekday: number;
+  start_time: string;
+  end_time: string;
+  valid_from: string | null;
+  valid_until: string | null;
+}
+
+export interface HallBooking extends HallSlot {
+  team: { id: string; name: string; color: string | null; archived: boolean };
+  court: number | null;
+  notes: string | null;
+  conflicts: { id: string; team: string; start_time: string; end_time: string; court: number | null }[];
+  outside_slots: boolean;
+}
+
+export interface Hall {
+  id: string;
+  name: string;
+  address: string | null;
+  courts: number;
+  notes: string | null;
+  slots: HallSlot[];
+  bookings: HallBooking[];
+}
+
+export interface TeamHallTime {
+  id: string;
+  hall: { id: string; name: string; address: string | null };
+  weekday: number;
+  start_time: string;
+  end_time: string;
+  court: number | null;
+  valid_from: string | null;
+  valid_until: string | null;
+}

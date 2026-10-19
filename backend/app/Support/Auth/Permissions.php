@@ -301,6 +301,21 @@ class Permissions
         return $this->actsForWith($member, $person, 'can_vote_polls');
     }
 
+    // ---- cash & halls ----
+
+    /** Team cash book: admins, trainers and organizers of the team. */
+    public function canManageCashOf(TenantMember $member, Team $team): bool
+    {
+        return $this->canInviteToTeam($member, $team);
+    }
+
+    /** The hall plan is visible to trainers of any team; only admins edit it. */
+    public function canSeeHalls(TenantMember $member): bool
+    {
+        return $this->isAdmin($member)
+            || $this->ownMemberships($member)->contains(fn (TeamMembership $m) => $m->role === TeamRole::Trainer);
+    }
+
     private function actsForWith(TenantMember $member, Person $person, string $flag): bool
     {
         if (! $this->actsFor($member, $person)) {

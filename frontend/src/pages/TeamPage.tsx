@@ -14,6 +14,7 @@ import { AddFromDepartment } from '../components/team/AddFromDepartment';
 import { RefereeBadge } from '../components/team/RefereeBadge';
 import { TeamBaseData } from '../components/team/TeamBaseData';
 import { TeamGuests } from '../components/team/TeamGuests';
+import { TeamHallTimes } from '../components/team/TeamHallTimes';
 import { TeamStatistics } from '../components/team/TeamStatistics';
 import { TrainingGroups } from '../components/team/TrainingGroups';
 
@@ -61,7 +62,12 @@ export function TeamPage() {
           ))}
         </div>
       )}
-      {tab === 'roster' && <Roster team={team.data} />}
+      {tab === 'roster' && (
+        <>
+          <TeamHallTimes teamId={team.data.id} />
+          <Roster team={team.data} />
+        </>
+      )}
       {tab === 'statistics' && <TeamStatistics team={team.data} />}
       {tab === 'groups' && <TrainingGroups team={team.data} />}
       {tab === 'guests' && <TeamGuests team={team.data} />}

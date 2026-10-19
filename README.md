@@ -51,4 +51,5 @@ Phase 6 (Statistik) umgesetzt: Zusagequoten je Team mit frei wählbarem Zeitraum
 Phase 5 (Spielplan-Import) umgesetzt: Spieltage je Mannschaft aus .ics/.ical oder SAMS-CSV mit Vorschau, Heim/Auswärts, Halle, Schiedsgericht-Terminen und Abgleich beim erneuten Import.
 Phase 7 (Aufgaben, Helferdienste, Umfragen) umgesetzt: Aufgaben mit Plätzen zu jedem Termin, Terminart Helferdienst mit Helfer-Statistik, Seite „Meine Aufgaben“, Umfragen pro Team und abteilungsweit (Mehrfachauswahl, anonym, Textantwort, Frist) mit Push und Hinweis auf der Startseite.
 Phase 8 (Chat) umgesetzt: Teamchats automatisch, Admin-Chats mit frei gewählten Mitgliedern, Gruppenchat oder Themen, antworten/bearbeiten/löschen, Live-Aktualisierung per Polling (4 s), Ungelesen-Zähler, Push an alle, die den Chat nicht gerade offen haben; Fotos, Videos, PDF sowie Office- und LibreOffice-Dateien als Anhänge.
-Nächster Schritt: Phase 9 – Kasse & Hallen.
+Phase 9 (Kasse & Hallen) umgesetzt: Teamkassen und Abteilungskasse als Kassenbuch (Einnahmen/Ausgaben, Kategorien, Person, Storno statt Löschen, laufender Saldo, Zeitraum, CSV-Export), Admin-Gesamtübersicht; Hallen mit verfügbaren Zeiten, Belegungsplan je Mannschaft mit Warnung bei Überschneidungen, Hallenzeiten auf der Teamseite.
+Nächster Schritt: Phase 10 – Ausbau.

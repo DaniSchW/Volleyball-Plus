@@ -528,3 +528,99 @@ describe('chat attachments', () => {
     expect(await screen.findByText('zu groß (max. 0 MB)')).toBeInTheDocument();
   });
 });
+
+describe('cash', () => {
+  const book = (entries: unknown[], balance: number) => ({
+    data: {
+      id: 'b1', kind: 'team', team_id: 't1', name: 'Herren 1', archived: false, opening_balance_cents: 0,
+      summary: { opening: 0, carried: 0, income: 2000, expenses: balance - 2000, closing: balance, balance },
+      entries, categories: ['Getränke', 'Strafe'], persons: [{ id: 'p1', name: 'Paul Spieler' }],
+    },
+  });
+  const fine = {
+    id: 'e1', booked_on: '2026-10-01', amount_cents: 2000, category: 'Strafe', description: 'Zu spät', person: { id: 'p1', name: 'Paul Spieler' },
+    created_by: 'Tom Trainer', created_at: null, cancelled_at: null, cancelled_by: null, balance_after: 2000,
+  };
+
+  it('books an expense and cancels a booking', async () => {
+    let sent: Record<string, unknown> = {};
+    let cancelled = false;
+    let current = book([fine], 2000);
+    vi.stubGlobal('confirm', () => true);
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/cash-books/b1': () => ({ body: current }),
+      'POST /t/ssv-ulm/cash-books/b1/entries': (init) => {
+        sent = JSON.parse(String(init.body));
+        current = book([{ ...fine, id: 'e2', amount_cents: -1250, category: 'Getränke', description: 'Wasser', person: null, balance_after: 750 }, fine], 750);
+        return { status: 201, body: { data: {} } };
+      },
+      'POST /t/ssv-ulm/cash-entries/e1/cancel': () => {
+        cancelled = true;
+        return { body: { message: 'ok' } };
+      },
+    });
+    renderAt('/ssv-ulm/cash/b1');
+
+    expect(await screen.findByText('Zu spät')).toBeInTheDocument();
+    expect(screen.getByText('Gebucht von Tom Trainer')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('radio', { name: 'Ausgabe' }));
+    fireEvent.change(screen.getByLabelText('Betrag (€)', { selector: 'input[placeholder]' }), { target: { value: '12,50' } });
+    fireEvent.change(screen.getByLabelText('Beschreibung'), { target: { value: 'Wasser' } });
+    fireEvent.change(screen.getByLabelText('Kategorie', { selector: 'input' }), { target: { value: 'Getränke' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Buchen' }));
+
+    await waitFor(() => expect(sent).toMatchObject({ amount_cents: -1250, description: 'Wasser', category: 'Getränke', person_id: null }));
+    expect(await screen.findByText('Wasser')).toBeInTheDocument();
+    expect(screen.getByText(/7,50/, { selector: 'p.text-2xl' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Buchung „Zu spät“ stornieren' }));
+    await waitFor(() => expect(cancelled).toBe(true));
+  });
+
+  it('hides cash and halls in the menu of players', async () => {
+    mockApi({ 'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() } });
+    renderAt('/ssv-ulm');
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Menü öffnen' }));
+    expect(screen.getByRole('link', { name: 'Chat' })).toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Kasse' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('link', { name: 'Hallen' })).not.toBeInTheDocument();
+  });
+});
+
+describe('halls', () => {
+  it('assigns a team and warns about an overlap', async () => {
+    let sent: Record<string, unknown> = {};
+    const hall = { id: 'h1', name: 'Kuhberghalle', address: null, courts: 1, notes: null, slots: [], bookings: [] as unknown[] };
+    const booking = {
+      id: 'k1', team: { id: 't2', name: 'Damen 1', color: null, archived: false }, weekday: 2, start_time: '20:00', end_time: '22:00',
+      court: null, valid_from: null, valid_until: null, notes: null, outside_slots: false,
+      conflicts: [{ id: 'k0', team: 'Herren 1', start_time: '19:30', end_time: '21:30', court: null }],
+    };
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME(true) },
+      'GET /t/ssv-ulm/halls': { body: { data: [hall], booking: null } },
+      'GET /t/ssv-ulm/teams': { body: { data: [{ id: 't2', name: 'Damen 1' }] } },
+      'POST /t/ssv-ulm/halls/h1/bookings': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { status: 201, body: { data: [{ ...hall, bookings: [booking] }], booking } };
+      },
+    });
+    renderAt('/ssv-ulm/halls');
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Mannschaft zuordnen' }));
+    await screen.findByRole('option', { name: 'Damen 1' });
+    fireEvent.change(screen.getByLabelText('Mannschaft'), { target: { value: 't2' } });
+    fireEvent.change(screen.getByLabelText('Tag'), { target: { value: '2' } });
+    fireEvent.change(screen.getByLabelText('Von'), { target: { value: '20:00' } });
+    fireEvent.change(screen.getByLabelText('Bis'), { target: { value: '22:00' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Speichern' }));
+
+    await waitFor(() => expect(sent).toMatchObject({ team_id: 't2', weekday: 2, start_time: '20:00', end_time: '22:00', court: null }));
+    expect(await screen.findByText('Gespeichert – bitte prüfen:')).toBeInTheDocument();
+    expect(screen.getAllByText('Überschneidung mit Herren 1 (19:30–21:30)', { exact: false })).toHaveLength(2);
+    expect(screen.getByText('1 Belegung überschneidet sich mit einer anderen.')).toBeInTheDocument();
+  });
+});

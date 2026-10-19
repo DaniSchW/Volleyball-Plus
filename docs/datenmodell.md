@@ -314,20 +314,20 @@ Trainer: `scope = team` für eigene Teams; Admin: zusätzlich `tenant`.
 
 ## 8. Kasse
 
-### 🏢 `cash_book`
-`kind` enum `team`, `department`, `team_id` null (CHECK: `team` ⇒ team_id gesetzt; genau eine Abteilungskasse pro Mandant), `name`, `opening_balance_cents`.
+### 🏢 `cash_books` ✅
+`kind` enum `team`, `department`, `team_id` null, `book_key` (Team-ID bzw. `department`; unique je Mandant – genau eine Kasse je Team und eine Abteilungskasse, angelegt beim ersten Aufruf), `opening_balance_cents`.
 
-### 🏢 `cash_entry`
+### 🏢 `cash_entries` ✅
 | Feld | Typ | Hinweis |
 |---|---|---|
-| cash_book_id | → cash_book | |
+| cash_book_id | → cash_books | |
 | booked_on | date | |
 | amount_cents | bigint | positiv = Einnahme, negativ = Ausgabe |
-| category | text | z. B. „Mitgliedsbeitrag“, „Strafe“, „Material“ |
-| description | text | |
-| person_id | → person null | optional: betroffene Person |
-| created_by | → tenant_member | |
-| deleted_at | datetime null | Storno statt Löschen |
+| category | string null | z. B. „Mitgliedsbeitrag“, „Strafe“, „Material“ |
+| description | string | |
+| person_id | → persons null | optional: betroffene Person |
+| created_by | → tenant_members | |
+| cancelled_at, cancelled_by | datetime / → tenant_members null | Storno statt Ändern/Löschen; zählt dann nicht mehr |
 
 Admin-Gesamtübersicht = Aggregation über alle `cash_book` des Mandanten. Keine Zahlungsabwicklung.
 
@@ -354,15 +354,15 @@ Admin-Gesamtübersicht = Aggregation über alle `cash_book` des Mandanten. Keine
 
 ## 10. Hallen & Belegungsplan
 
-### 🏢 `hall`
+### 🏢 `halls` ✅
 `name`, `address`, `courts` smallint (Anzahl Felder), `notes`.
 
-### 🏢 `hall_slot` – verfügbare Zeiten der Halle
+### 🏢 `hall_slots` ✅ – verfügbare Zeiten der Halle
 `hall_id`, `weekday` smallint (1–7), `start_time` time, `end_time` time, `valid_from`, `valid_until` date null (z. B. Schulferien ausschließen).
 
-### 🏢 `hall_booking` – Team-Zuordnung
-`hall_id`, `team_id`, `weekday`, `start_time`, `end_time`, `court` smallint null, `valid_from`, `valid_until`.
-Konfliktwarnung: Abfrage auf Überschneidung gleicher `hall_id`/`weekday`/(`court`) mit überlappendem Zeit- und Gültigkeitsintervall. Kein harter Constraint, da laut Spezifikation nur gewarnt wird. Serientermine können eine `hall_booking` referenzieren.
+### 🏢 `hall_bookings` ✅ – Team-Zuordnung
+`hall_id`, `team_id`, `weekday`, `start_time`, `end_time`, `court` smallint null (null = ganze Halle), `valid_from`, `valid_until`, `notes`.
+Konfliktwarnung: Abfrage auf Überschneidung gleicher `hall_id`/`weekday`/(`court`) mit überlappendem Zeit- und Gültigkeitsintervall. Kein harter Constraint, da laut Spezifikation nur gewarnt wird. Zusätzlich Warnung, wenn eine Belegung nicht in einer verfügbaren Zeit der Halle liegt. *(Später: Serientermine aus einer `hall_booking` erzeugen.)*
 
 Rechte: lesen = Trainer + Admin, schreiben = nur Admin.
 

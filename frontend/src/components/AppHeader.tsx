@@ -5,9 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { patch } from '../lib/api';
 import { changeLanguage, LANGUAGES, type Language } from '../i18n';
 
-/** Sections that follow in later phases (shown with a placeholder). */
-export const PLACEHOLDER_SECTIONS = ['cash', 'halls'] as const;
-export type MenuSection = (typeof PLACEHOLDER_SECTIONS)[number] | 'events' | 'teams' | 'chat' | 'polls' | 'tasks' | 'stats' | 'profile' | 'members';
+export type MenuSection = 'events' | 'teams' | 'chat' | 'polls' | 'tasks' | 'stats' | 'cash' | 'halls' | 'profile' | 'members';
 
 const MENU: MenuSection[] = ['events', 'teams', 'chat', 'polls', 'tasks', 'stats', 'cash', 'halls', 'profile'];
 
@@ -16,13 +14,15 @@ interface Props {
   tenantName: string;
   logoUrl: string | null;
   isAdmin: boolean;
+  /** Sections this member cannot use (e.g. cash for players) – the server checks anyway. */
+  hidden?: MenuSection[];
 }
 
 /**
  * Top bar with the department name and a drop-down menu at the top right –
  * deliberately no bottom tab bar, so the content keeps the screen space.
  */
-export function AppHeader({ tenantSlug, tenantName, logoUrl, isAdmin }: Props) {
+export function AppHeader({ tenantSlug, tenantName, logoUrl, isAdmin, hidden = [] }: Props) {
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -74,7 +74,7 @@ export function AppHeader({ tenantSlug, tenantName, logoUrl, isAdmin }: Props) {
             className="absolute right-2 top-full mt-1 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-lg"
           >
             <ul className="py-1">
-              {[...MENU, ...(isAdmin ? (['members'] as MenuSection[]) : [])].map((section) => (
+              {[...MENU, ...(isAdmin ? (['members'] as MenuSection[]) : [])].filter((section) => !hidden.includes(section)).map((section) => (
                 <li key={section}>
                   <NavLink
                     to={`/${tenantSlug}/${section}`}

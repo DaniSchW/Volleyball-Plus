@@ -3,10 +3,12 @@
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\CalendarController;
+use App\Http\Controllers\Api\CashController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\CrossNominationController;
 use App\Http\Controllers\Api\EventController;
 use App\Http\Controllers\Api\FileController;
+use App\Http\Controllers\Api\HallController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\LeagueController;
@@ -144,6 +146,25 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
         Route::delete('tasks/{task}', [TaskController::class, 'destroy']);
         Route::post('tasks/{task}/assignments', [TaskController::class, 'take']);
         Route::delete('tasks/{task}/assignments/{person}', [TaskController::class, 'release']);
+
+        Route::get('cash', [CashController::class, 'index']);
+        Route::get('cash-books/{book}', [CashController::class, 'show']);
+        Route::patch('cash-books/{book}', [CashController::class, 'update']);
+        Route::get('cash-books/{book}/export', [CashController::class, 'export']);
+        Route::post('cash-books/{book}/entries', [CashController::class, 'store']);
+        Route::post('cash-entries/{entry}/cancel', [CashController::class, 'cancel']);
+
+        Route::get('halls', [HallController::class, 'index']);
+        Route::post('halls', [HallController::class, 'store']);
+        Route::patch('halls/{hall}', [HallController::class, 'update']);
+        Route::delete('halls/{hall}', [HallController::class, 'destroy']);
+        Route::post('halls/{hall}/slots', [HallController::class, 'storeSlot']);
+        Route::patch('hall-slots/{slot}', [HallController::class, 'updateSlot']);
+        Route::delete('hall-slots/{slot}', [HallController::class, 'destroySlot']);
+        Route::post('halls/{hall}/bookings', [HallController::class, 'storeBooking']);
+        Route::patch('hall-bookings/{booking}', [HallController::class, 'updateBooking']);
+        Route::delete('hall-bookings/{booking}', [HallController::class, 'destroyBooking']);
+        Route::get('teams/{team}/hall-times', [HallController::class, 'team']);
 
         Route::get('notices', [NoticeController::class, 'index']);
         Route::post('notices', [NoticeController::class, 'store']);

@@ -25,7 +25,9 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  * - "yes" closes when the maximum number of participants is reached,
  * - with a Positions-Soll, "yes" counts for the player's main position, or
  *   the first secondary one with a free place (or the chosen position),
- * - cross-nominated guests may accept only from the opening time (GuestWindow).
+ * - cross-nominated guests may accept only if the event allows guests
+ *   (GuestWindow); with "only missing positions" only for a position of the
+ *   Positions-Soll (else the team's ideal squad) that still has a free place.
  */
 class RsvpService
 {
@@ -66,7 +68,9 @@ class RsvpService
             throw ValidationException::withMessages(['position' => __('events.position_not_yours')]);
         }
 
-        return DB::transaction(function () use ($event, $person, $status, $reason, $actor, $afterDeadline, $own, $position) {
+        $neededOnly = $guest && ! $manager && $event->guests_positions_only;
+
+        return DB::transaction(function () use ($event, $person, $status, $reason, $actor, $afterDeadline, $own, $position, $neededOnly) {
             // Lock the event so the participant limit holds with simultaneous replies.
             $locked = Event::query()->lockForUpdate()->findOrFail($event->id);
             $current = EventResponse::query()->where('event_id', $event->id)->where('person_id', $person->id)->first();
@@ -78,7 +82,7 @@ class RsvpService
                 }
             }
 
-            $asPosition = $status === RsvpStatus::Yes ? $this->positionFor($locked, $person, $own, $position, $current) : null;
+            $asPosition = $status === RsvpStatus::Yes ? $this->positionFor($locked, $person, $own, $position, $current, $neededOnly) : null;
 
             $response = $current ?? new EventResponse(['event_id' => $event->id, 'person_id' => $person->id]);
             $old = $current?->status;
@@ -106,16 +110,24 @@ class RsvpService
     /**
      * The position the "yes" counts for. Without limits simply the chosen or
      * main position; with limits the first one that still has a place.
+     * $neededOnly (guests): only positions still missing by the Positions-Soll
+     * or, without one, by the team's ideal squad.
      *
      * @param  list<string>  $own
      */
-    private function positionFor(Event $event, Person $person, array $own, ?string $chosen, ?EventResponse $current): ?string
+    private function positionFor(Event $event, Person $person, array $own, ?string $chosen, ?EventResponse $current, bool $neededOnly = false): ?string
     {
-        $limits = $event->position_limits ?? [];
+        $limits = $neededOnly ? $event->guestPositionNeeds() : ($event->position_limits ?? []);
         $candidates = $chosen !== null ? [$chosen] : $own;
         // Accepting again keeps the place one already has.
         if ($chosen === null && $current?->status === RsvpStatus::Yes && $current->as_position !== null) {
             $candidates = array_values(array_unique([$current->as_position, ...$candidates]));
+        }
+        if ($neededOnly) {
+            $candidates = array_values(array_filter($candidates, fn (string $c) => isset($limits[$c])));
+            if ($candidates === []) {
+                throw ValidationException::withMessages(['status' => __('events.guest_position_not_needed')]);
+            }
         }
         if ($limits === [] || $candidates === []) {
             return $candidates[0] ?? null;

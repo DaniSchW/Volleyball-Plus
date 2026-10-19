@@ -8,6 +8,7 @@ return [
     'reason_required' => 'Please give a reason.',
     'guests_not_allowed' => 'Guests cannot accept this training.',
     'position_full' => 'All places for :positions are taken.',
+    'guest_position_not_needed' => 'This training only looks for guests on missing positions – yours is not among them.',
     'position_not_yours' => 'This position is not in the profile.',
     'positions' => ['setter' => 'Setter', 'opposite' => 'Opposite', 'middle' => 'Middle blocker', 'outside' => 'Outside hitter', 'libero' => 'Libero', 'universal' => 'Universal'],
     'full' => 'The maximum number of participants is reached – no more acceptances possible.',

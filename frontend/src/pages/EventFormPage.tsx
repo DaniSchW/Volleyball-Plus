@@ -30,6 +30,7 @@ interface FormState {
   is_home: '' | 'home' | 'away';
   training_group_id: string;
   guests_allowed: boolean;
+  guests_positions_only: boolean;
   min_participants: string;
   repeat: boolean;
   weekdays: number[];
@@ -53,7 +54,7 @@ function initial(teamId?: string): FormState {
   return {
     type: 'training', title: '', description: '', allTeams: false, team_ids: teamId ? [teamId] : [], response_mode: 'rsvp',
     starts_at: startLocal, ends_at: addMinutes(startLocal, 120), meet_at: '', deadline_hours: '',
-    location_name: '', address: '', max_participants: '', position_limits: {}, opponent_id: '', is_home: '', training_group_id: '', guests_allowed: true, min_participants: '',
+    location_name: '', address: '', max_participants: '', position_limits: {}, opponent_id: '', is_home: '', training_group_id: '', guests_allowed: true, guests_positions_only: false, min_participants: '',
     repeat: false, weekdays: [((start.getDay() + 6) % 7) + 1], interval_weeks: 1, ends_on: '',
   };
 }
@@ -69,7 +70,7 @@ function fromEvent(e: EventDetail): FormState {
     address: e.address ?? '', max_participants: e.max_participants?.toString() ?? '',
     position_limits: Object.fromEntries(Object.entries(e.position_limits ?? {}).map(([k, v]) => [k, String(v)])), opponent_id: e.opponent?.id ?? '',
     is_home: e.is_home === null ? '' : e.is_home ? 'home' : 'away',
-    training_group_id: e.training_group?.id ?? '', guests_allowed: e.guests_allowed,
+    training_group_id: e.training_group?.id ?? '', guests_allowed: e.guests_allowed, guests_positions_only: e.guests_positions_only,
     min_participants: e.own_min_participants?.toString() ?? '',
     ...(e.series ? { weekdays: e.series.weekdays, interval_weeks: e.series.interval_weeks, ends_on: e.series.ends_on ?? '' } : {}),
   };
@@ -122,6 +123,7 @@ export function EventFormPage() {
       if (form.type === 'training') {
         body.training_group_id = form.training_group_id || null;
         body.guests_allowed = form.guests_allowed;
+        body.guests_positions_only = form.guests_allowed && form.guests_positions_only;
         body.min_participants = form.min_participants ? Number(form.min_participants) : null;
       }
       if (form.type === 'match') {
@@ -153,6 +155,7 @@ export function EventFormPage() {
   };
 
   const singleTeam = !form.allTeams && form.team_ids.length === 1 ? form.team_ids[0] : null;
+  const ideal = teams.data?.find((team) => team.id === singleTeam)?.ideal_positions ?? null;
 
   const toggleTeam = (id: string, on: boolean) => set('team_ids', on ? [...form.team_ids, id] : form.team_ids.filter((x) => x !== id));
   const canRepeat = form.type === 'training' && !form.allTeams && (eventId ? editSeries : true);
@@ -271,6 +274,8 @@ export function EventFormPage() {
           onGroupChange={(id) => set('training_group_id', id)}
           guestsAllowed={form.guests_allowed}
           onGuestsAllowedChange={(value) => set('guests_allowed', value)}
+          guestsPositionsOnly={form.guests_positions_only}
+          onGuestsPositionsOnlyChange={(value) => set('guests_positions_only', value)}
           minParticipants={form.min_participants}
           onMinParticipantsChange={(value) => set('min_participants', value)}
         />
@@ -302,6 +307,15 @@ export function EventFormPage() {
             <details open={Object.values(form.position_limits).some(Boolean)}>
               <summary className="cursor-pointer text-sm font-medium text-slate-700">{t('events.positionLimits')}</summary>
               <p className="mt-1 text-xs text-slate-500">{t('events.positionLimitsHint')}</p>
+              {ideal && (
+                <button
+                  type="button"
+                  className="mt-2 rounded-md border border-brand-700 px-3 py-1.5 text-xs font-medium text-brand-700"
+                  onClick={() => set('position_limits', Object.fromEntries(POSITIONS.map((p) => [p, ideal[p] === undefined ? '' : String(ideal[p])])))}
+                >
+                  {t('events.takeIdealSquad')}
+                </button>
+              )}
               <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
                 {POSITIONS.map((p) => (
                   <Field
@@ -333,12 +347,16 @@ export function EventFormPage() {
 }
 
 /** Training group (own trainings for part of the team), minimum of players, guests. */
-function TrainingOptions({ teamId, groupId, onGroupChange, guestsAllowed, onGuestsAllowedChange, minParticipants, onMinParticipantsChange }: {
+function TrainingOptions({
+  teamId, groupId, onGroupChange, guestsAllowed, onGuestsAllowedChange, guestsPositionsOnly, onGuestsPositionsOnlyChange, minParticipants, onMinParticipantsChange,
+}: {
   teamId: string | null;
   groupId: string;
   onGroupChange: (id: string) => void;
   guestsAllowed: boolean;
   onGuestsAllowedChange: (value: boolean) => void;
+  guestsPositionsOnly: boolean;
+  onGuestsPositionsOnlyChange: (value: boolean) => void;
   minParticipants: string;
   onMinParticipantsChange: (value: string) => void;
 }) {
@@ -372,6 +390,12 @@ function TrainingOptions({ teamId, groupId, onGroupChange, guestsAllowed, onGues
         />
         {!groupId && <Toggle label={t('events.guestsAllowed')} checked={guestsAllowed} onChange={onGuestsAllowedChange} />}
         {!groupId && <p className="-mt-2 text-xs text-slate-500">{t('events.guestsAllowedHint')}</p>}
+        {!groupId && guestsAllowed && (
+          <>
+            <Toggle label={t('events.guestsPositionsOnly')} checked={guestsPositionsOnly} onChange={onGuestsPositionsOnlyChange} />
+            <p className="-mt-2 text-xs text-slate-500">{t('events.guestsPositionsOnlyHint')}</p>
+          </>
+        )}
       </div>
     </Card>
   );

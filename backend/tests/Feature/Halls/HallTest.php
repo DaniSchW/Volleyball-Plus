@@ -157,4 +157,51 @@ class HallTest extends TestCase
         $this->loginAs($this->admin)->deleteJson("/api/v1/t/ssv-ulm/halls/{$hall['id']}")->assertOk()->assertJsonPath('data', []);
         $this->loginAs($this->paul)->getJson("/api/v1/t/ssv-ulm/teams/{$this->team->id}/hall-times")->assertJsonPath('data', []);
     }
+
+    public function test_address_fields_and_opening_hours(): void
+    {
+        $hall = $this->hall(['street' => 'Kuhbergstraße', 'house_number' => '12a', 'postal_code' => '89077', 'city' => 'Ulm']);
+        $this->assertSame('Kuhbergstraße 12a, 89077 Ulm', $hall['address']);
+        $this->assertSame(['Kuhbergstraße', '12a', '89077', 'Ulm'], [$hall['street'], $hall['house_number'], $hall['postal_code'], $hall['city']]);
+
+        // All address fields are optional.
+        $this->assertSame('Ulm', $this->hall(['name' => 'Halle Ulm', 'city' => 'Ulm'])['address']);
+        $this->assertNull($this->hall(['name' => 'Ohne Adresse'])['address']);
+
+        // A time limited to a period stays when the weekly hours change.
+        $this->loginAs($this->admin)->postJson("/api/v1/t/ssv-ulm/halls/{$hall['id']}/slots", [
+            'weekday' => 6, 'start_time' => '10:00', 'end_time' => '14:00', 'valid_from' => '2026-12-01', 'valid_until' => '2026-12-31',
+        ])->assertCreated();
+
+        $hours = [
+            ['weekday' => 1, 'start_time' => '18:00', 'end_time' => '20:00'],
+            ['weekday' => 2, 'start_time' => '18:00', 'end_time' => '22:00', 'courts' => [1, 2]],
+            ['weekday' => 2, 'start_time' => '16:00', 'end_time' => '17:30', 'courts' => [1, 2, 3]],
+        ];
+        $data = $this->loginAs($this->admin)->patchJson("/api/v1/t/ssv-ulm/halls/{$hall['id']}", [
+            'name' => 'Kuhberghalle', 'courts' => 3, 'street' => 'Kuhbergstraße', 'house_number' => '12a', 'postal_code' => '89077', 'city' => 'Ulm', 'opening_hours' => $hours,
+        ])->assertOk()->json('data');
+        $slots = collect($data)->firstWhere('id', $hall['id'])['slots'];
+        $this->assertSame([
+            [1, '18:00', '20:00', null, null],
+            [2, '16:00', '17:30', null, null],
+            [2, '18:00', '22:00', [1, 2], null],
+            [6, '10:00', '14:00', null, '2026-12-01'],
+        ], array_map(fn ($s) => [$s['weekday'], $s['start_time'], $s['end_time'], $s['courts'], $s['valid_from']], $slots));
+
+        // Replacing: Monday only now; the period stays.
+        $data = $this->loginAs($this->admin)->patchJson("/api/v1/t/ssv-ulm/halls/{$hall['id']}", [
+            'name' => 'Kuhberghalle', 'courts' => 3, 'opening_hours' => [['weekday' => 1, 'start_time' => '17:00', 'end_time' => '21:00']],
+        ])->assertOk()->json('data');
+        $this->assertSame([[1, '17:00'], [6, '10:00']], array_map(fn ($s) => [$s['weekday'], $s['start_time']], collect($data)->firstWhere('id', $hall['id'])['slots']));
+
+        // Invalid times or parts are refused; players cannot change anything.
+        $this->loginAs($this->admin)->patchJson("/api/v1/t/ssv-ulm/halls/{$hall['id']}", [
+            'name' => 'Kuhberghalle', 'courts' => 3, 'opening_hours' => [['weekday' => 1, 'start_time' => '21:00', 'end_time' => '17:00']],
+        ])->assertUnprocessable();
+        $this->loginAs($this->admin)->patchJson("/api/v1/t/ssv-ulm/halls/{$hall['id']}", [
+            'name' => 'Kuhberghalle', 'courts' => 3, 'opening_hours' => [['weekday' => 1, 'start_time' => '17:00', 'end_time' => '21:00', 'courts' => [4]]],
+        ])->assertUnprocessable();
+        $this->loginAs($this->paul)->patchJson("/api/v1/t/ssv-ulm/halls/{$hall['id']}", ['name' => 'X', 'courts' => 3, 'opening_hours' => []])->assertForbidden();
+    }
 }

@@ -12,10 +12,12 @@ use App\Support\Auth\Permissions;
 use App\Support\Halls\HallPlan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Halls, their available times and which team trains when. Every member
  * sees the plan, only admins change it. Overlaps are reported, not blocked.
+ * The times are training times – match days and other events stay apart.
  */
 class HallController extends Controller
 {
@@ -37,7 +39,8 @@ class HallController extends Controller
     public function store(Request $request): JsonResponse
     {
         $this->authorizeAdmin();
-        Hall::create($this->hallData($request));
+        $hall = Hall::create($this->hallData($request));
+        $this->saveOpeningHours($request, $hall);
 
         return $this->plan(201);
     }
@@ -46,14 +49,55 @@ class HallController extends Controller
     {
         $this->authorizeAdmin();
         $data = $this->hallData($request);
-        $court = HallBooking::query()->where('hall_id', $hall->id)->get()->map(fn (HallBooking $b) => $b->courtList())
+        $court = HallBooking::query()->where('hall_id', $hall->id)->get()->toBase()->map(fn (HallBooking $b) => $b->courtList())
             ->merge(HallSlot::query()->where('hall_id', $hall->id)->get()->map(fn (HallSlot $s) => $s->courtList()))
             ->flatMap(fn (?array $courts) => $courts ?? [])->filter(fn (int $c) => $c > $data['courts'])->min();
         abort_if($court !== null, 422, __('halls.courts_in_use', ['court' => $court]));
 
         $hall->update($data);
+        $this->saveOpeningHours($request, $hall);
 
         return $this->plan();
+    }
+
+    /**
+     * The weekly hall times like opening hours of a shop ("Mo 18–20, Di …").
+     * Replaces the times without a period; times limited to a period
+     * (holidays, a season) stay as they are.
+     */
+    private function saveOpeningHours(Request $request, Hall $hall): void
+    {
+        if (! $request->has('opening_hours')) {
+            return;
+        }
+        $data = $request->validate([
+            'opening_hours' => ['present', 'array', 'max:50'],
+            'opening_hours.*.weekday' => ['required', 'integer', 'between:1,7'],
+            'opening_hours.*.start_time' => ['required', 'date_format:H:i'],
+            'opening_hours.*.end_time' => ['required', 'date_format:H:i'],
+            'opening_hours.*.courts' => ['nullable', 'array', 'max:12'],
+            'opening_hours.*.courts.*' => ['integer', 'min:1'],
+        ]);
+        $rows = [];
+        foreach ($data['opening_hours'] as $row) {
+            abort_if($row['end_time'] <= $row['start_time'], 422, __('halls.end_after_start'));
+            $courts = array_values(array_unique(array_map('intval', $row['courts'] ?? [])));
+            sort($courts);
+            abort_if($courts !== [] && max($courts) > $hall->courts, 422, __('halls.court_too_high', ['courts' => $hall->courts]));
+            $rows[] = [
+                'weekday' => (int) $row['weekday'],
+                'start_time' => $row['start_time'].':00',
+                'end_time' => $row['end_time'].':00',
+                'courts' => $courts === [] || count($courts) === $hall->courts ? null : $courts,
+            ];
+        }
+
+        DB::transaction(function () use ($hall, $rows) {
+            HallSlot::query()->where('hall_id', $hall->id)->whereNull('valid_from')->whereNull('valid_until')->delete();
+            foreach ($rows as $row) {
+                HallSlot::create(['hall_id' => $hall->id] + $row);
+            }
+        });
     }
 
     public function destroy(Hall $hall): JsonResponse
@@ -142,7 +186,10 @@ class HallController extends Controller
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:120'],
-            'address' => ['nullable', 'string', 'max:255'],
+            'street' => ['nullable', 'string', 'max:120'],
+            'house_number' => ['nullable', 'string', 'max:20'],
+            'postal_code' => ['nullable', 'string', 'max:10'],
+            'city' => ['nullable', 'string', 'max:80'],
             'courts' => ['required', 'integer', 'between:1,12'],
             'contact_name' => ['nullable', 'string', 'max:120'],
             'contact_phone' => ['nullable', 'string', 'max:40'],

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\CrossNominationMode;
+use App\Enums\Position;
 use App\Enums\RsvpVisibility;
 use App\Enums\TeamGender;
 use App\Enums\TeamRole;
@@ -27,7 +28,7 @@ class TeamController extends Controller
 
     /** Team settings – admin and the team's trainers. */
     private const SETTING_FIELDS = [
-        'min_participants', 'default_max_participants', 'cross_nomination_mode', 'cross_nomination_hours',
+        'min_participants', 'default_max_participants', 'ideal_positions', 'cross_nomination_mode', 'cross_nomination_hours',
         'decline_reason_required', 'maybe_reason_required', 'reasons_visible_to_teammates', 'rsvp_visibility',
     ];
 
@@ -76,6 +77,9 @@ class TeamController extends Controller
             array_flip($allowed),
         ));
 
+        if (array_key_exists('ideal_positions', $data)) {
+            $data['ideal_positions'] = array_filter($data['ideal_positions'] ?? [], fn ($n) => $n !== null) ?: null;
+        }
         $team->fill($data);
         $hierarchyChanged = $team->isDirty(['league_id', 'rank_in_league', 'gender', 'is_youth']);
         $team->save();
@@ -156,6 +160,7 @@ class TeamController extends Controller
             'is_youth' => $team->is_youth,
             'league_name' => $team->league?->name,
             'color' => $team->color,
+            'ideal_positions' => $team->ideal_positions,
             'can_manage' => $this->permissions->canManageTeam($member, $team),
             'can_invite' => $this->permissions->canInviteToTeam($member, $team),
             'can_see' => $this->permissions->canSeeTeam($member, $team),
@@ -175,6 +180,7 @@ class TeamController extends Controller
             'settings' => [
                 'min_participants' => $team->min_participants,
                 'default_max_participants' => $team->default_max_participants,
+                'ideal_positions' => $team->ideal_positions,
                 'cross_nomination_mode' => $team->cross_nomination_mode->value,
                 'cross_nomination_hours' => $team->cross_nomination_hours,
                 'decline_reason_required' => $team->decline_reason_required,
@@ -210,6 +216,8 @@ class TeamController extends Controller
         return [
             'min_participants' => ['sometimes', 'nullable', 'integer', 'between:1,99'],
             'default_max_participants' => ['sometimes', 'nullable', 'integer', 'between:1,99'],
+            'ideal_positions' => ['sometimes', 'nullable', 'array:'.implode(',', array_column(Position::cases(), 'value'))],
+            'ideal_positions.*' => ['nullable', 'integer', 'between:0,50'],
             'cross_nomination_mode' => ['sometimes', Rule::enum(CrossNominationMode::class)],
             'cross_nomination_hours' => ['sometimes', 'nullable', 'integer', 'between:1,336'],
             'decline_reason_required' => ['sometimes', 'boolean'],

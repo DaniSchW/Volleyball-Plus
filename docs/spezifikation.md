@@ -97,6 +97,8 @@ Schiedsrichter-Lizenz: Im Spielerprofil kann eine Schiedsrichter-Lizenz hinterle
 
 Quernominierung aktivieren: Die Quernominierung ist pro Spieler aktivierbar. Der Trainer hat dafür einen Button, mit dem er Spieler aus unteren Teams zu Trainings seines Teams einladen kann.
 
+Idealkader und fehlende Positionen: Jedes Team legt fest, wie es sich seinen idealen Kader vorstellt – wie viele Spieler je Position (z. B. Mixed oft ohne Libero und Diagonal, dafür mehr von den anderen Positionen). Pro Training kann der Trainer „Gäste nur für fehlende Positionen“ einschalten: Dann können sich nur Quernominierte eintragen, deren Position laut Positions-Soll des Trainings (sonst laut Idealkader) noch gesucht wird.
+
 Mannschaftshierarchie: Die Teams einer Abteilung stehen in einer Hierarchie. Ein Spieler aus einem höheren Team kann nicht in einem niedrigeren Team mitspielen; Quernominierung ist nur von unten nach oben möglich.
 
 Liga-Baum: Für jedes Team wird die Liga aus dem Liga-Baum des Volleyballs ausgewählt (Ligaebenen von der Bundesliga abwärts bis zur untersten Spielklasse). Der Liga-Baum soll vom Admin pflegbar sein, da die Ligastruktur je Landesverband abweicht. Aus der gewählten Liga ergibt sich die Rangfolge der Teams für die Hierarchie.
@@ -105,7 +107,7 @@ Geschlechtsart des Teams: Beim Team wird definiert, ob es ein Herren-, Damen- od
 
 Hallen- und Trainingszeitenplan: Es gibt einen Plan für die verfügbaren Hallen und Trainingszeiten der Abteilung. Ein Team kann einer Halle (ganz oder einzelnen Hallenteilen) und einer Zeit zugeordnet werden. Belegen zwei Teams dieselbe Halle zur selben Zeit, warnt die App.
 
-Hallenübersicht: Es gibt eine Übersicht aller Hallen. Hallen werden in der App mit den jeweiligen verfügbaren Zeiten und Hallenteilen angelegt (z. B. nur 2 von 3 Teilen, wenn den dritten Teil eine andere Sportart nutzt), dazu ein Ansprechpartner je Halle. Der Bereich ist für alle Mitglieder einsehbar und nur für Admins bearbeitbar.
+Hallenübersicht: Es gibt eine Übersicht aller Hallen. Hallen werden in der App mit den jeweiligen verfügbaren Zeiten und Hallenteilen angelegt (z. B. nur 2 von 3 Teilen, wenn den dritten Teil eine andere Sportart nutzt), dazu ein Ansprechpartner je Halle. Der Bereich ist für alle Mitglieder einsehbar und nur für Admins bearbeitbar. Die Adresse einer Halle besteht aus Straße, Hausnummer, PLZ und Ort (alle optional). Die verfügbaren Trainingszeiten werden direkt in der Halle wie Öffnungszeiten gepflegt (Montag 18:00–20:00, Dienstag …); sie gelten nur für Trainings, Spieltage und andere Termine sind davon unabhängig.
 
 Infobereich für Spieler: Im oberen Bereich der Spieleransicht gibt es einen Infobereich. Der Trainer kann dort Notizen für einen wählbaren Zeitraum einblenden. Der Admin kann das über alle Teams hinweg.
 
@@ -166,3 +168,7 @@ Die App übernimmt die Funktionen beider Systeme als Grundlage (Termine, Aufgabe
 ## Status
 
 Dies ist der aktuelle Stand des Brainstormings und kann in weiteren Iterationen ergänzt werden (z. B. Fahrgemeinschaften, Spielberichte im Detail, konkretes Datenmodell). Claude Code soll auf Basis dieser Spezifikation einen technischen Umsetzungsplan sowie die Datenmodellierung vorschlagen, bevor die Implementierung beginnt.
+
+Positionen in der Rückmeldeliste: Bei den Spielern im Termin steht ihre Position als Kürzel, damit der Trainer schnell sieht, wer auf welcher Position kommt.
+
+Konto löschen: Jede Person kann ihr ganzes Konto selbst löschen – abgesichert durch erneutes Eintippen der E-Mail-Adresse. Plattform-Admins können gesperrte Vereine endgültig löschen.

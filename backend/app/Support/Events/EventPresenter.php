@@ -104,7 +104,9 @@ class EventPresenter
         $data['positions'] = null;
         $data['tasks'] = $this->tasks($event, $viewer, $canManage);
         // Places taken per limited position – numbers only, visible to everybody invited.
-        $data['position_taken'] = $event->position_limits ? EventResponse::query()->where('event_id', $event->id)
+        $needs = $event->guests_positions_only ? $event->guestPositionNeeds() : [];
+        $data['guest_position_needs'] = $needs ?: null;
+        $data['position_taken'] = $event->position_limits || $needs ? EventResponse::query()->where('event_id', $event->id)
             ->where('status', RsvpStatus::Yes)->whereNotNull('as_position')
             ->selectRaw('as_position, count(*) as n')->groupBy('as_position')->toBase()->pluck('n', 'as_position')
             ->map(fn ($n) => (int) $n)->all() : null;
@@ -195,6 +197,7 @@ class EventPresenter
             'max_participants' => $event->max_participants,
             'own_min_participants' => $event->min_participants,
             'guests_allowed' => $event->guests_allowed,
+            'guests_positions_only' => (bool) $event->guests_positions_only,
             'position_limits' => $event->position_limits,
             'is_full' => $event->max_participants !== null && $yes >= $event->max_participants,
             'min_participants' => $minimum,

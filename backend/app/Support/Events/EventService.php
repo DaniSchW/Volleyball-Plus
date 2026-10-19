@@ -27,7 +27,7 @@ class EventService
 {
     public const EVENT_FIELDS = [
         'type', 'response_mode', 'title', 'description', 'starts_at', 'ends_at', 'meet_at', 'rsvp_deadline',
-        'location_name', 'address', 'max_participants', 'min_participants', 'guests_allowed', 'position_limits', 'opponent_id', 'is_home', 'cross_nomination_opens_at', 'training_group_id',
+        'location_name', 'address', 'max_participants', 'min_participants', 'guests_allowed', 'guests_positions_only', 'position_limits', 'opponent_id', 'is_home', 'cross_nomination_opens_at', 'training_group_id',
     ];
 
     public function __construct(
@@ -122,6 +122,7 @@ class EventService
             'position_limits' => $attributes['position_limits'] ?? null,
             'min_participants' => $attributes['min_participants'] ?? null,
             'guests_allowed' => $attributes['guests_allowed'] ?? true,
+            'guests_positions_only' => $attributes['guests_positions_only'] ?? false,
             'training_group_id' => $attributes['training_group_id'] ?? null,
         ])->save();
 
@@ -206,6 +207,7 @@ class EventService
             'position_limits' => $attributes['position_limits'] ?? null,
             'min_participants' => $attributes['min_participants'] ?? null,
             'guests_allowed' => $attributes['guests_allowed'] ?? true,
+            'guests_positions_only' => $attributes['guests_positions_only'] ?? false,
             'training_group_id' => $attributes['training_group_id'] ?? null,
             'created_by' => $creator->id,
         ]);

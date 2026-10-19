@@ -4,6 +4,8 @@ return [
     'registered' => 'Danke! Wir prüfen die Anmeldung und melden uns per E-Mail, sobald euer Verein freigeschaltet ist.',
     'slug_taken' => 'Dieses Kürzel ist schon vergeben. Bitte wähle ein anderes.',
     'not_pending' => 'Dieser Verein wartet nicht auf Freigabe.',
+    'suspend_first' => 'Nur gesperrte Vereine können gelöscht werden. Sperre den Verein zuerst.',
+    'confirm_slug' => 'Bitte gib zur Bestätigung die Adresse (Kürzel) des Vereins genau ein.',
     'mail' => [
         'new' => [
             'title' => 'Neue Vereinsanmeldung: :name',

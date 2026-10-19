@@ -165,7 +165,11 @@
     "reasonsVisible": "Teammates see reasons",
     "training": "Training",
     "minParticipants": "Minimum participants",
-    "maxParticipants": "Maximum participants"
+    "maxParticipants": "Maximum participants",
+    "idealSquad": "Ideal squad",
+    "idealSquadHint": "How many players per position does the team want? E.g. mixed without libero and opposite, but more outside hitters. Empty = any, 0 = none. Used as template for the Positions-Soll and as the measure when guests may only accept for missing positions.",
+    "idealSquadTotal_one": "{{count}} player in total",
+    "idealSquadTotal_other": "{{count}} players in total"
   },
   "profile": {
     "standard": "Profile",
@@ -206,7 +210,14 @@
       "height_cm": "Height (cm)",
       "reach_height_cm": "Reach (cm)",
       "jump_reach_cm": "Jump reach (cm)"
-    }
+    },
+    "deleteAccount": "Delete account",
+    "deleteAccountWarning": "This cannot be undone.",
+    "deleteAccountProfiles": "Your profile is deleted in all clubs, with replies, tasks and votes.",
+    "deleteAccountChildren": "Your children’s profiles stay in the club, but you no longer have access to them.",
+    "deleteAccountKept": "Chat messages and cash bookings stay without your name.",
+    "deleteAccountConfirm": "Type your e-mail address to confirm ({{email}})",
+    "deleteAccountButton": "Delete account for good"
   },
   "child": {
     "title": "What may the child do by itself?",
@@ -373,7 +384,13 @@
     "hallFree": "free",
     "hallTaken": "taken: {{teams}}",
     "takeHall": "Use",
-    "guestsNotAllowed": "Guests cannot accept this training."
+    "guestsNotAllowed": "Guests cannot accept this training.",
+    "guestsPositionsOnly": "Guests only for missing positions",
+    "guestsPositionsOnlyHint": "Cross-nominated players can only accept if their position still has a place in the Positions-Soll – without one the team’s ideal squad counts.",
+    "guestsPositionsOnlyInfo": "Guests can only accept on missing positions.",
+    "takeIdealSquad": "Use the team’s ideal squad",
+    "idealSquad": "Wanted for guests (ideal squad)",
+    "idealSquadInfo": "Guests can only accept as long as their position has a place here."
   },
   "notifications": {
     "title": "Notifications",
@@ -690,7 +707,7 @@
     "delete": "Delete hall",
     "deleteConfirm": "Delete hall “{{name}}” with all times and bookings?",
     "deleteSlot": "Delete available time {{time}}",
-    "addSlot": "Available time",
+    "addSlot": "Time for a period only",
     "addBooking": "Assign team",
     "editBooking": "Edit booking of {{team}}",
     "editBookingTitle": "Edit booking",
@@ -719,7 +736,19 @@
     "contactName": "Name",
     "contactPhone": "Phone",
     "contactEmail": "E-mail",
-    "slotCourtHint": "Which parts are available to us? Nothing chosen = whole hall (e.g. part 3 is used by another sport)."
+    "slotCourtHint": "Which parts are available to us? Nothing chosen = whole hall (e.g. part 3 is used by another sport).",
+    "street": "Street",
+    "houseNumber": "No.",
+    "postalCode": "Postcode",
+    "city": "City",
+    "openingHours": "Training times of the hall",
+    "openingHoursHint": "Like opening hours: when is the hall available for training every week? Several times per day with +. Match days and other events are not affected.",
+    "closed": "no time",
+    "openFrom": "{{day}} from",
+    "openUntil": "{{day}} until",
+    "removeTime": "Remove time {{time}}",
+    "addTime": "Add a time on {{day}}",
+    "trainingTimes": "Training times"
   },
   "privacy": {
     "title": "Personal data",
@@ -775,7 +804,9 @@
     "rejectConfirm": "Reject and delete the registration of “{{name}}”?",
     "suspend": "Suspend",
     "suspendConfirm": "Suspend “{{name}}”? Nobody from the club can log in then; the data is kept.",
-    "reactivate": "Reactivate"
+    "reactivate": "Reactivate",
+    "delete": "Delete for good",
+    "deleteConfirm": "Delete “{{name}}” with all data for good? Type the short name “{{slug}}” to confirm:"
   },
   "activity": {
     "title": "Activity log",
@@ -809,5 +840,13 @@
       "league": "League",
       "training_group": "Training group"
     }
+  },
+  "positionsShort": {
+    "setter": "S",
+    "opposite": "OPP",
+    "middle": "MB",
+    "outside": "OH",
+    "libero": "L",
+    "universal": "U"
   }
 }

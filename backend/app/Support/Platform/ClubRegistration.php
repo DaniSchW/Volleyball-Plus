@@ -14,10 +14,13 @@ use App\Models\Tenant;
 use App\Models\TenantMember;
 use App\Support\Auth\MagicLinks;
 use App\Support\Tenancy\TenantContext;
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Clubs register their volleyball department themselves; a platform admin
@@ -116,6 +119,35 @@ class ClubRegistration
             }
             $tenant->delete();
         });
+
+        $stillMember = TenantMember::withoutGlobalScopes()->whereIn('account_id', $accountIds)->pluck('account_id');
+        Account::query()->whereIn('id', $accountIds->diff($stillMember))->where('is_platform_admin', false)->delete();
+    }
+
+    /**
+     * Removes a (suspended) club completely: every row of the department,
+     * its files, and the logins that belong to no other club.
+     */
+    public function destroy(Tenant $tenant): void
+    {
+        $accountIds = TenantMember::withoutGlobalScopes()->where('tenant_id', $tenant->id)->pluck('account_id');
+        $tables = collect(Schema::getTables())->pluck('name')
+            ->filter(fn (string $table) => $table !== 'tenants' && Schema::hasColumn($table, 'tenant_id'))->values();
+
+        // References inside the department may block a certain order – repeat until all are gone.
+        for ($pass = 0; $tables->isNotEmpty() && $pass < 20; $pass++) {
+            $tables = $tables->reject(function (string $table) use ($tenant) {
+                try {
+                    DB::table($table)->where('tenant_id', $tenant->id)->delete();
+
+                    return true;
+                } catch (QueryException) {
+                    return false;
+                }
+            })->values();
+        }
+        $tenant->delete();
+        Storage::disk('local')->deleteDirectory('tenants/'.$tenant->id);
 
         $stillMember = TenantMember::withoutGlobalScopes()->whereIn('account_id', $accountIds)->pluck('account_id');
         Account::query()->whereIn('id', $accountIds->diff($stillMember))->where('is_platform_admin', false)->delete();

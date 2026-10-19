@@ -8,6 +8,7 @@ return [
     'reason_required' => 'Bitte gib einen Grund an.',
     'guests_not_allowed' => 'Gäste können für dieses Training nicht zusagen.',
     'position_full' => 'Für :positions sind alle Plätze vergeben.',
+    'guest_position_not_needed' => 'Für dieses Training werden nur Gäste auf fehlenden Positionen gesucht – deine Position ist nicht dabei.',
     'position_not_yours' => 'Diese Position ist im Profil nicht eingetragen.',
     'positions' => ['setter' => 'Zuspiel', 'opposite' => 'Diagonal', 'middle' => 'Mittelblock', 'outside' => 'Außenangriff', 'libero' => 'Libero', 'universal' => 'Universal'],
     'full' => 'Das Teilnehmermaximum ist erreicht – keine weiteren Zusagen möglich.',

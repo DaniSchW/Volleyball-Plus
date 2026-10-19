@@ -263,6 +263,7 @@ class EventController extends Controller
             'is_home' => ['sometimes', 'nullable', 'boolean'],
             'cross_nomination_opens_at' => ['sometimes', 'nullable', 'date'],
             'guests_allowed' => ['sometimes', 'boolean'],
+            'guests_positions_only' => ['sometimes', 'boolean'],
             'min_participants' => ['sometimes', 'nullable', 'integer', 'between:1,500'],
             'training_group_id' => ['sometimes', 'nullable', 'string'],
             'repeat' => ['sometimes', 'nullable', 'array'],

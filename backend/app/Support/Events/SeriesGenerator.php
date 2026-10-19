@@ -154,6 +154,7 @@ class SeriesGenerator
             'position_limits' => $series->position_limits,
             'min_participants' => $series->min_participants,
             'guests_allowed' => $series->guests_allowed,
+            'guests_positions_only' => $series->guests_positions_only,
             'training_group_id' => $series->training_group_id,
         ];
     }

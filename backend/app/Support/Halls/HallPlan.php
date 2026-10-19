@@ -11,6 +11,8 @@ use Illuminate\Support\Collection;
  * The department's hall plan. Two bookings conflict when they use the same
  * hall on the same weekday at overlapping times and validity periods, and
  * a shared part of the hall (no parts = whole hall). Conflicts only warn.
+ * Hall times and bookings concern trainings; match days and other events
+ * are not checked against them.
  */
 class HallPlan
 {
@@ -31,6 +33,10 @@ class HallPlan
             'id' => $hall->id,
             'name' => $hall->name,
             'address' => $hall->address,
+            'street' => $hall->street,
+            'house_number' => $hall->house_number,
+            'postal_code' => $hall->postal_code,
+            'city' => $hall->city,
             'courts' => $hall->courts,
             'contact' => $hall->contact_name || $hall->contact_phone || $hall->contact_email
                 ? ['name' => $hall->contact_name, 'phone' => $hall->contact_phone, 'email' => $hall->contact_email] : null,

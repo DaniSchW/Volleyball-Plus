@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
-import { api, errorText, post, POSITIONS, type EventDetail, type ResponseRow, type RsvpStatus } from '../lib/api';
+import { api, errorText, post, POSITIONS, type EventDetail, type Position, type ResponseRow, type RsvpStatus } from '../lib/api';
 import { formatDateTime, formatLongDay, formatTime } from '../lib/dates';
 import { useTenantPath, useTenantSlug } from '../lib/queries';
 import { RsvpControl } from '../components/events/RsvpControl';
@@ -104,7 +104,11 @@ export function EventPage() {
 
       {!cancelled && <TasksCard event={e} />}
 
-      {e.position_limits && Object.keys(e.position_limits).length > 0 && <PositionLimits event={e} />}
+      {e.position_limits && Object.keys(e.position_limits).length > 0 && <PositionLimits event={e} limits={e.position_limits} />}
+      {e.guests_positions_only && !(e.position_limits && Object.keys(e.position_limits).length > 0) && e.guest_position_needs && (
+        <PositionLimits event={e} limits={e.guest_position_needs} ideal />
+      )}
+      {e.guests_positions_only && <p className="text-xs text-slate-500">{t('events.guestsPositionsOnlyInfo')}</p>}
 
       {e.positions && <Positions positions={e.positions} />}
 
@@ -130,17 +134,18 @@ export function EventPage() {
   );
 }
 
-/** Positions-Soll: places taken per limited position, for everybody invited. */
-function PositionLimits({ event }: { event: EventDetail }) {
+/** Positions-Soll (or the team's ideal squad): places taken per position, for everybody invited. */
+function PositionLimits({ event, limits, ideal = false }: { event: EventDetail; limits: Partial<Record<Position, number>>; ideal?: boolean }) {
   const { t } = useTranslation();
-  const keys = POSITIONS.filter((p) => event.position_limits?.[p] !== undefined);
+  // In the ideal squad 0 just means "not wanted" – nothing to show for guests.
+  const keys = POSITIONS.filter((p) => limits[p] !== undefined && !(ideal && limits[p] === 0));
 
   return (
-    <Card title={t('events.positionLimits')}>
+    <Card title={ideal ? t('events.idealSquad') : t('events.positionLimits')}>
       <ul className="flex flex-wrap gap-2">
         {keys.map((key) => {
           const taken = event.position_taken?.[key] ?? 0;
-          const limit = event.position_limits![key]!;
+          const limit = limits[key]!;
           return (
             <li key={key} className={`rounded-full px-3 py-1 text-sm ${taken >= limit ? 'bg-red-50 text-red-800' : 'bg-slate-100'}`}>
               {t(`positions.${key}`)}: <span className="font-semibold">{taken}/{limit}</span>
@@ -149,7 +154,7 @@ function PositionLimits({ event }: { event: EventDetail }) {
           );
         })}
       </ul>
-      <p className="mt-2 text-xs text-slate-500">{t('events.positionLimitsInfo')}</p>
+      <p className="mt-2 text-xs text-slate-500">{ideal ? t('events.idealSquadInfo') : t('events.positionLimitsInfo')}</p>
     </Card>
   );
 }
@@ -188,8 +193,15 @@ function Responses({ event }: { event: EventDetail }) {
     );
   }
 
-  const byGroup = (group: RsvpStatus | 'open'): ResponseRow[] =>
-    event.responses!.filter((row) => (row.status ?? 'open') === group);
+  // Accepted players sorted by position, so the trainer sees the line-up at a glance.
+  const order = (row: ResponseRow) => {
+    const position = shownPosition(row);
+    return position ? POSITIONS.indexOf(position) : POSITIONS.length;
+  };
+  const byGroup = (group: RsvpStatus | 'open'): ResponseRow[] => {
+    const rows = event.responses!.filter((row) => (row.status ?? 'open') === group);
+    return group === 'yes' ? [...rows].sort((a, b) => order(a) - order(b)) : rows;
+  };
 
   return (
     <Card title={t('events.replies')}>
@@ -209,10 +221,11 @@ function Responses({ event }: { event: EventDetail }) {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm">{row.person.name}</span>
                       <span className="block truncate text-xs text-slate-500">
-                        {[row.person.is_guest && t('events.guest'), row.person.role !== 'player' && !row.person.is_guest && t(`roles.${row.person.role}`), (row.status === 'yes' && row.as_position ? row.as_position : row.person.primary_position) && t(`positions.${row.status === 'yes' && row.as_position ? row.as_position : row.person.primary_position}`), row.reason]
+                        {[row.person.is_guest && t('events.guest'), row.person.role !== 'player' && !row.person.is_guest && t(`roles.${row.person.role}`), shownPosition(row) && t(`positions.${shownPosition(row)}`), row.reason]
                           .filter(Boolean).join(' · ')}
                       </span>
                     </span>
+                    {row.person.role === 'player' && <PositionBadges row={row} />}
                   </li>
                 ))}
               </ul>
@@ -221,5 +234,35 @@ function Responses({ event }: { event: EventDetail }) {
         })}
       </div>
     </Card>
+  );
+}
+
+/** The position a player counts for: the accepted one, else the main position. */
+const shownPosition = (row: ResponseRow): Position | null =>
+  (row.status === 'yes' && row.as_position) || row.person.primary_position || row.person.positions?.[0] || null;
+
+const BADGE_COLORS: Record<Position, string> = {
+  setter: 'bg-amber-100 text-amber-900 ring-amber-300',
+  opposite: 'bg-rose-100 text-rose-900 ring-rose-300',
+  middle: 'bg-sky-100 text-sky-900 ring-sky-300',
+  outside: 'bg-emerald-100 text-emerald-900 ring-emerald-300',
+  libero: 'bg-violet-100 text-violet-900 ring-violet-300',
+  universal: 'bg-slate-100 text-slate-800 ring-slate-300',
+};
+
+/** Short position badges next to the name: the counted position bold, further ones light. */
+function PositionBadges({ row }: { row: ResponseRow }) {
+  const { t } = useTranslation();
+  const main = shownPosition(row);
+  if (!main) return null;
+  const others = (row.person.positions ?? []).filter((p) => p !== main);
+
+  return (
+    <span className="flex shrink-0 items-center gap-1">
+      <span title={t(`positions.${main}`)} className={`rounded-md px-2 py-0.5 text-xs font-bold ring-1 ${BADGE_COLORS[main]}`}>{t(`positionsShort.${main}`)}</span>
+      {others.map((p) => (
+        <span key={p} title={t(`positions.${p}`)} className="rounded-md px-1.5 py-0.5 text-[0.65rem] font-medium text-slate-500 ring-1 ring-slate-200">{t(`positionsShort.${p}`)}</span>
+      ))}
+    </span>
   );
 }

@@ -15,13 +15,30 @@ class Hall extends Model
 {
     use BelongsToTenant, HasUlids, LogsActivity;
 
-    protected $fillable = ['name', 'address', 'courts', 'contact_name', 'contact_phone', 'contact_email', 'notes'];
+    protected $fillable = ['name', 'street', 'house_number', 'postal_code', 'city', 'courts', 'contact_name', 'contact_phone', 'contact_email', 'notes'];
 
     protected $attributes = ['courts' => 1];
 
     protected function casts(): array
     {
         return ['courts' => 'integer'];
+    }
+
+    protected static function booted(): void
+    {
+        // One-line address for maps and the location of events.
+        static::saving(function (Hall $hall) {
+            $hall->address = self::composeAddress($hall->street, $hall->house_number, $hall->postal_code, $hall->city);
+        });
+    }
+
+    /** "Kuhbergstraße 12, 89077 Ulm" – whatever parts are given. */
+    public static function composeAddress(?string $street, ?string $number, ?string $postalCode, ?string $city): ?string
+    {
+        $line1 = trim(($street ?? '').' '.($number ?? ''));
+        $line2 = trim(($postalCode ?? '').' '.($city ?? ''));
+
+        return implode(', ', array_filter([$line1, $line2], fn (string $p) => $p !== '')) ?: null;
     }
 
     /**

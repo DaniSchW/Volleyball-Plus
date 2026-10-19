@@ -165,7 +165,11 @@
     "reasonsVisible": "Mitspieler sehen Absagegründe",
     "training": "Training",
     "minParticipants": "Mindestteilnehmer",
-    "maxParticipants": "Teilnehmermaximum"
+    "maxParticipants": "Teilnehmermaximum",
+    "idealSquad": "Idealkader",
+    "idealSquadHint": "Wie viele Spieler je Position wünscht sich das Team? Z. B. Mixed ohne Libero und Diagonal, dafür mehr Außenangreifer. Leer = egal, 0 = keine. Dient als Vorlage fürs Positions-Soll und als Maßstab, wenn Gäste nur für fehlende Positionen zusagen dürfen.",
+    "idealSquadTotal_one": "Insgesamt {{count}} Spieler",
+    "idealSquadTotal_other": "Insgesamt {{count}} Spieler"
   },
   "profile": {
     "standard": "Profil",
@@ -206,7 +210,14 @@
       "height_cm": "Größe (cm)",
       "reach_height_cm": "Reichhöhe (cm)",
       "jump_reach_cm": "Sprunghöhe (cm)"
-    }
+    },
+    "deleteAccount": "Konto löschen",
+    "deleteAccountWarning": "Das kann nicht rückgängig gemacht werden.",
+    "deleteAccountProfiles": "Dein Profil wird in allen Vereinen gelöscht, mit Zusagen, Aufgaben und Abstimmungen.",
+    "deleteAccountChildren": "Die Profile deiner Kinder bleiben im Verein, du hast aber keinen Zugriff mehr darauf.",
+    "deleteAccountKept": "Chatnachrichten und Kassenbuchungen bleiben ohne deinen Namen erhalten.",
+    "deleteAccountConfirm": "Zur Bestätigung deine E-Mail-Adresse eingeben ({{email}})",
+    "deleteAccountButton": "Konto endgültig löschen"
   },
   "child": {
     "title": "Was darf das Kind selbst?",
@@ -373,7 +384,13 @@
     "hallFree": "frei",
     "hallTaken": "belegt: {{teams}}",
     "takeHall": "Übernehmen",
-    "guestsNotAllowed": "Gäste können für dieses Training nicht zusagen."
+    "guestsNotAllowed": "Gäste können für dieses Training nicht zusagen.",
+    "guestsPositionsOnly": "Gäste nur für fehlende Positionen",
+    "guestsPositionsOnlyHint": "Quernominierte können nur zusagen, wenn ihre Position laut Positions-Soll noch frei ist – ohne Positions-Soll gilt der Idealkader des Teams.",
+    "guestsPositionsOnlyInfo": "Gäste können nur auf fehlenden Positionen zusagen.",
+    "takeIdealSquad": "Idealkader des Teams übernehmen",
+    "idealSquad": "Gesucht für Gäste (Idealkader)",
+    "idealSquadInfo": "Gäste können nur zusagen, solange ihre Position hier noch frei ist."
   },
   "notifications": {
     "title": "Benachrichtigungen",
@@ -690,7 +707,7 @@
     "delete": "Halle löschen",
     "deleteConfirm": "Halle „{{name}}“ mit allen Zeiten und Belegungen löschen?",
     "deleteSlot": "Verfügbare Zeit {{time}} löschen",
-    "addSlot": "Verfügbare Zeit",
+    "addSlot": "Zeit nur für einen Zeitraum",
     "addBooking": "Mannschaft zuordnen",
     "editBooking": "Belegung von {{team}} bearbeiten",
     "editBookingTitle": "Belegung bearbeiten",
@@ -719,7 +736,19 @@
     "contactName": "Name",
     "contactPhone": "Telefon",
     "contactEmail": "E-Mail",
-    "slotCourtHint": "Welche Teile stehen uns zur Verfügung? Nichts gewählt = ganze Halle (z. B. Teil 3 nutzt eine andere Sportart)."
+    "slotCourtHint": "Welche Teile stehen uns zur Verfügung? Nichts gewählt = ganze Halle (z. B. Teil 3 nutzt eine andere Sportart).",
+    "street": "Straße",
+    "houseNumber": "Nr.",
+    "postalCode": "PLZ",
+    "city": "Ort",
+    "openingHours": "Trainingszeiten der Halle",
+    "openingHoursHint": "Wie Öffnungszeiten: wann steht uns die Halle jede Woche fürs Training zur Verfügung? Mehrere Zeiten pro Tag mit +. Spieltage und andere Termine sind davon unabhängig.",
+    "closed": "keine Zeit",
+    "openFrom": "{{day}} von",
+    "openUntil": "{{day}} bis",
+    "removeTime": "Zeit {{time}} entfernen",
+    "addTime": "Zeit am {{day}} hinzufügen",
+    "trainingTimes": "Trainingszeiten"
   },
   "privacy": {
     "title": "Persönliche Daten",
@@ -775,7 +804,9 @@
     "rejectConfirm": "Anmeldung von „{{name}}“ ablehnen und löschen?",
     "suspend": "Sperren",
     "suspendConfirm": "„{{name}}“ sperren? Niemand aus dem Verein kann sich dann anmelden; die Daten bleiben erhalten.",
-    "reactivate": "Wieder aktivieren"
+    "reactivate": "Wieder aktivieren",
+    "delete": "Endgültig löschen",
+    "deleteConfirm": "„{{name}}“ mit allen Daten endgültig löschen? Zur Bestätigung das Kürzel „{{slug}}“ eingeben:"
   },
   "activity": {
     "title": "Änderungsprotokoll",
@@ -809,5 +840,13 @@
       "league": "Liga",
       "training_group": "Trainingsgruppe"
     }
+  },
+  "positionsShort": {
+    "setter": "ZU",
+    "opposite": "DIA",
+    "middle": "MB",
+    "outside": "AA",
+    "libero": "L",
+    "universal": "U"
   }
 }

@@ -4,6 +4,8 @@ return [
     'registered' => 'Thank you! We will review the registration and let you know by e-mail as soon as your club is activated.',
     'slug_taken' => 'This short name is already taken. Please choose another one.',
     'not_pending' => 'This club is not waiting for approval.',
+    'suspend_first' => 'Only suspended clubs can be deleted. Suspend the club first.',
+    'confirm_slug' => 'Please type the club\'s address (short name) exactly to confirm.',
     'mail' => [
         'new' => [
             'title' => 'New club registration: :name',

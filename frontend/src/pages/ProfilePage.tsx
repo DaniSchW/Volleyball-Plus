@@ -1,9 +1,10 @@
+import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
-import { api, del, post, type SessionInfo } from '../lib/api';
+import { api, del, errorText, post, type SessionInfo } from '../lib/api';
 import { useAccount, useTenantMe, useTenantSlug } from '../lib/queries';
-import { Button, Card, Loading, PageTitle } from '../components/ui';
+import { Button, Card, Field, Loading, Notice, PageTitle } from '../components/ui';
 import { NotificationsCard } from '../components/NotificationsCard';
 import { forgetPushOnLogout } from '../lib/push';
 import { ShareLink } from './TeamPage';
@@ -85,7 +86,73 @@ export function ProfilePage() {
       <Button variant="danger" className="w-full" onClick={() => logout.mutate()} disabled={logout.isPending}>
         {t('profile.logout')}
       </Button>
+
+      <DeleteAccountCard email={account.data?.email ?? ''} />
     </div>
+  );
+}
+
+/**
+ * Deletes the whole login in all clubs. Safeguard: open on purpose, read
+ * what happens, type the own e-mail address again.
+ */
+function DeleteAccountCard({ email }: { email: string }) {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [confirm, setConfirm] = useState('');
+  const matches = confirm.trim().toLowerCase() === email.toLowerCase() && email !== '';
+
+  const remove = useMutation({
+    mutationFn: async () => {
+      await forgetPushOnLogout();
+      return post('/me/delete', { confirm });
+    },
+    onSuccess: () => {
+      queryClient.clear();
+      navigate('/', { replace: true });
+    },
+  });
+
+  const submit = (event: FormEvent) => {
+    event.preventDefault();
+    if (matches) remove.mutate();
+  };
+
+  if (!open) {
+    return (
+      <div className="pt-4 text-center">
+        <button type="button" className="text-sm text-red-700 underline" onClick={() => setOpen(true)}>{t('profile.deleteAccount')}</button>
+      </div>
+    );
+  }
+
+  return (
+    <Card title={t('profile.deleteAccount')}>
+      <form onSubmit={submit} className="space-y-3">
+        <div role="alert" className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-900">
+          <p className="font-medium">{t('profile.deleteAccountWarning')}</p>
+          <ul className="mt-1 list-disc pl-5">
+            <li>{t('profile.deleteAccountProfiles')}</li>
+            <li>{t('profile.deleteAccountChildren')}</li>
+            <li>{t('profile.deleteAccountKept')}</li>
+          </ul>
+        </div>
+        <Field
+          label={t('profile.deleteAccountConfirm', { email })}
+          type="email"
+          autoComplete="off"
+          value={confirm}
+          onChange={(e) => setConfirm(e.target.value)}
+        />
+        {remove.isError && <Notice tone="error">{errorText(remove.error, t('errors.generic'))}</Notice>}
+        <div className="flex flex-wrap gap-2">
+          <Button type="submit" variant="danger" disabled={!matches || remove.isPending}>{t('profile.deleteAccountButton')}</Button>
+          <Button variant="secondary" onClick={() => { setOpen(false); setConfirm(''); }}>{t('common.cancel')}</Button>
+        </div>
+      </form>
+    </Card>
   );
 }
 

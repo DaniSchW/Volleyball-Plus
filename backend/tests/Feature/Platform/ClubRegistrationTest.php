@@ -9,7 +9,9 @@ use App\Models\Account;
 use App\Models\Person;
 use App\Models\Tenant;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
@@ -128,5 +130,40 @@ class ClubRegistrationTest extends TestCase
         $this->postJson('/api/v1/auth/login', ['email' => 'betreiber@example.org'])->assertStatus(202);
         Mail::assertSent(MagicLinkMail::class);
         $this->loginAs($this->operator)->getJson('/api/v1/me')->assertJsonPath('data.is_platform_admin', true);
+    }
+
+    public function test_platform_admin_deletes_a_suspended_club_completely(): void
+    {
+        Storage::fake('local');
+        $club = $this->tenant('tsv-weg', 'TSV Weg');
+        $kept = $this->tenant();
+        $ada = $this->member($club, 'ada@example.org', 'Ada', 'Admin', admin: true, gender: 'female');
+        $both = $this->member($club, 'max@example.org');
+        $this->member($kept, 'max@example.org');
+        $team = $this->team($club);
+        $this->addToTeam($team, $this->personOf($both));
+        $event = $this->loginAs($ada)->postJson('/api/v1/t/tsv-weg/events', [
+            'type' => 'training', 'team_ids' => [$team->id], 'starts_at' => '2030-10-20T19:30', 'ends_at' => '2030-10-20T21:30',
+        ])->assertCreated()->json('data');
+        $this->loginAs($both)->postJson("/api/v1/t/tsv-weg/events/{$event['id']}/responses", ['person_id' => $this->personOf($both)->id, 'status' => 'yes'])->assertOk();
+        Storage::disk('local')->put("tenants/{$club->id}/avatar/x.jpg", 'x');
+
+        // Only suspended clubs, and only with the slug typed again.
+        $this->loginAs($this->operator)->postJson("/api/v1/platform/clubs/{$club->id}/delete", ['confirm' => 'tsv-weg'])->assertUnprocessable();
+        $this->loginAs($this->operator)->postJson("/api/v1/platform/clubs/{$club->id}/suspend")->assertOk();
+        $this->loginAs($this->operator)->postJson("/api/v1/platform/clubs/{$club->id}/delete", ['confirm' => 'tsv'])->assertUnprocessable();
+        $this->loginAs($ada)->postJson("/api/v1/platform/clubs/{$club->id}/delete", ['confirm' => 'tsv-weg'])->assertForbidden();
+
+        $this->loginAs($this->operator)->postJson("/api/v1/platform/clubs/{$club->id}/delete", ['confirm' => 'tsv-weg'])->assertOk();
+
+        $this->assertNull(Tenant::query()->find($club->id));
+        foreach (['events', 'event_responses', 'persons', 'teams', 'tenant_members', 'activity_log'] as $table) {
+            $this->assertSame(0, DB::table($table)->where('tenant_id', $club->id)->count(), $table);
+        }
+        $this->assertFalse(Storage::disk('local')->exists("tenants/{$club->id}/avatar/x.jpg"));
+        // Logins only of this club are gone, others stay.
+        $this->assertNull(Account::query()->where('email', 'ada@example.org')->first());
+        $this->assertNotNull(Account::query()->where('email', 'max@example.org')->first());
+        $this->assertNotNull(Tenant::query()->find($kept->id));
     }
 }

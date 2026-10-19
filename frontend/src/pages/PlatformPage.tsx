@@ -25,6 +25,11 @@ export function PlatformPage() {
       kind === 'reject' ? del<{ data: PlatformClub[] }>(`/platform/clubs/${id}`) : post<{ data: PlatformClub[] }>(`/platform/clubs/${id}/${kind}`),
     onSuccess: done,
   });
+  // Deleting a club for good: only suspended ones, the short name has to be typed again.
+  const destroy = useMutation({
+    mutationFn: ({ id, confirm }: { id: string; confirm: string }) => post<{ data: PlatformClub[] }>(`/platform/clubs/${id}/delete`, { confirm }),
+    onSuccess: done,
+  });
 
   if (account.isPending || clubs.isPending) return <Loading />;
   if (!account.data?.is_platform_admin) return <Notice tone="error">{t('tenant.noAccess')}</Notice>;
@@ -40,6 +45,7 @@ export function PlatformPage() {
         <p className="text-sm text-slate-600">{t('platform.hint')}</p>
       </div>
       {action.isError && <Notice tone="error">{errorText(action.error, t('errors.generic'))}</Notice>}
+      {destroy.isError && <Notice tone="error">{errorText(destroy.error, t('errors.generic'))}</Notice>}
 
       {groups.map(({ status, list }) => (
         <Card key={status} title={`${t(`platform.status.${status}`)} (${list.length})`}>
@@ -87,6 +93,18 @@ export function PlatformPage() {
                     )}
                     {status === 'suspended' && (
                       <Button variant="secondary" disabled={action.isPending} onClick={() => action.mutate({ id: club.id, kind: 'reactivate' })}>{t('platform.reactivate')}</Button>
+                    )}
+                    {status === 'suspended' && (
+                      <Button
+                        variant="danger"
+                        disabled={destroy.isPending}
+                        onClick={() => {
+                          const confirm = window.prompt(t('platform.deleteConfirm', { name: club.name, slug: club.slug }));
+                          if (confirm !== null) destroy.mutate({ id: club.id, confirm: confirm.trim() });
+                        }}
+                      >
+                        {t('platform.delete')}
+                      </Button>
                     )}
                   </div>
                 </li>

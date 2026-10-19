@@ -21,7 +21,7 @@ class Event extends Model
 
     protected $fillable = [
         'type', 'response_mode', 'scope', 'title', 'description', 'starts_at', 'ends_at', 'meet_at',
-        'rsvp_deadline', 'location_name', 'address', 'max_participants', 'min_participants', 'guests_allowed', 'position_limits', 'series_id', 'series_exception',
+        'rsvp_deadline', 'location_name', 'address', 'max_participants', 'min_participants', 'guests_allowed', 'guests_positions_only', 'position_limits', 'series_id', 'series_exception',
         'opponent_id', 'is_home', 'status', 'created_by', 'cross_nomination_opens_at', 'training_group_id', 'import_key',
     ];
 
@@ -41,6 +41,7 @@ class Event extends Model
             'status' => EventStatus::class,
             'position_limits' => 'array',
             'guests_allowed' => 'boolean',
+            'guests_positions_only' => 'boolean',
             'min_participants' => 'integer',
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
@@ -148,5 +149,21 @@ class Event extends Model
     public function shouldLogActivity(string $action): bool
     {
         return ! ($action === 'created' && $this->series_id !== null);
+    }
+
+    /**
+     * Positions guests may fill with "only missing positions": the event's
+     * Positions-Soll, else the ideal squad of its (first) team.
+     *
+     * @return array<string, int>
+     */
+    public function guestPositionNeeds(): array
+    {
+        if (! empty($this->position_limits)) {
+            return array_map('intval', $this->position_limits);
+        }
+        $team = $this->teams->first(fn (Team $t) => ! empty($t->ideal_positions));
+
+        return $team ? array_map('intval', $team->ideal_positions) : [];
     }
 }

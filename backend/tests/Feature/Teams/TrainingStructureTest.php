@@ -4,6 +4,7 @@ namespace Tests\Feature\Teams;
 
 use App\Enums\TeamRole;
 use App\Models\EventInvitee;
+use App\Models\EventResponse;
 use App\Models\League;
 use App\Models\Team;
 use App\Models\TeamMembership;
@@ -245,6 +246,42 @@ class TrainingStructureTest extends TestCase
         $this->respond($this->paul, $closed['id'], 'yes')->assertUnprocessable()->assertJsonPath('errors.status.0', 'Gäste können für dieses Training nicht zusagen.');
         $this->respond($this->paul, $closed['id'], 'no')->assertOk();
         $this->assertFalse($this->loginAs($this->paul)->getJson($this->url("events/{$closed['id']}"))->json('data.my.0.can_accept'));
+    }
+
+    public function test_guests_only_for_missing_positions(): void
+    {
+        $this->nominate($this->paul, 'H2')->assertCreated();
+        $this->inTenant($this->tenant, function () {
+            $this->personOf($this->paul)->forceFill(['primary_position' => 'middle'])->save();
+            $this->personOf($this->max)->forceFill(['primary_position' => 'middle'])->save();
+        });
+
+        // Positions-Soll without middle blockers: Paul is not needed.
+        $setters = $this->training(['guests_positions_only' => true, 'position_limits' => ['setter' => 2]]);
+        $this->respond($this->paul, $setters['id'], 'yes')->assertUnprocessable()
+            ->assertJsonPath('errors.status.0', 'Für dieses Training werden nur Gäste auf fehlenden Positionen gesucht – deine Position ist nicht dabei.');
+        $this->respond($this->paul, $setters['id'], 'no')->assertOk();
+        // The team's own players are not limited by it.
+        $this->respond($this->max, $setters['id'], 'yes')->assertOk();
+
+        // Without an own Positions-Soll the team's ideal squad counts (here: one middle blocker).
+        $this->loginAs($this->trainer)->patchJson($this->url("teams/{$this->teams['H1']->id}"), ['ideal_positions' => ['middle' => 1, 'libero' => 0, 'setter' => null]])
+            ->assertOk()->assertJsonPath('data.settings.ideal_positions', ['middle' => 1, 'libero' => 0]);
+        $ideal = $this->training(['guests_positions_only' => true]);
+        $this->assertEquals(['middle' => 1, 'libero' => 0], $this->loginAs($this->paul)->getJson($this->url("events/{$ideal['id']}"))->json('data.guest_position_needs'));
+        $this->respond($this->paul, $ideal['id'], 'yes')->assertOk();
+        $this->assertSame('middle', $this->inTenant($this->tenant, fn () => EventResponse::query()->where('event_id', $ideal['id'])->value('as_position')));
+
+        // Once the middle position is filled by the team, no guest place is left.
+        $full = $this->training(['guests_positions_only' => true]);
+        $this->respond($this->max, $full['id'], 'yes')->assertOk();
+        $this->respond($this->paul, $full['id'], 'yes')->assertUnprocessable();
+
+        // Unchecked: guests accept as before.
+        $open = $this->training();
+        $this->assertFalse($open['guests_positions_only']);
+        $this->respond($this->max, $open['id'], 'yes')->assertOk();
+        $this->respond($this->paul, $open['id'], 'yes')->assertOk();
     }
 
     public function test_training_groups_have_their_own_trainings(): void

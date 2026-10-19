@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, useSearchParams } from 'react-router';
 import {
-  api, del, errorText, patch, post,
+  api, del, errorText, patch, post, POSITIONS,
   type Invitation, type RosterRow, type Team, type TeamRole, type TeamSettings,
 } from '../lib/api';
 import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
@@ -324,7 +324,10 @@ function Settings({ team, settings }: { team: Team; settings: TeamSettings }) {
 
   const save = useMutation({
     mutationFn: () => patch<{ data: Team }>(tp(`teams/${team.id}`), { ...form }),
-    onSuccess: ({ data }) => queryClient.setQueryData(['team', team.id], data),
+    onSuccess: ({ data }) => {
+      queryClient.setQueryData(['team', team.id], data);
+      void queryClient.invalidateQueries({ queryKey: ['teams'] });
+    },
   });
 
   const submit = (event: FormEvent) => {
@@ -351,6 +354,34 @@ function Settings({ team, settings }: { team: Team; settings: TeamSettings }) {
           <Field label={t('settings.minParticipants')} type="number" min={1} max={99} inputMode="numeric" value={form.min_participants ?? ''} onChange={(e) => set('min_participants', num(e.target.value))} />
           <Field label={t('settings.maxParticipants')} type="number" min={1} max={99} inputMode="numeric" value={form.default_max_participants ?? ''} onChange={(e) => set('default_max_participants', num(e.target.value))} />
         </div>
+      </Card>
+
+      <Card title={t('settings.idealSquad')}>
+        <p className="mb-3 text-xs text-slate-500">{t('settings.idealSquadHint')}</p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          {POSITIONS.map((p) => (
+            <Field
+              key={p}
+              label={t(`positions.${p}`)}
+              type="number"
+              min={0}
+              max={50}
+              inputMode="numeric"
+              placeholder="–"
+              value={form.ideal_positions?.[p] ?? ''}
+              onChange={(e) => {
+                const value = num(e.target.value);
+                const next = { ...(form.ideal_positions ?? {}) };
+                if (value === null) delete next[p];
+                else next[p] = value;
+                set('ideal_positions', Object.keys(next).length > 0 ? next : null);
+              }}
+            />
+          ))}
+        </div>
+        {form.ideal_positions && (
+          <p className="mt-2 text-sm font-medium">{t('settings.idealSquadTotal', { count: Object.values(form.ideal_positions).reduce((sum, n) => sum + (n ?? 0), 0) })}</p>
+        )}
       </Card>
 
       {save.isError && <Notice tone="error">{errorText(save.error, t('errors.generic'))}</Notice>}

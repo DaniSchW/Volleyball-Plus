@@ -8,6 +8,7 @@ use App\Http\Middleware\SetLocale;
 use App\Models\AccountSession;
 use App\Models\TenantMember;
 use App\Support\Auth\SessionManager;
+use App\Support\Privacy\AccountDeletion;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -73,5 +74,22 @@ class AccountController extends Controller
         $manager->revoke($target);
 
         return response()->json(['message' => 'ok']);
+    }
+
+    /**
+     * Deletes the whole login (all clubs). Safeguard: the own e-mail address
+     * has to be typed again.
+     */
+    public function destroy(Request $request, AccountDeletion $deletion, SessionManager $manager): JsonResponse
+    {
+        $account = $request->user();
+        $data = $request->validate(['confirm' => ['required', 'string']]);
+        if (mb_strtolower(trim($data['confirm'])) !== $account->email) {
+            return response()->json(['message' => __('account.confirm_email'), 'errors' => ['confirm' => [__('account.confirm_email')]]], 422);
+        }
+
+        $deletion->delete($account);
+
+        return response()->json(['message' => __('account.deleted')])->withCookie($manager->forgetCookie());
     }
 }

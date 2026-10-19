@@ -112,6 +112,19 @@ class PlatformController extends Controller
         return $this->index($request);
     }
 
+    /** Deletes a suspended club with all its data; the slug must be typed to confirm. */
+    public function destroy(Request $request, string $id): JsonResponse
+    {
+        $this->authorizePlatform($request);
+        $tenant = Tenant::query()->findOrFail($id);
+        abort_unless($tenant->status === TenantStatus::Suspended, 422, __('platform.suspend_first'));
+        $request->validate(['confirm' => ['required', 'string', Rule::in([$tenant->slug])]], ['confirm.in' => __('platform.confirm_slug')]);
+
+        $this->clubs->destroy($tenant);
+
+        return $this->index($request);
+    }
+
     private function authorizePlatform(Request $request): void
     {
         abort_unless((bool) $request->user()?->is_platform_admin, 403);

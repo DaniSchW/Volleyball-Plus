@@ -132,6 +132,7 @@ export interface TenantMe {
 export interface TeamSettings {
   min_participants: number | null;
   default_max_participants: number | null;
+  ideal_positions: Partial<Record<Position, number>> | null;
   cross_nomination_mode: 'immediately' | 'hours_before_start' | 'after_rsvp_deadline';
   cross_nomination_hours: number | null;
   decline_reason_required: boolean;
@@ -147,6 +148,8 @@ export interface Team {
   is_youth: boolean;
   league_name: string | null;
   color: string | null;
+  /** Ideal squad: players per position (template for the Positions-Soll). */
+  ideal_positions: Partial<Record<Position, number>> | null;
   can_manage: boolean;
   can_invite: boolean;
   can_see: boolean;
@@ -317,6 +320,8 @@ export interface EventSummary {
   /** Training: own minimum (else the team's). */
   own_min_participants: number | null;
   guests_allowed: boolean;
+  /** Guests only on positions that are still missing. */
+  guests_positions_only: boolean;
   is_full: boolean;
   min_participants: number | null;
   below_minimum: boolean;
@@ -328,7 +333,7 @@ export interface EventSummary {
 }
 
 export interface ResponseRow {
-  person: { id: string; name: string; avatar_url: string | null; primary_position: Position | null; role: TeamRole; is_guest: boolean };
+  person: { id: string; name: string; avatar_url: string | null; primary_position: Position | null; positions: Position[]; role: TeamRole; is_guest: boolean };
   status: RsvpStatus | null;
   as_position: Position | null;
   reason: string | null;
@@ -349,6 +354,8 @@ export interface EventDetail extends EventSummary {
   positions: Partial<Record<Position | 'unknown', number>> | null;
   /** Accepted per limited position (numbers only). */
   position_taken: Partial<Record<Position, number>> | null;
+  /** "Only missing positions": places guests may fill (Positions-Soll, else the team's ideal squad). */
+  guest_position_needs: Partial<Record<Position, number>> | null;
 }
 
 export interface EventPage {
@@ -639,6 +646,10 @@ export interface Hall {
   id: string;
   name: string;
   address: string | null;
+  street: string | null;
+  house_number: string | null;
+  postal_code: string | null;
+  city: string | null;
   courts: number;
   contact: { name: string | null; phone: string | null; email: string | null } | null;
   notes: string | null;

@@ -451,4 +451,7 @@ erDiagram
 - `events` / `event_series`: `min_participants` smallint null (Trainingsminimum je Termin), `guests_allowed` bool (Quernominierte dürfen zusagen; gleiche Frist wie alle).
 - `invitations`: `kind = department` (Einladung in den Verein ohne Team), `grants_admin` bool.
 - 🏢 `activity_log` ✅: `actor_id` (Mitglied, null = System), `action` (`created`/`updated`/`deleted`), `subject_type`, `subject_id`, `label`, `created_at`; Einträge älter als 7 Tage löscht der Cron.
-
+- `events` / `event_series`: `guests_positions_only` bool (Gäste nur für fehlende Positionen).
+- `teams`: `ideal_positions` JSON null (Idealkader: Position → Anzahl, 0 = keine).
+- `halls`: `street` (120), `house_number` (20), `postal_code` (10), `city` (80), alle optional; `address` wird beim Speichern daraus zusammengesetzt.
+- Konto löschen: `accounts.email` wird zu `deleted-<id>@invalid`, Sitzungen, Push-Abos und Anmeldelinks werden gelöscht, `tenant_members.status = disabled`.

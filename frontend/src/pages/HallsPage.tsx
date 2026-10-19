@@ -119,7 +119,7 @@ function HallCard({ hall, admin }: { hall: Hall; admin: boolean }) {
                   <h3 className="text-sm font-semibold">{weekdayName(day)}</h3>
                   {slots.length > 0 && (
                     <p className="text-xs text-slate-500">
-                      {t('halls.available')}:{' '}
+                      {t('halls.trainingTimes')}:{' '}
                       {slots.map((s, i) => (
                         <span key={s.id}>
                           {i > 0 && ', '}
@@ -207,23 +207,34 @@ function HallForm({ hall, onDone }: { hall?: Hall; onDone?: () => void }) {
   const { t } = useTranslation();
   const tp = useTenantPath();
   const update = usePlanUpdate();
-  const empty = { name: '', address: '', courts: '1', contact_name: '', contact_phone: '', contact_email: '', notes: '' };
+  const empty = {
+    name: '', street: '', house_number: '', postal_code: '', city: '', courts: '1', contact_name: '', contact_phone: '', contact_email: '', notes: '',
+  };
   const [form, setForm] = useState(hall ? {
-    name: hall.name, address: hall.address ?? '', courts: String(hall.courts), notes: hall.notes ?? '',
+    name: hall.name, street: hall.street ?? '', house_number: hall.house_number ?? '', postal_code: hall.postal_code ?? '', city: hall.city ?? '',
+    courts: String(hall.courts), notes: hall.notes ?? '',
     contact_name: hall.contact?.name ?? '', contact_phone: hall.contact?.phone ?? '', contact_email: hall.contact?.email ?? '',
   } : empty);
+  const [hours, setHours] = useState<OpeningHour[]>(() => (hall?.slots ?? [])
+    .filter((s) => !s.valid_from && !s.valid_until)
+    .map((s) => ({ key: s.id, weekday: s.weekday, start_time: s.start_time, end_time: s.end_time, courts: s.courts ?? [] })));
 
   const save = useMutation({
     mutationFn: () => {
       const body = {
-        ...form, courts: Number(form.courts) || 1, address: form.address || null, notes: form.notes || null,
+        ...form, courts: Number(form.courts) || 1, notes: form.notes || null,
+        street: form.street || null, house_number: form.house_number || null, postal_code: form.postal_code || null, city: form.city || null,
         contact_name: form.contact_name || null, contact_phone: form.contact_phone || null, contact_email: form.contact_email || null,
+        opening_hours: hours.map(({ weekday, start_time, end_time, courts }) => ({ weekday, start_time, end_time, courts })),
       };
       return hall ? patch<PlanResponse>(tp(`halls/${hall.id}`), body) : post<PlanResponse>(tp('halls'), body);
     },
     onSuccess: (result) => {
       update(result);
-      if (!hall) setForm(empty);
+      if (!hall) {
+        setForm(empty);
+        setHours([]);
+      }
       onDone?.();
     },
   });
@@ -239,7 +250,18 @@ function HallForm({ hall, onDone }: { hall?: Hall; onDone?: () => void }) {
         <Field label={t('halls.name')} required maxLength={120} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
         <Field label={t('halls.courtsLabel')} type="number" min={1} max={12} required inputMode="numeric" value={form.courts} onChange={(e) => setForm({ ...form, courts: e.target.value })} />
       </div>
-      <Field label={t('halls.address')} maxLength={255} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+      <fieldset className="space-y-2">
+        <legend className="mb-1 text-sm font-medium text-slate-700">{t('halls.address')}</legend>
+        <div className="grid grid-cols-[1fr_6rem] gap-2">
+          <Field label={t('halls.street')} maxLength={120} autoComplete="off" value={form.street} onChange={(e) => setForm({ ...form, street: e.target.value })} />
+          <Field label={t('halls.houseNumber')} maxLength={20} autoComplete="off" value={form.house_number} onChange={(e) => setForm({ ...form, house_number: e.target.value })} />
+        </div>
+        <div className="grid grid-cols-[6rem_1fr] gap-2">
+          <Field label={t('halls.postalCode')} maxLength={10} inputMode="numeric" autoComplete="off" value={form.postal_code} onChange={(e) => setForm({ ...form, postal_code: e.target.value })} />
+          <Field label={t('halls.city')} maxLength={80} autoComplete="off" value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+        </div>
+      </fieldset>
+      <OpeningHours hours={hours} onChange={setHours} courts={Number(form.courts) || 1} />
       <fieldset className="space-y-2">
         <legend className="mb-1 text-sm font-medium text-slate-700">{t('halls.contact')}</legend>
         <p className="text-xs text-slate-500">{t('halls.contactHint')}</p>
@@ -259,6 +281,100 @@ function HallForm({ hall, onDone }: { hall?: Hall; onDone?: () => void }) {
   );
 
   return hall ? fields : <Card title={t('halls.new')}>{fields}</Card>;
+}
+
+type OpeningHour = { key: string; weekday: number; start_time: string; end_time: string; courts: number[] };
+
+let nextKey = 0;
+
+/**
+ * Weekly training times of the hall, entered like the opening hours of a
+ * shop: per weekday one or more times, optionally only some parts.
+ */
+function OpeningHours({ hours, onChange, courts }: { hours: OpeningHour[]; onChange: (hours: OpeningHour[]) => void; courts: number }) {
+  const { t } = useTranslation();
+  const change = (key: string, values: Partial<OpeningHour>) => onChange(hours.map((h) => (h.key === key ? { ...h, ...values } : h)));
+  const add = (weekday: number) => {
+    const last = hours.filter((h) => h.weekday === weekday).at(-1) ?? hours.at(-1);
+    onChange([...hours, { key: `new-${nextKey++}`, weekday, start_time: last?.start_time ?? '18:00', end_time: last?.end_time ?? '20:00', courts: last?.courts ?? [] }]);
+  };
+
+  return (
+    <fieldset className="min-w-0">
+      <legend className="mb-1 text-sm font-medium text-slate-700">{t('halls.openingHours')}</legend>
+      <p className="mb-2 text-xs text-slate-500">{t('halls.openingHoursHint')}</p>
+      <ul className="divide-y divide-slate-100 rounded-lg border border-slate-200">
+        {WEEKDAYS.map((day) => {
+          const rows = hours.filter((h) => h.weekday === day).sort((a, b) => a.start_time.localeCompare(b.start_time));
+          return (
+            <li key={day} className="flex items-start gap-2 p-2">
+              <span className="w-10 shrink-0 pt-2 text-sm font-semibold">{weekdayName(day, 'short')}</span>
+              <div className="min-w-0 flex-1 space-y-2">
+                {rows.length === 0 && <p className="pt-2 text-sm text-slate-400">{t('halls.closed')}</p>}
+                {rows.map((h) => (
+                  <div key={h.key} className="space-y-1">
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="time"
+                        required
+                        aria-label={t('halls.openFrom', { day: weekdayName(day) })}
+                        className="min-h-10 w-full min-w-0 rounded-lg border border-slate-300 px-2 text-sm"
+                        value={h.start_time}
+                        onChange={(e) => change(h.key, { start_time: e.target.value })}
+                      />
+                      <span className="text-slate-500">–</span>
+                      <input
+                        type="time"
+                        required
+                        aria-label={t('halls.openUntil', { day: weekdayName(day) })}
+                        className="min-h-10 w-full min-w-0 rounded-lg border border-slate-300 px-2 text-sm"
+                        value={h.end_time}
+                        onChange={(e) => change(h.key, { end_time: e.target.value })}
+                      />
+                      <button
+                        type="button"
+                        className="min-h-10 shrink-0 rounded px-2 text-red-700"
+                        aria-label={t('halls.removeTime', { time: `${weekdayName(day)} ${h.start_time}` })}
+                        onClick={() => onChange(hours.filter((x) => x.key !== h.key))}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                    {courts > 1 && (
+                      <div className="flex flex-wrap items-center gap-1 text-xs">
+                        {Array.from({ length: courts }, (_, i) => i + 1).map((c) => {
+                          const on = h.courts.length === 0 || h.courts.includes(c);
+                          const all = Array.from({ length: courts }, (_, i) => i + 1);
+                          return (
+                            <button
+                              key={c}
+                              type="button"
+                              aria-pressed={on}
+                              className={`rounded-full px-2 py-1 ring-1 ${on ? 'bg-brand-50 text-brand-800 ring-brand-500' : 'text-slate-400 ring-slate-200'}`}
+                              onClick={() => {
+                                const current = h.courts.length === 0 ? all : h.courts;
+                                const next = on ? current.filter((x) => x !== c) : [...current, c].sort((a, b) => a - b);
+                                change(h.key, { courts: next.length === courts || next.length === 0 ? [] : next });
+                              }}
+                            >
+                              {t('halls.court', { court: c })}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <button type="button" className="min-h-10 min-w-10 shrink-0 rounded-lg text-xl font-semibold leading-none text-brand-700 hover:bg-brand-50" aria-label={t('halls.addTime', { day: weekdayName(day) })} onClick={() => add(day)}>
+                +
+              </button>
+            </li>
+          );
+        })}
+      </ul>
+    </fieldset>
+  );
 }
 
 function TimeForm({ hall, kind, booking, onDone, onWarning }: {

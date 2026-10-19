@@ -657,6 +657,64 @@ describe('positions', () => {
   });
 });
 
+describe('positions in the replies', () => {
+  it('shows short position badges, accepted players sorted by position', async () => {
+    const row = (id: string, name: string, status: string | null, primary: string | null, positions: string[], asPosition: string | null = null) => ({
+      person: { id, name, avatar_url: null, primary_position: primary, positions, role: 'player', is_guest: false },
+      status, as_position: asPosition, reason: null, responded_at: null,
+    });
+    const detail = {
+      ...EVENT, description: null, names_visible: true, series_id: null, series: null, team_ids: ['t1'], cross_nomination_opens_at: null,
+      guests_open_at: null, positions: null, tasks: [], task_summary: null, position_limits: null, position_taken: null, guest_position_needs: null,
+      responses: [
+        row('p1', 'Anna Berg', 'yes', 'outside', ['outside']),
+        row('p2', 'Zoe Zuspiel', 'yes', 'setter', ['setter', 'opposite']),
+        row('p3', 'Mia Mitte', 'yes', 'outside', ['outside', 'middle'], 'middle'),
+        row('p4', 'Lea Libero', null, 'libero', ['libero']),
+      ],
+    };
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/events/e1': { body: { data: detail } },
+    });
+    renderAt('/ssv-ulm/events/e1');
+
+    expect(await screen.findByText('Zoe Zuspiel')).toBeInTheDocument();
+    // Counted position bold first (Mia accepted as middle blocker), further positions next to it.
+    expect(screen.getAllByText('ZU')).toHaveLength(1);
+    expect(screen.getAllByText('MB')).toHaveLength(1);
+    expect(screen.getAllByText('AA')).toHaveLength(2);
+    expect(screen.getByText('L')).toHaveAttribute('title', 'Libero');
+    const names = screen.getAllByText(/^(Anna Berg|Zoe Zuspiel|Mia Mitte)$/).map((el) => el.textContent);
+    expect(names).toEqual(['Zoe Zuspiel', 'Mia Mitte', 'Anna Berg']);
+  });
+});
+
+describe('hall form', () => {
+  it('saves address fields and weekly training times', async () => {
+    let sent: Record<string, unknown> = {};
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME(true) },
+      'GET /t/ssv-ulm/halls': { body: { data: [], booking: null } },
+      'POST /t/ssv-ulm/halls': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { status: 201, body: { data: [], booking: null } };
+      },
+    });
+    renderAt('/ssv-ulm/halls');
+
+    fireEvent.change((await screen.findAllByLabelText('Name'))[0], { target: { value: 'Kuhberghalle' } });
+    fireEvent.change(screen.getByLabelText('Straße'), { target: { value: 'Kuhbergstraße' } });
+    fireEvent.change(screen.getByLabelText('PLZ'), { target: { value: '89077' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Zeit am Montag hinzufügen' }));
+    fireEvent.change(screen.getByLabelText('Montag bis'), { target: { value: '21:30' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Halle anlegen' }));
+
+    await waitFor(() => expect(sent.opening_hours).toEqual([{ weekday: 1, start_time: '18:00', end_time: '21:30', courts: [] }]));
+    expect(sent).toMatchObject({ street: 'Kuhbergstraße', postal_code: '89077', house_number: null, city: null });
+  });
+});
+
 describe('halls for players', () => {
   it('shows times, parts and the contact without edit buttons', async () => {
     const hall = {

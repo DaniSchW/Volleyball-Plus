@@ -45,12 +45,14 @@ Route::middleware('auth')->group(function () {
     Route::patch('me', [AccountController::class, 'update']);
     Route::get('me/sessions', [AccountController::class, 'sessions']);
     Route::delete('me/sessions/{session}', [AccountController::class, 'revokeSession']);
+    Route::post('me/delete', [AccountController::class, 'destroy']);
 
     Route::get('platform/clubs', [PlatformController::class, 'index']);
     Route::post('platform/clubs/{id}/approve', [PlatformController::class, 'approve']);
     Route::post('platform/clubs/{id}/suspend', [PlatformController::class, 'suspend']);
     Route::post('platform/clubs/{id}/reactivate', [PlatformController::class, 'reactivate']);
     Route::delete('platform/clubs/{id}', [PlatformController::class, 'reject']);
+    Route::post('platform/clubs/{id}/delete', [PlatformController::class, 'destroy']);
 
     Route::get('push/key', [PushController::class, 'key']);
     Route::post('push/subscriptions', [PushController::class, 'subscribe']);

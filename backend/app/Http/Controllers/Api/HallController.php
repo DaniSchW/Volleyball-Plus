@@ -48,7 +48,8 @@ class HallController extends Controller
     {
         $this->authorizeAdmin();
         $data = $this->hallData($request);
-        $court = HallBooking::query()->where('hall_id', $hall->id)->where('court', '>', $data['courts'])->min('court');
+        $court = HallBooking::query()->where('hall_id', $hall->id)->get()
+            ->flatMap(fn (HallBooking $b) => $b->courtList() ?? [])->filter(fn (int $c) => $c > $data['courts'])->min();
         abort_if($court !== null, 422, __('halls.courts_in_use', ['court' => $court]));
 
         $hall->update($data);
@@ -174,13 +175,20 @@ class HallController extends Controller
     {
         $data = $request->validate([
             'team_id' => ['required', 'string'],
-            'court' => ['nullable', 'integer', 'min:1'],
+            // Parts of the hall; empty or all parts = whole hall.
+            'courts' => ['nullable', 'array', 'max:12'],
+            'courts.*' => ['integer', 'min:1', 'distinct'],
             'notes' => ['nullable', 'string', 'max:255'],
         ]);
         $team = Team::query()->whereKey($data['team_id'])->whereNull('archived_at')->first();
         abort_if($team === null, 422, __('events.teams_invalid'));
-        abort_if(($data['court'] ?? null) !== null && $data['court'] > $hall->courts, 422, __('halls.court_too_high', ['courts' => $hall->courts]));
+        $courts = array_map('intval', $data['courts'] ?? []);
+        sort($courts);
+        abort_if($courts !== [] && max($courts) > $hall->courts, 422, __('halls.court_too_high', ['courts' => $hall->courts]));
+        if (count($courts) === $hall->courts) {
+            $courts = [];
+        }
 
-        return $this->timeData($request) + ['team_id' => $team->id, 'court' => $data['court'] ?? null, 'notes' => $data['notes'] ?? null];
+        return $this->timeData($request) + ['team_id' => $team->id, 'courts' => $courts === [] ? null : $courts, 'notes' => $data['notes'] ?? null];
     }
 }

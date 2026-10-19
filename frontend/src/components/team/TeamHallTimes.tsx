@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { api, type TeamHallTime } from '../../lib/api';
 import { formatDate, weekdayName } from '../../lib/dates';
 import { useTenantPath } from '../../lib/queries';
+import { courtsLabel } from '../../pages/HallsPage';
 
 /** The team's weekly hall times from the hall plan (hidden when there are none). */
 export function TeamHallTimes({ teamId }: { teamId: string }) {
@@ -26,7 +27,7 @@ export function TeamHallTimes({ teamId }: { teamId: string }) {
             {time.hall.address ? (
               <a className="text-brand-700 underline" target="_blank" rel="noreferrer" href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(time.hall.address)}`}>{time.hall.name}</a>
             ) : time.hall.name}
-            {time.court && <span className="text-slate-500"> · {t('halls.court', { court: time.court })}</span>}
+            {time.courts && <span className="text-slate-500"> · {courtsLabel(time.courts, null, t)}</span>}
             {time.valid_from && time.valid_from > new Date().toISOString().slice(0, 10) && <span className="text-slate-500"> · {t('halls.since', { from: formatDate(time.valid_from) })}</span>}
             {time.valid_until && <span className="text-slate-500"> · {t('halls.until', { until: formatDate(time.valid_until) })}</span>}
           </li>

@@ -5,7 +5,7 @@ return [
     'categories' => [
         'event_new' => 'New events',
         'event_changed' => 'Changes and cancellations',
-        'reminder' => 'Reminder for missing replies',
+        'reminder' => 'Reminders (missing replies, tasks taken)',
         'chat' => 'Chat messages',
         'poll' => 'New polls',
         'notice' => 'New notices',
@@ -22,6 +22,7 @@ return [
         'body' => ':when – please accept or decline.',
         'body_deadline' => ':when – please reply by :deadline.',
     ],
+    'task_reminder' => ['title' => 'Your task: :tasks', 'body' => ':title · :when'],
     'imported' => ['title' => '{1} :team: 1 new date in the schedule|[2,*] :team: :count new dates in the schedule', 'body' => 'Next: :title, :when'],
     'poll' => ['title' => 'New poll: :title'],
     'notice' => ['title' => 'New notice: :title'],

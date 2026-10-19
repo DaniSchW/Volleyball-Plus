@@ -103,6 +103,11 @@ class EventPresenter
         $data['responses'] = null;
         $data['positions'] = null;
         $data['tasks'] = $this->tasks($event, $viewer, $canManage);
+        // Places taken per limited position – numbers only, visible to everybody invited.
+        $data['position_taken'] = $event->position_limits ? EventResponse::query()->where('event_id', $event->id)
+            ->where('status', RsvpStatus::Yes)->whereNotNull('as_position')
+            ->selectRaw('as_position, count(*) as n')->groupBy('as_position')->toBase()->pluck('n', 'as_position')
+            ->map(fn ($n) => (int) $n)->all() : null;
 
         if ($showNames) {
             $invitees = EventInvitee::query()->where('event_id', $event->id)->pluck('source', 'person_id');
@@ -119,10 +124,12 @@ class EventPresenter
                         'name' => $person->first_name.' '.$person->last_name,
                         'avatar_url' => $person->avatar_file_id ? $this->fileUrl($person->avatar_file_id) : null,
                         'primary_position' => $person->primary_position?->value,
+                        'positions' => array_values(array_unique(array_filter([$person->primary_position?->value, ...($person->secondary_positions ?? [])]))),
                         'role' => $roles[$person->id] ?? TeamRole::Player->value,
                         'is_guest' => $invitees[$person->id] === 'cross_nomination',
                     ],
                     'status' => $response?->status->value,
+                    'as_position' => $response?->as_position,
                     'reason' => $showReasons ? $response?->reason : null,
                     'responded_at' => $response?->responded_at?->toIso8601ZuluString(),
                 ];
@@ -132,7 +139,7 @@ class EventPresenter
             if ($canManage) {
                 $data['positions'] = collect($data['responses'])
                     ->filter(fn ($row) => $row['status'] === RsvpStatus::Yes->value && $row['person']['role'] === TeamRole::Player->value)
-                    ->countBy(fn ($row) => $row['person']['primary_position'] ?? 'unknown')
+                    ->countBy(fn ($row) => $row['as_position'] ?? $row['person']['primary_position'] ?? 'unknown')
                     ->all();
             }
         }
@@ -186,6 +193,7 @@ class EventPresenter
                 'open' => max(0, $invited - $answered),
             ],
             'max_participants' => $event->max_participants,
+            'position_limits' => $event->position_limits,
             'is_full' => $event->max_participants !== null && $yes >= $event->max_participants,
             'min_participants' => $minimum,
             'below_minimum' => $minimum !== null && $event->expectsResponses() && $yes < $minimum,
@@ -207,6 +215,8 @@ class EventPresenter
                     'is_self' => $person->id === $this->permissions->ownPersonId($viewer),
                     'status' => $response?->status->value,
                     'reason' => $response?->reason,
+                    'as_position' => $response?->as_position,
+                    'positions' => array_values(array_unique(array_filter([$person->primary_position?->value, ...($person->secondary_positions ?? [])]))),
                     'is_guest' => $guest,
                     // Guests may decline any time, accept only once places open up for them.
                     'can_accept' => $canManage || ! $guest || $this->guests->isOpen($event),

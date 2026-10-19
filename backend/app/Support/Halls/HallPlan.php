@@ -10,7 +10,7 @@ use Illuminate\Support\Collection;
 /**
  * The department's hall plan. Two bookings conflict when they use the same
  * hall on the same weekday at overlapping times and validity periods, and
- * the same court (no court = whole hall). Conflicts only warn.
+ * a shared part of the hall (no parts = whole hall). Conflicts only warn.
  */
 class HallPlan
 {
@@ -57,12 +57,12 @@ class HallPlan
             'weekday' => $booking->weekday,
             'start_time' => self::hm($booking->start_time),
             'end_time' => self::hm($booking->end_time),
-            'court' => $booking->court,
+            'courts' => $booking->courtList(),
             'valid_from' => $booking->valid_from?->toDateString(),
             'valid_until' => $booking->valid_until?->toDateString(),
             'notes' => $booking->notes,
             'conflicts' => $this->conflicts($booking, $others)->map(fn (HallBooking $o) => [
-                'id' => $o->id, 'team' => $o->team->name, 'start_time' => self::hm($o->start_time), 'end_time' => self::hm($o->end_time), 'court' => $o->court,
+                'id' => $o->id, 'team' => $o->team->name, 'start_time' => self::hm($o->start_time), 'end_time' => self::hm($o->end_time), 'courts' => $o->courtList(),
             ])->values()->all(),
             'outside_slots' => ! $this->withinSlots($booking, $hall->slots),
         ];
@@ -86,7 +86,7 @@ class HallPlan
             && $o->weekday === $booking->weekday
             && self::hm($o->start_time) < self::hm($booking->end_time) && self::hm($booking->start_time) < self::hm($o->end_time)
             && self::periodsOverlap($o->valid_from?->toDateString(), $o->valid_until?->toDateString(), $booking->valid_from?->toDateString(), $booking->valid_until?->toDateString())
-            && ($o->court === null || $booking->court === null || $o->court === $booking->court))->values();
+            && self::courtsOverlap($o->courtList(), $booking->courtList()))->values();
     }
 
     /**
@@ -121,10 +121,16 @@ class HallPlan
                 'weekday' => $b->weekday,
                 'start_time' => self::hm($b->start_time),
                 'end_time' => self::hm($b->end_time),
-                'court' => $b->court,
+                'courts' => $b->courtList(),
                 'valid_from' => $b->valid_from?->toDateString(),
                 'valid_until' => $b->valid_until?->toDateString(),
             ])->values()->all();
+    }
+
+    /** @param  list<int>|null  $a  null = whole hall */
+    private static function courtsOverlap(?array $a, ?array $b): bool
+    {
+        return $a === null || $b === null || array_intersect($a, $b) !== [];
     }
 
     private static function periodsOverlap(?string $fromA, ?string $untilA, ?string $fromB, ?string $untilB): bool

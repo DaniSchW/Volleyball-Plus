@@ -192,6 +192,8 @@ export interface PersonDetail extends Person {
   shared_fields: string[] | null;
   editable_fields: string[];
   can_manage_profile: boolean;
+  /** DSGVO export and deletion. */
+  can_manage_personal_data: boolean;
   can_manage_minor_permissions: boolean;
   can_edit_referee_license: boolean;
   can_invite_guardian: boolean;
@@ -259,6 +261,10 @@ export interface MyReply {
   is_self: boolean;
   status: RsvpStatus | null;
   reason: string | null;
+  /** Position the acceptance counts for (Positions-Soll). */
+  as_position: Position | null;
+  /** Main and secondary positions from the profile. */
+  positions: Position[];
   is_guest: boolean;
   can_accept: boolean;
   guests_open_at: string | null;
@@ -287,6 +293,8 @@ export interface EventSummary {
   opponent_logo_url: string | null;
   counts: { yes: number; no: number; maybe: number; open: number };
   max_participants: number | null;
+  /** Positions-Soll: at most n accepted per position. */
+  position_limits: Partial<Record<Position, number>> | null;
   is_full: boolean;
   min_participants: number | null;
   below_minimum: boolean;
@@ -300,6 +308,7 @@ export interface EventSummary {
 export interface ResponseRow {
   person: { id: string; name: string; avatar_url: string | null; primary_position: Position | null; role: TeamRole; is_guest: boolean };
   status: RsvpStatus | null;
+  as_position: Position | null;
   reason: string | null;
   responded_at: string | null;
 }
@@ -316,6 +325,8 @@ export interface EventDetail extends EventSummary {
   tasks: EventTask[];
   /** Accepted players per position – only for people managing the event. */
   positions: Partial<Record<Position | 'unknown', number>> | null;
+  /** Accepted per limited position (numbers only). */
+  position_taken: Partial<Record<Position, number>> | null;
 }
 
 export interface EventPage {
@@ -502,6 +513,8 @@ export interface ChatSummary {
 export interface ChatDetail extends Omit<ChatSummary, 'unread' | 'last_message'> {
   topics: { id: string; name: string; unread: number }[];
   members: { id: string; name: string }[];
+  /** Chosen members of a custom chat; null for team chats. */
+  member_ids: string[] | null;
   upload: { max_bytes: number; per_message: number; extensions: string[] };
 }
 
@@ -593,9 +606,10 @@ export interface HallSlot {
 
 export interface HallBooking extends HallSlot {
   team: { id: string; name: string; color: string | null; archived: boolean };
-  court: number | null;
+  /** Parts of the hall, null = whole hall. */
+  courts: number[] | null;
   notes: string | null;
-  conflicts: { id: string; team: string; start_time: string; end_time: string; court: number | null }[];
+  conflicts: { id: string; team: string; start_time: string; end_time: string; courts: number[] | null }[];
   outside_slots: boolean;
 }
 
@@ -615,7 +629,7 @@ export interface TeamHallTime {
   weekday: number;
   start_time: string;
   end_time: string;
-  court: number | null;
+  courts: number[] | null;
   valid_from: string | null;
   valid_until: string | null;
 }

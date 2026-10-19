@@ -16,6 +16,7 @@ use App\Support\Auth\CurrentMember;
 use App\Support\Auth\Permissions;
 use App\Support\Auth\PersonPresenter;
 use App\Support\Files\ImageStore;
+use App\Support\Privacy\PersonData;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
@@ -174,6 +175,28 @@ class PersonController extends Controller
         }
 
         return $this->show($person->refresh());
+    }
+
+    /** DSGVO: everything stored about the person as a JSON file. */
+    public function export(Person $person, PersonData $data): JsonResponse
+    {
+        abort_unless($this->permissions->canManagePersonalData($this->current->get(), $person), 403);
+
+        $name = str($person->first_name.' '.$person->last_name)->slug()->toString();
+
+        return response()->json($data->export($person), 200, [
+            'Content-Disposition' => 'attachment; filename="daten-'.$name.'.json"',
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    }
+
+    /** DSGVO: delete the profile and everything belonging to it (cannot be undone). */
+    public function destroy(Person $person, PersonData $data): JsonResponse
+    {
+        abort_unless($this->permissions->canManagePersonalData($this->current->get(), $person), 403);
+
+        $data->delete($person);
+
+        return response()->json(['message' => 'ok']);
     }
 
     /** Referee license with expiry date; the person (parents for children) or admins. */

@@ -83,6 +83,8 @@ class ChatController extends Controller
                 'id' => $t->id, 'name' => $t->name, 'unread' => $unread['topics'][$t->id] ?? 0,
             ])->values()->all() : [],
             'members' => $this->memberList($chat),
+            // Chosen members of a custom chat (for editing them).
+            'member_ids' => $chat->kind === Chat::KIND_CUSTOM ? $chat->members()->pluck('tenant_member_id')->values()->all() : null,
             'upload' => [
                 'max_bytes' => AttachmentStore::maxBytes(),
                 'per_message' => (int) config('security.chat_upload.per_message'),
@@ -134,7 +136,7 @@ class ChatController extends Controller
             $this->chats->setMode($chat, $data['mode']);
         }
         if (isset($data['member_ids']) && $chat->kind === Chat::KIND_CUSTOM) {
-            $this->syncMembers($chat, collect($data['member_ids']), $chat->created_by);
+            $this->syncMembers($chat, collect($data['member_ids'])->when($chat->created_by, fn ($ids) => $ids->push($chat->created_by)), $chat->created_by);
         }
 
         return $this->show($chat->refresh());

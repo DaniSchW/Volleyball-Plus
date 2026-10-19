@@ -353,7 +353,14 @@
     "wholeTeam": "ganzes Team",
     "guestsFrom": "Gäste dürfen zusagen ab",
     "guestsFromHint": "Leer = Standard aus den Team-Einstellungen (Quernominierung).",
-    "helperHint": "Z. B. Vereinsfest oder Heimspieltag. Unten im Termin legst du danach die Aufgaben mit Plätzen an, für die sich Helfer eintragen."
+    "helperHint": "Z. B. Vereinsfest oder Heimspieltag. Unten im Termin legst du danach die Aufgaben mit Plätzen an, für die sich Helfer eintragen.",
+    "positionLimits": "Positions-Soll",
+    "positionLimitsHint": "Höchstens so viele Zusagen je Position (leer = ohne Grenze). Wer auf der Hauptposition keinen Platz mehr bekommt, zählt für eine freie Nebenposition.",
+    "positionLimitsInfo": "Ist eine Position voll, ist die Zusage dafür geschlossen; wer absagt, gibt den Platz wieder frei.",
+    "positionFull": "voll",
+    "acceptAs": "Zusagen als",
+    "acceptAsAuto": "automatisch",
+    "acceptedAs": "Zugesagt als {{position}}"
   },
   "notifications": {
     "title": "Benachrichtigungen",
@@ -596,7 +603,8 @@
     "removeFile": "{{name}} entfernen",
     "tooBig": "zu groß (max. {{mb}} MB)",
     "open": "öffnen",
-    "downloadVideo": "Video herunterladen ({{size}})"
+    "downloadVideo": "Video herunterladen ({{size}})",
+    "editMembers": "Mitglieder bearbeiten"
   },
   "cash": {
     "hint": "Teamkassen und Abteilungskasse als Kassenbuch – ohne echte Zahlungen. Buchungen werden nicht geändert, sondern bei Bedarf storniert.",
@@ -656,11 +664,11 @@
     "savedWithWarning": "Gespeichert – bitte prüfen:",
     "dismiss": "Ausblenden",
     "available": "Verfügbar",
-    "courts_one": "{{count}} Feld",
-    "courts_other": "{{count}} Felder",
-    "court": "Feld {{court}}",
-    "courtLabel": "Feld",
-    "courtsLabel": "Felder",
+    "courts_one": "{{count}} Hallenteil",
+    "courts_other": "{{count}} Hallenteile",
+    "court": "Teil {{court}}",
+    "courtLabel": "Hallenteile",
+    "courtsLabel": "Hallenteile",
     "wholeHall": "Ganze Halle",
     "between": "{{from}} – {{until}}",
     "since": "ab {{from}}",
@@ -687,6 +695,22 @@
     "end": "Bis",
     "validFrom": "Gültig ab",
     "validUntil": "Gültig bis",
-    "teamTimes": "Hallenzeiten"
+    "teamTimes": "Hallenzeiten",
+    "courtHint": "Nichts gewählt = ganze Halle.",
+    "parts_one": "Teil {{parts}}",
+    "parts_other": "Teile {{parts}}",
+    "partsOf_one": "Teil {{parts}} von {{total}}",
+    "partsOf_other": "Teile {{parts}} von {{total}}"
+  },
+  "privacy": {
+    "title": "Persönliche Daten",
+    "exportHint": "Alle gespeicherten Angaben zu dieser Person als Datei (JSON): Profil, Teams, Zu- und Absagen, Aufgaben, Abstimmungen, Kassenbuchungen, eigene Chat-Nachrichten.",
+    "export": "Daten herunterladen",
+    "delete": "Profil von {{name}} löschen",
+    "deleteOwn": "Mein Profil löschen",
+    "deleteHint": "Das Profil wird mit Teams, Zu-/Absagen, Aufgaben, Abstimmungen, Lizenz und Bild endgültig gelöscht. Kassenbuchungen bleiben ohne Namen erhalten. Das lässt sich nicht rückgängig machen.",
+    "deleteOwnHint": "Dein Profil wird mit Teams, Zu-/Absagen, Aufgaben, Abstimmungen, Lizenz und Bild endgültig gelöscht, und du verlierst den Zugang zu dieser Abteilung. Chat-Nachrichten bleiben ohne Namen stehen, Kassenbuchungen ohne Bezug zu dir. Das lässt sich nicht rückgängig machen.",
+    "confirmLabel": "Zum Bestätigen „{{name}}“ eingeben",
+    "deleteNow": "Endgültig löschen"
   }
 }

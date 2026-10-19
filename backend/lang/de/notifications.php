@@ -5,7 +5,7 @@ return [
     'categories' => [
         'event_new' => 'Neue Termine',
         'event_changed' => 'Änderungen und Absagen',
-        'reminder' => 'Erinnerung an offene Antworten',
+        'reminder' => 'Erinnerungen (offene Antworten, übernommene Aufgaben)',
         'chat' => 'Chat-Nachrichten',
         'poll' => 'Neue Umfragen',
         'notice' => 'Neue Infos',
@@ -22,6 +22,7 @@ return [
         'body' => ':when – bitte sag zu oder ab.',
         'body_deadline' => ':when – Antwort bitte bis :deadline.',
     ],
+    'task_reminder' => ['title' => 'Deine Aufgabe: :tasks', 'body' => ':title · :when'],
     'imported' => ['title' => '{1} :team: 1 neuer Termin im Spielplan|[2,*] :team: :count neue Termine im Spielplan', 'body' => 'Als Nächstes: :title, :when'],
     'poll' => ['title' => 'Neue Umfrage: :title'],
     'notice' => ['title' => 'Neue Info: :title'],

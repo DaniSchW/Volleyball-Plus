@@ -2,7 +2,8 @@ import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
-import { api, errorText, post, type ChatDetail, type ChatSummary, type MemberRow } from '../lib/api';
+import { api, errorText, post, type ChatDetail, type ChatSummary } from '../lib/api';
+import { MemberPicker } from '../components/chat/MemberPicker';
 import { formatDay, formatTime } from '../lib/dates';
 import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
 import { Button, Card, Field, Loading, Notice, PageTitle, Select } from '../components/ui';
@@ -76,11 +77,9 @@ function CreateChat({ onDone }: { onDone: () => void }) {
   const tp = useTenantPath();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const members = useQuery({ queryKey: ['members', slug], queryFn: async () => (await api<{ data: MemberRow[] }>(tp('members'))).data });
   const [name, setName] = useState('');
   const [mode, setMode] = useState<'flat' | 'topics'>('flat');
   const [chosen, setChosen] = useState<string[]>([]);
-  const [filter, setFilter] = useState('');
 
   const create = useMutation({
     mutationFn: () => post<{ data: ChatDetail }>(tp('chats'), { name, mode, member_ids: chosen }),
@@ -90,12 +89,6 @@ function CreateChat({ onDone }: { onDone: () => void }) {
       navigate(`/${slug}/chat/${data.id}`);
     },
   });
-
-  const label = (m: MemberRow) => m.persons.find((p) => p.relation === 'self')?.name ?? m.persons[0]?.name ?? m.email;
-  const list = (members.data ?? [])
-    .filter((m) => m.status === 'active')
-    .filter((m) => !filter || label(m).toLowerCase().includes(filter.toLowerCase()))
-    .sort((a, b) => label(a).localeCompare(label(b)));
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
@@ -111,32 +104,7 @@ function CreateChat({ onDone }: { onDone: () => void }) {
             <option value="flat">{t('chat.modes.flat')}</option>
             <option value="topics">{t('chat.modes.topics')}</option>
           </Select>
-          <fieldset>
-            <legend className="mb-1 text-sm font-medium text-slate-700">{t('chat.members', { count: chosen.length })}</legend>
-            <input
-              type="search"
-              className="mb-2 min-h-11 w-full rounded-lg border border-slate-300 px-3 text-base"
-              placeholder={t('team.search')}
-              aria-label={t('team.search')}
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-            />
-            <ul className="max-h-64 overflow-y-auto rounded-lg border border-slate-100">
-              {list.map((m) => (
-                <li key={m.id}>
-                  <label className="flex min-h-11 items-center gap-3 px-3 text-sm">
-                    <input
-                      type="checkbox"
-                      className="size-5 accent-brand-700"
-                      checked={chosen.includes(m.id)}
-                      onChange={(e) => setChosen((c) => (e.target.checked ? [...c, m.id] : c.filter((x) => x !== m.id)))}
-                    />
-                    {label(m)}
-                  </label>
-                </li>
-              ))}
-            </ul>
-          </fieldset>
+          <MemberPicker chosen={chosen} onChange={setChosen} />
           {create.isError && <Notice tone="error">{errorText(create.error, t('errors.generic'))}</Notice>}
           <div className="flex gap-2">
             <Button type="submit" disabled={create.isPending || chosen.length === 0}>{t('common.create')}</Button>

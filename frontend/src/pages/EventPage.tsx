@@ -104,6 +104,8 @@ export function EventPage() {
 
       {!cancelled && <TasksCard event={e} />}
 
+      {e.position_limits && Object.keys(e.position_limits).length > 0 && <PositionLimits event={e} />}
+
       {e.positions && <Positions positions={e.positions} />}
 
       {e.response_mode === 'rsvp' && <Responses event={e} />}
@@ -125,6 +127,30 @@ export function EventPage() {
         </Card>
       )}
     </div>
+  );
+}
+
+/** Positions-Soll: places taken per limited position, for everybody invited. */
+function PositionLimits({ event }: { event: EventDetail }) {
+  const { t } = useTranslation();
+  const keys = POSITIONS.filter((p) => event.position_limits?.[p] !== undefined);
+
+  return (
+    <Card title={t('events.positionLimits')}>
+      <ul className="flex flex-wrap gap-2">
+        {keys.map((key) => {
+          const taken = event.position_taken?.[key] ?? 0;
+          const limit = event.position_limits![key]!;
+          return (
+            <li key={key} className={`rounded-full px-3 py-1 text-sm ${taken >= limit ? 'bg-red-50 text-red-800' : 'bg-slate-100'}`}>
+              {t(`positions.${key}`)}: <span className="font-semibold">{taken}/{limit}</span>
+              {taken >= limit && <span className="sr-only"> {t('events.positionFull')}</span>}
+            </li>
+          );
+        })}
+      </ul>
+      <p className="mt-2 text-xs text-slate-500">{t('events.positionLimitsInfo')}</p>
+    </Card>
   );
 }
 
@@ -183,7 +209,7 @@ function Responses({ event }: { event: EventDetail }) {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm">{row.person.name}</span>
                       <span className="block truncate text-xs text-slate-500">
-                        {[row.person.is_guest && t('events.guest'), row.person.role !== 'player' && !row.person.is_guest && t(`roles.${row.person.role}`), row.person.primary_position && t(`positions.${row.person.primary_position}`), row.reason]
+                        {[row.person.is_guest && t('events.guest'), row.person.role !== 'player' && !row.person.is_guest && t(`roles.${row.person.role}`), (row.status === 'yes' && row.as_position ? row.as_position : row.person.primary_position) && t(`positions.${row.status === 'yes' && row.as_position ? row.as_position : row.person.primary_position}`), row.reason]
                           .filter(Boolean).join(' · ')}
                       </span>
                     </span>

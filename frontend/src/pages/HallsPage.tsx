@@ -48,6 +48,10 @@ function usePlanUpdate() {
   };
 }
 
+/** "Teil 1 + 2 von 3" or "Ganze Halle" */
+export const courtsLabel = (courts: number[] | null, total: number | null, t: (key: string, o?: Record<string, unknown>) => string) =>
+  courts === null ? t('halls.wholeHall') : t(total ? 'halls.partsOf' : 'halls.parts', { count: courts.length, parts: courts.join(' + '), total });
+
 const period = (from: string | null, until: string | null, t: (key: string, o?: Record<string, string>) => string) =>
   from && until ? t('halls.between', { from: formatDate(from), until: formatDate(until) })
     : from ? t('halls.since', { from: formatDate(from) })
@@ -131,7 +135,7 @@ function HallCard({ hall, admin }: { hall: Hall; admin: boolean }) {
                               {b.team.archived && <span className="text-xs text-slate-500"> ({t('cash.archived')})</span>}
                             </p>
                             <p className="text-xs text-slate-500">
-                              {[b.court ? t('halls.court', { court: b.court }) : t('halls.wholeHall'), period(b.valid_from, b.valid_until, t), b.notes].filter(Boolean).join(' · ')}
+                              {[courtsLabel(b.courts, hall.courts, t), period(b.valid_from, b.valid_until, t), b.notes].filter(Boolean).join(' · ')}
                             </p>
                             {b.conflicts.map((c) => (
                               <p key={c.id} className="text-xs font-medium text-red-700">⚠️ {t('halls.conflictWith', { team: c.team, time: `${c.start_time}–${c.end_time}` })}</p>
@@ -255,7 +259,7 @@ function TimeForm({ hall, kind, booking, onDone, onWarning }: {
     weekday: String(source.weekday ?? 1),
     start_time: source.start_time ?? '18:00',
     end_time: source.end_time ?? '20:00',
-    court: source.court ? String(source.court) : '',
+    courts: source.courts ?? [],
     valid_from: source.valid_from ?? '',
     valid_until: source.valid_until ?? '',
     notes: source.notes ?? '',
@@ -266,7 +270,7 @@ function TimeForm({ hall, kind, booking, onDone, onWarning }: {
       const body = {
         weekday: Number(form.weekday), start_time: form.start_time, end_time: form.end_time,
         valid_from: form.valid_from || null, valid_until: form.valid_until || null,
-        ...(kind === 'booking' ? { team_id: form.team_id, court: form.court ? Number(form.court) : null, notes: form.notes || null } : {}),
+        ...(kind === 'booking' ? { team_id: form.team_id, courts: form.courts, notes: form.notes || null } : {}),
       };
       if (kind === 'slot') return post<PlanResponse>(tp(`halls/${hall.id}/slots`), body);
       return booking ? patch<PlanResponse>(tp(`hall-bookings/${booking.id}`), body) : post<PlanResponse>(tp(`halls/${hall.id}/bookings`), body);
@@ -300,10 +304,26 @@ function TimeForm({ hall, kind, booking, onDone, onWarning }: {
         <Field label={t('halls.end')} type="time" required value={form.end_time} onChange={(e) => setForm({ ...form, end_time: e.target.value })} />
       </div>
       {kind === 'booking' && hall.courts > 1 && (
-        <Select label={t('halls.courtLabel')} value={form.court} onChange={(e) => setForm({ ...form, court: e.target.value })}>
-          <option value="">{t('halls.wholeHall')}</option>
-          {Array.from({ length: hall.courts }, (_, i) => i + 1).map((c) => <option key={c} value={c}>{t('halls.court', { court: c })}</option>)}
-        </Select>
+        <fieldset>
+          <legend className="mb-1 text-sm font-medium text-slate-700">{t('halls.courtLabel')}</legend>
+          <p className="mb-1 text-xs text-slate-500">{t('halls.courtHint')}</p>
+          <div className="flex flex-wrap gap-2">
+            {Array.from({ length: hall.courts }, (_, i) => i + 1).map((c) => (
+              <label key={c} className="flex min-h-11 items-center gap-2 rounded-lg border border-slate-300 px-3 text-sm">
+                <input
+                  type="checkbox"
+                  className="size-5 accent-brand-700"
+                  checked={form.courts.includes(c)}
+                  onChange={(e) => setForm({ ...form, courts: e.target.checked ? [...form.courts, c].sort((a, b) => a - b) : form.courts.filter((x) => x !== c) })}
+                />
+                {t('halls.court', { court: c })}
+              </label>
+            ))}
+          </div>
+          <p className="mt-1 text-xs text-slate-500">
+            {courtsLabel(form.courts.length === 0 || form.courts.length === hall.courts ? null : form.courts, hall.courts, t)}
+          </p>
+        </fieldset>
       )}
       <div className="grid grid-cols-2 gap-2">
         <Field label={t('halls.validFrom')} type="date" value={form.valid_from} onChange={(e) => setForm({ ...form, valid_from: e.target.value })} />

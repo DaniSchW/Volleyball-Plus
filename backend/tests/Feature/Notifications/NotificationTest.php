@@ -184,6 +184,26 @@ class NotificationTest extends TestCase
         $this->assertSame(2, Queue::pushed(SendPush::class, fn (SendPush $j) => str_starts_with($j->payload['title'], 'Bitte antworten'))->count());
     }
 
+    public function test_reminder_for_taken_tasks_the_day_before(): void
+    {
+        $event = $this->createEvent(['type' => 'helper', 'title' => 'Vereinsfest']);
+        $task = $this->loginAs($this->trainer)->postJson("/api/v1/t/ssv-ulm/events/{$event['id']}/tasks", ['title' => 'Kuchen', 'slots' => 3])->assertCreated()->json('data.tasks.0.id');
+        $this->loginAs($this->player)->postJson("/api/v1/t/ssv-ulm/tasks/{$task}/assignments", ['person_id' => $this->personOf($this->player)->id])->assertOk();
+
+        $this->artisan('app:send-notifications')->assertSuccessful();
+        $taskPushes = fn () => array_values(array_filter($this->pushesTo($this->player), fn ($p) => str_starts_with($p['title'], 'Deine Aufgabe')));
+        $this->assertSame([], $taskPushes());
+
+        // Start 22.10. 19:30 local = 17:30 UTC → reminder from 21.10. 17:30 UTC, once.
+        Carbon::setTestNow('2026-10-21 18:00:00');
+        $this->artisan('app:send-notifications')->assertSuccessful();
+        $this->artisan('app:send-notifications')->assertSuccessful();
+        $this->assertCount(1, $taskPushes());
+        $this->assertSame('Deine Aufgabe: Kuchen', $taskPushes()[0]['title']);
+        $this->assertSame('Vereinsfest · Do 22.10. 19:30 Uhr', $taskPushes()[0]['body']);
+        $this->assertSame([], array_filter($this->pushesTo($this->trainer), fn ($p) => str_starts_with($p['title'], 'Deine Aufgabe')));
+    }
+
     public function test_no_reminder_for_events_created_shortly_before(): void
     {
         $event = $this->createEvent(['starts_at' => '2026-10-19T18:00', 'ends_at' => '2026-10-19T20:00']);

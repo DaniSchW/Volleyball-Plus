@@ -164,6 +164,13 @@ class ChatTest extends TestCase
         $this->assertSame(['custom', 'topics', ['Allgemein']], [$chat['kind'], $chat['mode'], array_column($chat['topics'], 'name')]);
         $this->assertSame(['Ada Admin', 'Lena Damen', 'Tom Trainer'], array_column($chat['members'], 'name'));
         $this->assertNull(collect($this->loginAs($this->paul)->getJson($this->url('chats'))->json('data'))->firstWhere('name', 'Abteilungsleitung'));
+        $this->assertEqualsCanonicalizing([$this->admin->id, $this->trainer->id, $this->lena->id], $chat['member_ids']);
+
+        // Members can be changed later; the creator stays.
+        $changed = $this->loginAs($this->admin)->patchJson($this->url("chats/{$chat['id']}"), ['member_ids' => [$this->trainer->id, $this->paul->id]])->assertOk()->json('data');
+        $this->assertEqualsCanonicalizing([$this->admin->id, $this->trainer->id, $this->paul->id], $changed['member_ids']);
+        $this->loginAs($this->lena)->getJson($this->url("chats/{$chat['id']}"))->assertForbidden();
+        $this->loginAs($this->admin)->patchJson($this->url("chats/{$chat['id']}"), ['member_ids' => $board])->assertOk();
 
         $general = $chat['topics'][0]['id'];
         $chat = $this->loginAs($this->admin)->postJson($this->url("chats/{$chat['id']}/topics"), ['name' => 'Finanzen'])->json('data');

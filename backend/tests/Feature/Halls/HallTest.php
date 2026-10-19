@@ -71,15 +71,22 @@ class HallTest extends TestCase
         $this->assertSame(['Herren 1'], array_column($second['conflicts'], 'team'));
 
         // Touching times and other courts do not conflict.
-        $this->bookTeam($hall['id'], $this->other, '21:30', '22:00', ['court' => 1])->assertCreated();
+        $this->bookTeam($hall['id'], $this->other, '21:30', '22:00', ['courts' => [1]])->assertCreated();
         $this->loginAs($this->admin)->patchJson("/api/v1/t/ssv-ulm/hall-bookings/{$first['id']}", [
-            'team_id' => $this->team->id, 'weekday' => 2, 'start_time' => '19:30', 'end_time' => '21:30', 'court' => 1,
+            'team_id' => $this->team->id, 'weekday' => 2, 'start_time' => '19:30', 'end_time' => '21:30', 'courts' => [1],
         ])->assertOk();
-        $courtTwo = $this->bookTeam($hall['id'], $this->other, '19:00', '20:00', ['court' => 2])->json('booking');
+        $courtTwo = $this->bookTeam($hall['id'], $this->other, '19:00', '20:00', ['courts' => [2]])->json('booking');
         $this->assertSame([], $courtTwo['conflicts']);
 
+        // Two of three parts overlap with one of them.
+        $twoParts = $this->bookTeam($hall['id'], $this->other, '20:30', '21:00', ['courts' => [3, 2]])->json('booking');
+        $this->assertSame([2, 3], $twoParts['courts']);
+        $this->assertSame(['Damen 1'], array_column($twoParts['conflicts'], 'team'));
+        // All parts = whole hall.
+        $this->assertNull($this->bookTeam($hall['id'], $this->team, '18:00', '18:30', ['courts' => [1, 2, 3]])->json('booking.courts'));
+
         // Not within the hall's times.
-        $late = $this->bookTeam($hall['id'], $this->other, '21:00', '23:00', ['court' => 3])->json('booking');
+        $late = $this->bookTeam($hall['id'], $this->other, '21:00', '23:00', ['courts' => [3]])->json('booking');
         $this->assertTrue($late['outside_slots']);
 
         // Different validity periods do not conflict.
@@ -93,8 +100,8 @@ class HallTest extends TestCase
     {
         $hall = $this->hall(['courts' => 2]);
         $this->bookTeam($hall['id'], $this->team, '20:00', '19:00')->assertUnprocessable();
-        $this->bookTeam($hall['id'], $this->team, '19:00', '20:00', ['court' => 3])->assertUnprocessable();
-        $this->bookTeam($hall['id'], $this->team, '19:00', '20:00', ['court' => 2])->assertCreated();
+        $this->bookTeam($hall['id'], $this->team, '19:00', '20:00', ['courts' => [3]])->assertUnprocessable();
+        $this->bookTeam($hall['id'], $this->team, '19:00', '20:00', ['courts' => [2]])->assertCreated();
 
         // Fewer courts only when no booking uses the removed ones.
         $this->loginAs($this->admin)->patchJson("/api/v1/t/ssv-ulm/halls/{$hall['id']}", ['name' => 'Kuhberghalle', 'courts' => 1])->assertUnprocessable();

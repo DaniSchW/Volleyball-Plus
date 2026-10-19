@@ -98,6 +98,8 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
         Route::post('persons', [PersonController::class, 'store']);
         Route::get('persons/{person}', [PersonController::class, 'show']);
         Route::patch('persons/{person}', [PersonController::class, 'update']);
+        Route::delete('persons/{person}', [PersonController::class, 'destroy']);
+        Route::get('persons/{person}/export', [PersonController::class, 'export']);
         Route::post('persons/{person}/avatar', [PersonController::class, 'uploadAvatar']);
         Route::delete('persons/{person}/avatar', [PersonController::class, 'deleteAvatar']);
         Route::put('persons/{person}/referee-license', [PersonController::class, 'updateRefereeLicense']);

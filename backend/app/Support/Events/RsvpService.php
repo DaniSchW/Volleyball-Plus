@@ -23,13 +23,15 @@ use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
  * - until the deadline (people managing the event may still change it),
  * - a reason if the team requires one (for several teams: the strictest rule),
  * - "yes" closes when the maximum number of participants is reached,
+ * - with a Positions-Soll, "yes" counts for the player's main position, or
+ *   the first secondary one with a free place (or the chosen position),
  * - cross-nominated guests may accept only from the opening time (GuestWindow).
  */
 class RsvpService
 {
     public function __construct(private Permissions $permissions, private GuestWindow $guests) {}
 
-    public function respond(Event $event, Person $person, RsvpStatus $status, ?string $reason, TenantMember $actor): EventResponse
+    public function respond(Event $event, Person $person, RsvpStatus $status, ?string $reason, TenantMember $actor, ?string $position = null): EventResponse
     {
         $manager = $this->permissions->canManageEvent($actor, $event);
 
@@ -61,7 +63,12 @@ class RsvpService
             throw ValidationException::withMessages(['reason' => __('events.reason_required')]);
         }
 
-        return DB::transaction(function () use ($event, $person, $status, $reason, $actor, $afterDeadline) {
+        $own = array_values(array_unique(array_filter([$person->primary_position?->value, ...($person->secondary_positions ?? [])])));
+        if ($position !== null && ! in_array($position, $own, true) && ! $manager) {
+            throw ValidationException::withMessages(['position' => __('events.position_not_yours')]);
+        }
+
+        return DB::transaction(function () use ($event, $person, $status, $reason, $actor, $afterDeadline, $own, $position) {
             // Lock the event so the participant limit holds with simultaneous replies.
             $locked = Event::query()->lockForUpdate()->findOrFail($event->id);
             $current = EventResponse::query()->where('event_id', $event->id)->where('person_id', $person->id)->first();
@@ -73,10 +80,13 @@ class RsvpService
                 }
             }
 
+            $asPosition = $status === RsvpStatus::Yes ? $this->positionFor($locked, $person, $own, $position, $current) : null;
+
             $response = $current ?? new EventResponse(['event_id' => $event->id, 'person_id' => $person->id]);
             $old = $current?->status;
             $response->fill([
                 'status' => $status,
+                'as_position' => $asPosition,
                 'reason' => $status === RsvpStatus::Yes ? null : $reason,
                 'responded_by' => $actor->id,
                 'responded_at' => Carbon::now(),
@@ -93,6 +103,39 @@ class RsvpService
 
             return $response;
         });
+    }
+
+    /**
+     * The position the "yes" counts for. Without limits simply the chosen or
+     * main position; with limits the first one that still has a place.
+     *
+     * @param  list<string>  $own
+     */
+    private function positionFor(Event $event, Person $person, array $own, ?string $chosen, ?EventResponse $current): ?string
+    {
+        $limits = $event->position_limits ?? [];
+        $candidates = $chosen !== null ? [$chosen] : $own;
+        // Accepting again keeps the place one already has.
+        if ($chosen === null && $current?->status === RsvpStatus::Yes && $current->as_position !== null) {
+            $candidates = array_values(array_unique([$current->as_position, ...$candidates]));
+        }
+        if ($limits === [] || $candidates === []) {
+            return $candidates[0] ?? null;
+        }
+
+        $taken = EventResponse::query()->where('event_id', $event->id)->where('status', RsvpStatus::Yes)
+            ->where('person_id', '!=', $person->id)->whereNotNull('as_position')
+            ->selectRaw('as_position, count(*) as n')->groupBy('as_position')->toBase()->pluck('n', 'as_position');
+
+        foreach ($candidates as $candidate) {
+            if (! isset($limits[$candidate]) || (int) ($taken[$candidate] ?? 0) < $limits[$candidate]) {
+                return $candidate;
+            }
+        }
+
+        throw ValidationException::withMessages(['status' => __('events.position_full', [
+            'positions' => implode(', ', array_map(fn (string $p) => __('events.positions.'.$p), $candidates)),
+        ])]);
     }
 
     public function reasonRequired(Event $event, RsvpStatus $status): bool

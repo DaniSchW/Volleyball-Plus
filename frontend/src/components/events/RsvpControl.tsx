@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { errorText, post, type EventDetail, type EventSummary, type MyReply, type RsvpStatus } from '../../lib/api';
+import { errorText, post, type EventDetail, type EventSummary, type MyReply, type Position, type RsvpStatus } from '../../lib/api';
 import { formatDateTime } from '../../lib/dates';
 import { useTenantPath } from '../../lib/queries';
 import { Notice } from '../ui';
@@ -24,9 +24,12 @@ export function RsvpControl({ event, reply, showName }: { event: EventSummary; r
   const queryClient = useQueryClient();
   const [pending, setPending] = useState<RsvpStatus | null>(null);
   const [reason, setReason] = useState(reply.reason ?? '');
+  const limited = !!event.position_limits && Object.keys(event.position_limits).length > 0;
+  // With a Positions-Soll players with several positions may choose; otherwise the first free one counts.
+  const [position, setPosition] = useState<Position | ''>(reply.as_position ?? '');
 
   const send = useMutation({
-    mutationFn: (body: { status: RsvpStatus; reason?: string }) =>
+    mutationFn: (body: { status: RsvpStatus; reason?: string; position?: Position | null }) =>
       post<{ data: EventDetail }>(tp(`events/${event.id}/responses`), { person_id: reply.person_id, ...body }),
     onSuccess: ({ data }) => {
       setPending(null);
@@ -37,7 +40,7 @@ export function RsvpControl({ event, reply, showName }: { event: EventSummary; r
 
   const choose = (status: RsvpStatus) => {
     if (status === 'yes') {
-      send.mutate({ status });
+      send.mutate({ status, ...(limited ? { position: position || null } : {}) });
     } else {
       setPending(status);
     }
@@ -72,6 +75,27 @@ export function RsvpControl({ event, reply, showName }: { event: EventSummary; r
           })}
         </div>
       </div>
+
+      {limited && reply.positions.length > 1 && reply.can_respond && (
+        <label className="flex items-center gap-2 text-xs text-slate-600">
+          {t('events.acceptAs')}
+          <select
+            className="min-h-9 rounded-md border border-slate-300 bg-white px-2 text-sm"
+            value={position}
+            onChange={(e) => {
+              const value = e.target.value as Position | '';
+              setPosition(value);
+              if (reply.status === 'yes' && value) send.mutate({ status: 'yes', position: value });
+            }}
+          >
+            <option value="">{t('events.acceptAsAuto')}</option>
+            {reply.positions.map((p) => <option key={p} value={p}>{t(`positions.${p}`)}</option>)}
+          </select>
+        </label>
+      )}
+      {reply.status === 'yes' && reply.as_position && limited && (
+        <p className="text-xs text-slate-500">{t('events.acceptedAs', { position: t(`positions.${reply.as_position}`) })}</p>
+      )}
 
       {pending && (
         <form

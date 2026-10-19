@@ -6,6 +6,7 @@ use App\Enums\NotificationCategory;
 use App\Models\Event;
 use App\Models\EventInvitee;
 use App\Models\EventResponse;
+use App\Models\TaskAssignment;
 use App\Models\Team;
 use App\Models\TenantMember;
 use Illuminate\Support\Carbon;
@@ -85,6 +86,25 @@ class EventNotifications
                 ? __('notifications.reminder.body_deadline', ['when' => $this->notifier->when($event->starts_at, $locale), 'deadline' => $this->notifier->when($event->rsvp_deadline, $locale)], $locale)
                 : __('notifications.reminder.body', ['when' => $this->notifier->when($event->starts_at, $locale)], $locale),
         ], $this->path($event));
+    }
+
+    /**
+     * Reminder for everybody who took a task of the event ("Fahrer",
+     * "Kuchen"), one message per person with all their tasks.
+     */
+    public function remindTasks(Event $event): int
+    {
+        $assignments = TaskAssignment::query()->with('task')->whereIn('task_id', $event->tasks()->select('id'))->get();
+        $sent = 0;
+        foreach ($assignments->groupBy('person_id') as $personId => $rows) {
+            $tasks = $rows->map(fn (TaskAssignment $a) => $a->task?->title)->filter()->unique()->implode(', ');
+            $sent += $this->notifier->toPersons(NotificationCategory::Reminder, [$personId], fn (string $locale) => [
+                'title' => __('notifications.task_reminder.title', ['tasks' => $tasks], $locale),
+                'body' => __('notifications.task_reminder.body', ['title' => $event->title, 'when' => $this->notifier->when($event->starts_at, $locale)], $locale),
+            ], $this->path($event));
+        }
+
+        return $sent;
     }
 
     private function send(Event $event, NotificationCategory $category, string $kind, ?TenantMember $actor): void

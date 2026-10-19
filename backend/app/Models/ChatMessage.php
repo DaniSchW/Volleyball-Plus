@@ -23,6 +23,14 @@ class ChatMessage extends Model
     }
 
     /**
+     * @return BelongsTo<Chat, $this>
+     */
+    public function chat(): BelongsTo
+    {
+        return $this->belongsTo(Chat::class);
+    }
+
+    /**
      * @return BelongsTo<TenantMember, $this>
      */
     public function author(): BelongsTo

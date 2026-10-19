@@ -23,6 +23,7 @@ use Illuminate\Support\Str;
  * Time-driven notifications, run with every cron call:
  * - reminder 24 hours before the reply deadline (or the start) to everyone
  *   who has not answered, once per event;
+ * - reminder 24 hours before the start to everyone who took a task;
  * - notices as soon as they become visible.
  * Works by "not yet sent" markers, so a late or skipped cron run only
  * delays messages and never sends them twice.
@@ -43,6 +44,7 @@ class SendNotifications extends Command
         foreach (Tenant::query()->cursor() as $tenant) {
             $tenants->run($tenant, function () use ($events, $notifier, &$reminders, &$notices) {
                 $reminders += $this->reminders($events);
+                $reminders += $this->taskReminders($events);
                 $notices += $this->notices($notifier);
             });
         }
@@ -83,6 +85,25 @@ class SendNotifications extends Command
         }
 
         return $sent;
+    }
+
+    private function taskReminders(EventNotifications $events): int
+    {
+        $now = Carbon::now();
+        $due = Event::query()
+            ->whereNull('task_reminder_sent_at')
+            ->where('status', EventStatus::Scheduled)
+            ->where('starts_at', '>', $now)
+            ->where('starts_at', '<=', $now->copy()->addHours(self::REMINDER_HOURS))
+            ->whereHas('tasks.assignments')
+            ->get();
+
+        foreach ($due as $event) {
+            $event->forceFill(['task_reminder_sent_at' => $now])->save();
+            $events->remindTasks($event);
+        }
+
+        return $due->count();
     }
 
     private function notices(Notifier $notifier): int

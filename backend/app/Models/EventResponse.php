@@ -12,7 +12,7 @@ class EventResponse extends Model
 {
     use BelongsToTenant, HasUlids;
 
-    protected $fillable = ['event_id', 'person_id', 'status', 'reason', 'responded_by', 'responded_at'];
+    protected $fillable = ['event_id', 'person_id', 'status', 'as_position', 'reason', 'responded_by', 'responded_at'];
 
     protected function casts(): array
     {

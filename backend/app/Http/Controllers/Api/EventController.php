@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\EventScope;
 use App\Enums\EventType;
+use App\Enums\Position;
 use App\Enums\RsvpStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
@@ -151,10 +152,11 @@ class EventController extends Controller
             'person_id' => ['required', 'string'],
             'status' => ['required', Rule::enum(RsvpStatus::class)],
             'reason' => ['nullable', 'string', 'max:500'],
+            'position' => ['nullable', Rule::enum(Position::class)],
         ]);
 
         $person = Person::query()->findOrFail($data['person_id']);
-        $rsvp->respond($event, $person, RsvpStatus::from($data['status']), $data['reason'] ?? null, $member);
+        $rsvp->respond($event, $person, RsvpStatus::from($data['status']), $data['reason'] ?? null, $member, $data['position'] ?? null);
 
         return response()->json(['data' => $this->presenter->detail($event->refresh(), $member)]);
     }
@@ -255,6 +257,8 @@ class EventController extends Controller
             'location_name' => ['sometimes', 'nullable', 'string', 'max:120'],
             'address' => ['sometimes', 'nullable', 'string', 'max:255'],
             'max_participants' => ['sometimes', 'nullable', 'integer', 'between:1,500'],
+            'position_limits' => ['sometimes', 'nullable', 'array:'.implode(',', array_column(Position::cases(), 'value'))],
+            'position_limits.*' => ['nullable', 'integer', 'between:0,50'],
             'opponent_id' => ['sometimes', 'nullable', 'string', Rule::exists('opponents', 'id')->where('tenant_id', $this->current->get()->tenant_id)],
             'is_home' => ['sometimes', 'nullable', 'boolean'],
             'cross_nomination_opens_at' => ['sometimes', 'nullable', 'date'],

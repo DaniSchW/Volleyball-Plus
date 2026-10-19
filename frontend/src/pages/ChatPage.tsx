@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Link, useParams, useSearchParams } from 'react-router';
 import { api, del, errorText, patch, post, upload, type ChatAttachment, type ChatDetail, type ChatMessage, type ChatMessagesPage } from '../lib/api';
 import { Attachments } from '../components/chat/Attachments';
+import { MemberPicker } from '../components/chat/MemberPicker';
 import { formatDay, formatTime } from '../lib/dates';
 import { useTenantPath, useTenantSlug } from '../lib/queries';
 import { Button, Loading, Notice } from '../components/ui';
@@ -371,7 +372,12 @@ function ChatSettings({ chat }: { chat: ChatDetail }) {
   const tp = useTenantPath();
   const queryClient = useQueryClient();
   const [topic, setTopic] = useState('');
+  const [members, setMembers] = useState<string[] | null>(null);
   const done = ({ data }: { data: ChatDetail }) => queryClient.setQueryData(['chat', chat.id], data);
+  const saveMembers = useMutation({
+    mutationFn: (ids: string[]) => patch<{ data: ChatDetail }>(tp(`chats/${chat.id}`), { member_ids: ids }),
+    onSuccess: (result) => { setMembers(null); done(result); },
+  });
   const mode = useMutation({ mutationFn: (value: 'flat' | 'topics') => patch<{ data: ChatDetail }>(tp(`chats/${chat.id}`), { mode: value }), onSuccess: done });
   const add = useMutation({
     mutationFn: () => post<{ data: ChatDetail }>(tp(`chats/${chat.id}/topics`), { name: topic }),
@@ -407,6 +413,18 @@ function ChatSettings({ chat }: { chat: ChatDetail }) {
         </form>
       )}
       <p className="text-xs text-slate-500">{t('chat.membersList', { names: chat.members.map((m) => m.name).join(', ') })}</p>
+      {chat.member_ids && (members === null ? (
+        <Button variant="secondary" onClick={() => setMembers(chat.member_ids)}>{t('chat.editMembers')}</Button>
+      ) : (
+        <div className="space-y-2">
+          <MemberPicker chosen={members} onChange={setMembers} />
+          {saveMembers.isError && <Notice tone="error">{errorText(saveMembers.error, t('errors.generic'))}</Notice>}
+          <div className="flex gap-2">
+            <Button disabled={members.length === 0 || saveMembers.isPending} onClick={() => saveMembers.mutate(members)}>{t('common.save')}</Button>
+            <Button variant="secondary" onClick={() => setMembers(null)}>{t('common.cancel')}</Button>
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

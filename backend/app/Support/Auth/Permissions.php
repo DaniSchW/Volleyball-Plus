@@ -190,6 +190,15 @@ class Permissions
         return $this->actsFor($member, $person) && ! $person->hasGuardians();
     }
 
+    /**
+     * DSGVO export and deleting the profile: the adult person, the parents
+     * of a child, admins.
+     */
+    public function canManagePersonalData(TenantMember $member, Person $person): bool
+    {
+        return $this->canManageProfile($member, $person);
+    }
+
     /** Only parents decide what the child may do. */
     public function canEditRefereeLicense(TenantMember $member, Person $person): bool
     {

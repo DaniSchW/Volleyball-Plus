@@ -20,7 +20,7 @@ class Event extends Model
 
     protected $fillable = [
         'type', 'response_mode', 'scope', 'title', 'description', 'starts_at', 'ends_at', 'meet_at',
-        'rsvp_deadline', 'location_name', 'address', 'max_participants', 'series_id', 'series_exception',
+        'rsvp_deadline', 'location_name', 'address', 'max_participants', 'position_limits', 'series_id', 'series_exception',
         'opponent_id', 'is_home', 'status', 'created_by', 'cross_nomination_opens_at', 'training_group_id', 'import_key',
     ];
 
@@ -38,6 +38,7 @@ class Event extends Model
             'response_mode' => ResponseMode::class,
             'scope' => EventScope::class,
             'status' => EventStatus::class,
+            'position_limits' => 'array',
             'starts_at' => 'datetime',
             'ends_at' => 'datetime',
             'meet_at' => 'datetime',
@@ -46,6 +47,7 @@ class Event extends Model
             'max_participants' => 'integer',
             'series_exception' => 'boolean',
             'reminder_sent_at' => 'datetime',
+            'task_reminder_sent_at' => 'datetime',
             'is_home' => 'boolean',
         ];
     }

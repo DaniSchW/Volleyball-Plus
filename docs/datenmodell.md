@@ -253,15 +253,15 @@ Ein täglicher Job (`app:generate-series`) erzeugt daraus Einzeltermine rolliere
 `event_id`, `person_id`, `source` enum `team`, `group`, `cross_nomination` (später `manual`).
 Eingeladen sind alle Personen der Termin-Teams (Spieler, Trainer, Betreuer). Kaderänderungen aktualisieren automatisch alle kommenden Termine des Teams; vergangene bleiben unverändert (Statistik). Basis für Statistik („war eingeladen“) und Startseite.
 
-### 🏢 `event_position_quota` – Positions-Soll (Ausbaustufe)
-`event_id` (oder `event_series_id`), `position`, `max_count`.
+### Positions-Soll ✅
+`events.position_limits` und `event_series.position_limits` (JSON, z. B. `{"setter": 2, "libero": 1}`; null = ohne). Die Reihe gibt ihre Werte an neu erzeugte Termine weiter.
 
 ### 🏢 `event_responses` – aktuelle Zu-/Absage ✅
 | Feld | Typ | Hinweis |
 |---|---|---|
 | event_id, person_id | | unique |
 | status | enum `yes`, `no`, `maybe` | Zusage / Absage / Vielleicht (zählt nicht als Zusage für Limit und Mindestteilnehmer) |
-| as_position | enum `position` null | *(Ausbaustufe)* Position, für die zugesagt wurde (Positions-Soll) |
+| as_position | enum `position` null | Position, für die zugesagt wurde (Positions-Soll) ✅ |
 | reason | text null | Absage-/Vielleicht-Grund; Pflicht laut Team-Einstellung, Sichtbarkeit für Mitspieler laut `team.reasons_visible_to_teammates` |
 | responded_by | → tenant_member | wer geklickt hat (Spieler selbst oder Elternteil) |
 | responded_at | datetime | |
@@ -275,7 +275,7 @@ Append-only: `event_id`, `person_id`, `old_status`, `new_status`, `responded_by`
 
 **Mindestteilnehmer:** Trainings mit weniger Zusagen als `team.min_participants` werden gelb markiert.
 
-**Positionen:** Wer den Termin verwaltet, sieht die Zusagen der Spieler nach Hauptposition gezählt (z. B. „Zuspiel: 2, Mittelblock: 3“). Gäste sind in der Rückmeldeliste als „Gast“ markiert. Ein Positions-Soll mit automatischem Stopp folgt als Ausbaustufe (`event_position_quota`).
+**Positionen:** Wer den Termin verwaltet, sieht die Zusagen der Spieler nach Hauptposition gezählt (z. B. „Zuspiel: 2, Mittelblock: 3“). Gäste sind in der Rückmeldeliste als „Gast“ markiert. Positions-Soll mit automatischem Stopp: siehe oben; gezählt wird nach `as_position`.
 
 **Kapazitätsprüfung:** Zusage läuft in einer Transaktion mit `SELECT … FROM event WHERE id = ? FOR UPDATE`, prüft Frist und (bei Quernominierten) Freigabezeitpunkt, zählt `yes`-Antworten (gesamt und je `as_position`) und lehnt bei vollem Limit ab. Keine Warteliste – bei einer Absage wird der Platz einfach wieder frei.
 
@@ -355,14 +355,14 @@ Admin-Gesamtübersicht = Aggregation über alle `cash_book` des Mandanten. Keine
 ## 10. Hallen & Belegungsplan
 
 ### 🏢 `halls` ✅
-`name`, `address`, `courts` smallint (Anzahl Felder), `notes`.
+`name`, `address`, `courts` smallint (Anzahl Hallenteile), `notes`.
 
 ### 🏢 `hall_slots` ✅ – verfügbare Zeiten der Halle
 `hall_id`, `weekday` smallint (1–7), `start_time` time, `end_time` time, `valid_from`, `valid_until` date null (z. B. Schulferien ausschließen).
 
 ### 🏢 `hall_bookings` ✅ – Team-Zuordnung
-`hall_id`, `team_id`, `weekday`, `start_time`, `end_time`, `court` smallint null (null = ganze Halle), `valid_from`, `valid_until`, `notes`.
-Konfliktwarnung: Abfrage auf Überschneidung gleicher `hall_id`/`weekday`/(`court`) mit überlappendem Zeit- und Gültigkeitsintervall. Kein harter Constraint, da laut Spezifikation nur gewarnt wird. Zusätzlich Warnung, wenn eine Belegung nicht in einer verfügbaren Zeit der Halle liegt. *(Später: Serientermine aus einer `hall_booking` erzeugen.)*
+`hall_id`, `team_id`, `weekday`, `start_time`, `end_time`, `courts` JSON null (Liste der Hallenteile, z. B. `[1, 2]`; null = ganze Halle), `valid_from`, `valid_until`, `notes`.
+Konfliktwarnung: Abfrage auf Überschneidung gleicher `hall_id`/`weekday` mit gemeinsamem Hallenteil mit überlappendem Zeit- und Gültigkeitsintervall. Kein harter Constraint, da laut Spezifikation nur gewarnt wird. Zusätzlich Warnung, wenn eine Belegung nicht in einer verfügbaren Zeit der Halle liegt. *(Später: Serientermine aus einer `hall_booking` erzeugen.)*
 
 Rechte: lesen = Trainer + Admin, schreiben = nur Admin.
 
@@ -384,6 +384,7 @@ Gespeichert werden nur Abweichungen vom Standard: Push für alles an, E-Mail nur
 - Neuer Termin; eine neue Trainingsreihe nur einmal (nicht je Termin).
 - Änderung von Zeit, Treffpunkt oder Ort; Absage; „findet doch statt“; Reihe geändert oder beendet (je eine Nachricht).
 - Erinnerung einmalig 24 h vor der Frist (ohne Frist: vor Beginn) an alle ohne Antwort; nicht bei Terminen, die erst innerhalb dieser 24 h angelegt wurden (`events.reminder_sent_at`).
+- Erinnerung einmalig 24 h vor Beginn an alle, die eine Aufgabe übernommen haben (`events.task_reminder_sent_at`).
 - Neue Info, sobald sie sichtbar wird.
 - Ohne Einstellungsmöglichkeit per E-Mail: Ablösung mit 18 (an Eltern und Person), fehlgeschlagene SSL-Prüfung (an alle Admins).
 

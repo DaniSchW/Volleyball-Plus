@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
-import { api, errorText, patch, post, type EventDetail, type EventType, type Opponent, type Team, type TrainingGroup } from '../lib/api';
+import { api, errorText, patch, post, POSITIONS, type EventDetail, type EventType, type Opponent, type Position, type Team, type TrainingGroup } from '../lib/api';
 import { addMinutes, toLocalInput } from '../lib/dates';
 import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
 import { Button, Card, Field, Loading, Notice, PageTitle, Select, Toggle } from '../components/ui';
@@ -23,6 +23,7 @@ interface FormState {
   location_name: string;
   address: string;
   max_participants: string;
+  position_limits: Partial<Record<Position, string>>;
   opponent_id: string;
   is_home: '' | 'home' | 'away';
   training_group_id: string;
@@ -41,7 +42,7 @@ function initial(teamId?: string): FormState {
   return {
     type: 'training', title: '', description: '', allTeams: false, team_ids: teamId ? [teamId] : [], response_mode: 'rsvp',
     starts_at: startLocal, ends_at: addMinutes(startLocal, 120), meet_at: '', rsvp_deadline: '',
-    location_name: '', address: '', max_participants: '', opponent_id: '', is_home: '', training_group_id: '', guests_from: '',
+    location_name: '', address: '', max_participants: '', position_limits: {}, opponent_id: '', is_home: '', training_group_id: '', guests_from: '',
     repeat: false, weekdays: [((start.getDay() + 6) % 7) + 1], interval_weeks: 1, ends_on: '',
   };
 }
@@ -52,7 +53,8 @@ function fromEvent(e: EventDetail): FormState {
     type: e.type, title: e.title, description: e.description ?? '', allTeams: e.scope === 'tenant', team_ids: e.team_ids,
     response_mode: e.response_mode, starts_at: toLocalInput(e.starts_at), ends_at: toLocalInput(e.ends_at),
     meet_at: toLocalInput(e.meet_at), rsvp_deadline: toLocalInput(e.rsvp_deadline), location_name: e.location_name ?? '',
-    address: e.address ?? '', max_participants: e.max_participants?.toString() ?? '', opponent_id: e.opponent?.id ?? '',
+    address: e.address ?? '', max_participants: e.max_participants?.toString() ?? '',
+    position_limits: Object.fromEntries(Object.entries(e.position_limits ?? {}).map(([k, v]) => [k, String(v)])), opponent_id: e.opponent?.id ?? '',
     is_home: e.is_home === null ? '' : e.is_home ? 'home' : 'away',
     training_group_id: e.training_group?.id ?? '', guests_from: toLocalInput(e.cross_nomination_opens_at),
     ...(e.series ? { weekdays: e.series.weekdays, interval_weeks: e.series.interval_weeks, ends_on: e.series.ends_on ?? '' } : {}),
@@ -101,6 +103,7 @@ export function EventFormPage() {
         address: form.address || null,
         max_participants: form.max_participants ? Number(form.max_participants) : null,
         response_mode: form.type === 'extra' ? form.response_mode : form.type === 'helper' ? 'info' : 'rsvp',
+        position_limits: Object.fromEntries(POSITIONS.filter((p) => form.position_limits[p]).map((p) => [p, Number(form.position_limits[p])])),
       };
       if (form.type === 'training') {
         body.training_group_id = form.training_group_id || null;
@@ -254,6 +257,27 @@ export function EventFormPage() {
       <Card>
         <div className="space-y-3">
           <Field label={t('events.maxParticipants')} type="number" min={1} max={500} inputMode="numeric" value={form.max_participants} onChange={(e) => set('max_participants', e.target.value)} hint={t('invitations.optional')} />
+          {form.type !== 'helper' && (form.type !== 'extra' || form.response_mode === 'rsvp') && (
+            <details open={Object.values(form.position_limits).some(Boolean)}>
+              <summary className="cursor-pointer text-sm font-medium text-slate-700">{t('events.positionLimits')}</summary>
+              <p className="mt-1 text-xs text-slate-500">{t('events.positionLimitsHint')}</p>
+              <div className="mt-2 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                {POSITIONS.map((p) => (
+                  <Field
+                    key={p}
+                    label={t(`positions.${p}`)}
+                    type="number"
+                    min={0}
+                    max={50}
+                    inputMode="numeric"
+                    placeholder="–"
+                    value={form.position_limits[p] ?? ''}
+                    onChange={(e) => set('position_limits', { ...form.position_limits, [p]: e.target.value })}
+                  />
+                ))}
+              </div>
+            </details>
+          )}
           <div>
             <label htmlFor="event-description" className="mb-1 block text-sm font-medium text-slate-700">{t('events.description')}</label>
             <textarea id="event-description" rows={3} maxLength={5000} className="w-full rounded-lg border border-slate-300 p-3 text-base" value={form.description} onChange={(e) => set('description', e.target.value)} />

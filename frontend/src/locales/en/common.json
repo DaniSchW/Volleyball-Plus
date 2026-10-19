@@ -353,7 +353,14 @@
     "wholeTeam": "whole team",
     "guestsFrom": "Guests may accept from",
     "guestsFromHint": "Empty = default from the team settings (cross-nomination).",
-    "helperHint": "E.g. club party or home match day. Afterwards add the tasks with places in the event for helpers to sign up."
+    "helperHint": "E.g. club party or home match day. Afterwards add the tasks with places in the event for helpers to sign up.",
+    "positionLimits": "Positions",
+    "positionLimitsHint": "At most this many acceptances per position (empty = no limit). Who finds no place on the main position counts for a free secondary one.",
+    "positionLimitsInfo": "When a position is full, accepting for it is closed; declining frees the place again.",
+    "positionFull": "full",
+    "acceptAs": "Accept as",
+    "acceptAsAuto": "automatic",
+    "acceptedAs": "Accepted as {{position}}"
   },
   "notifications": {
     "title": "Notifications",
@@ -596,7 +603,8 @@
     "removeFile": "Remove {{name}}",
     "tooBig": "too large (max. {{mb}} MB)",
     "open": "open",
-    "downloadVideo": "Download video ({{size}})"
+    "downloadVideo": "Download video ({{size}})",
+    "editMembers": "Edit members"
   },
   "cash": {
     "hint": "Team cash books and the department's cash book – no real payments. Bookings are not changed but cancelled if necessary.",
@@ -656,11 +664,11 @@
     "savedWithWarning": "Saved – please check:",
     "dismiss": "Dismiss",
     "available": "Available",
-    "courts_one": "{{count}} court",
-    "courts_other": "{{count}} courts",
-    "court": "Court {{court}}",
-    "courtLabel": "Court",
-    "courtsLabel": "Courts",
+    "courts_one": "{{count}} part",
+    "courts_other": "{{count}} parts",
+    "court": "Part {{court}}",
+    "courtLabel": "Parts of the hall",
+    "courtsLabel": "Parts",
     "wholeHall": "Whole hall",
     "between": "{{from}} – {{until}}",
     "since": "from {{from}}",
@@ -687,6 +695,22 @@
     "end": "To",
     "validFrom": "Valid from",
     "validUntil": "Valid until",
-    "teamTimes": "Hall times"
+    "teamTimes": "Hall times",
+    "courtHint": "Nothing chosen = whole hall.",
+    "parts_one": "Part {{parts}}",
+    "parts_other": "Parts {{parts}}",
+    "partsOf_one": "Part {{parts}} of {{total}}",
+    "partsOf_other": "Parts {{parts}} of {{total}}"
+  },
+  "privacy": {
+    "title": "Personal data",
+    "exportHint": "Everything stored about this person as a file (JSON): profile, teams, replies, tasks, votes, cash bookings, own chat messages.",
+    "export": "Download data",
+    "delete": "Delete the profile of {{name}}",
+    "deleteOwn": "Delete my profile",
+    "deleteHint": "The profile is deleted for good with teams, replies, tasks, votes, licence and picture. Cash bookings stay without the name. This cannot be undone.",
+    "deleteOwnHint": "Your profile is deleted for good with teams, replies, tasks, votes, licence and picture, and you lose access to this department. Chat messages stay without your name, cash bookings without reference to you. This cannot be undone.",
+    "confirmLabel": "Type “{{name}}” to confirm",
+    "deleteNow": "Delete for good"
   }
 }

@@ -96,9 +96,9 @@ const EVENT = {
   starts_at: '2026-10-20T17:30:00Z', ends_at: '2026-10-20T19:30:00Z', meet_at: null, rsvp_deadline: null, deadline_passed: false,
   location_name: 'Kuhberghalle', address: null, directions_url: null, teams: [{ id: 't1', name: 'Herren 1', color: null }],
   opponent: null, is_home: null, own_logo_url: null, opponent_logo_url: null, counts: { yes: 3, no: 1, maybe: 0, open: 6 },
-  max_participants: null, is_full: false, min_participants: 6, below_minimum: true, can_manage: false,
+  max_participants: null, position_limits: null, is_full: false, min_participants: 6, below_minimum: true, can_manage: false,
   reason_required: { no: true, maybe: false }, training_group: null,
-  my: [{ person_id: 'p1', name: 'Max', is_self: true, status: null, reason: null, is_guest: false, can_accept: true, guests_open_at: null, can_respond: true }],
+  my: [{ person_id: 'p1', name: 'Max', is_self: true, status: null, reason: null, as_position: null, positions: [], is_guest: false, can_accept: true, guests_open_at: null, can_respond: true }],
 };
 
 describe('start page', () => {
@@ -593,11 +593,11 @@ describe('cash', () => {
 describe('halls', () => {
   it('assigns a team and warns about an overlap', async () => {
     let sent: Record<string, unknown> = {};
-    const hall = { id: 'h1', name: 'Kuhberghalle', address: null, courts: 1, notes: null, slots: [], bookings: [] as unknown[] };
+    const hall = { id: 'h1', name: 'Kuhberghalle', address: null, courts: 3, notes: null, slots: [], bookings: [] as unknown[] };
     const booking = {
       id: 'k1', team: { id: 't2', name: 'Damen 1', color: null, archived: false }, weekday: 2, start_time: '20:00', end_time: '22:00',
-      court: null, valid_from: null, valid_until: null, notes: null, outside_slots: false,
-      conflicts: [{ id: 'k0', team: 'Herren 1', start_time: '19:30', end_time: '21:30', court: null }],
+      courts: [1, 2], valid_from: null, valid_until: null, notes: null, outside_slots: false,
+      conflicts: [{ id: 'k0', team: 'Herren 1', start_time: '19:30', end_time: '21:30', courts: null }],
     };
     mockApi({
       'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME(true) },
@@ -616,11 +616,43 @@ describe('halls', () => {
     fireEvent.change(screen.getByLabelText('Tag'), { target: { value: '2' } });
     fireEvent.change(screen.getByLabelText('Von'), { target: { value: '20:00' } });
     fireEvent.change(screen.getByLabelText('Bis'), { target: { value: '22:00' } });
+    fireEvent.click(screen.getByLabelText('Teil 2'));
+    fireEvent.click(screen.getByLabelText('Teil 1'));
+    expect(screen.getByText('Teile 1 + 2 von 3')).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Speichern' }));
 
-    await waitFor(() => expect(sent).toMatchObject({ team_id: 't2', weekday: 2, start_time: '20:00', end_time: '22:00', court: null }));
+    await waitFor(() => expect(sent).toMatchObject({ team_id: 't2', weekday: 2, start_time: '20:00', end_time: '22:00', courts: [1, 2] }));
     expect(await screen.findByText('Gespeichert – bitte prüfen:')).toBeInTheDocument();
     expect(screen.getAllByText('Überschneidung mit Herren 1 (19:30–21:30)', { exact: false })).toHaveLength(2);
     expect(screen.getByText('1 Belegung überschneidet sich mit einer anderen.')).toBeInTheDocument();
+  });
+});
+
+describe('positions', () => {
+  it('shows taken places and accepts for a chosen position', async () => {
+    let sent: Record<string, unknown> = {};
+    const detail = {
+      ...EVENT, description: null, names_visible: false, series_id: null, series: null, team_ids: ['t1'], cross_nomination_opens_at: null,
+      guests_open_at: null, responses: null, positions: null, tasks: [], task_summary: null,
+      position_limits: { setter: 2, outside: 3 }, position_taken: { setter: 2, outside: 1 },
+      my: [{ ...EVENT.my[0], positions: ['setter', 'outside'] }],
+    };
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/events/e1': { body: { data: detail } },
+      'POST /t/ssv-ulm/events/e1/responses': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { body: { data: { ...detail, position_taken: { setter: 2, outside: 2 }, my: [{ ...detail.my[0], status: 'yes', as_position: 'outside' }] } } };
+      },
+    });
+    renderAt('/ssv-ulm/events/e1');
+
+    expect(await screen.findByText('2/2')).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText('Zusagen als'), { target: { value: 'outside' } });
+    fireEvent.click(screen.getByRole('button', { name: /Zusage/ }));
+
+    await waitFor(() => expect(sent).toEqual({ person_id: 'p1', status: 'yes', position: 'outside' }));
+    expect(await screen.findByText('Zugesagt als Außenangriff')).toBeInTheDocument();
+    expect(screen.getByText('2/3')).toBeInTheDocument();
   });
 });

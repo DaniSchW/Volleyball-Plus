@@ -65,6 +65,7 @@ class PersonPresenter
             'shared_fields' => $canManage ? ($person->shared_fields ?? []) : null,
             'editable_fields' => $this->permissions->editableFields($viewer, $person),
             'can_manage_profile' => $canManage,
+            'can_manage_personal_data' => $this->permissions->canManagePersonalData($viewer, $person),
             'can_edit_referee_license' => $this->permissions->canEditRefereeLicense($viewer, $person),
             'can_manage_minor_permissions' => $this->permissions->canManageMinorPermissions($viewer, $person),
         ];

@@ -653,14 +653,14 @@
     "negative": "negative"
   },
   "halls": {
-    "hint": "Halls, available times and which team trains when. Only admins can change it.",
+    "hint": "Halls, available times, contacts and which team trains when. Only admins can change it.",
     "hintAdmin": "Add halls with their available times and assign the teams. Overlaps are marked but not prevented.",
     "none": "No halls yet.",
     "empty": "No times entered yet.",
     "conflictCount_one": "{{count}} booking overlaps with another one.",
     "conflictCount_other": "{{count}} bookings overlap with others.",
     "conflictWith": "Overlaps with {{team}} ({{time}})",
-    "outsideSlots": "Outside the hall's available times",
+    "outsideSlots": "Outside the hall's available times or parts",
     "savedWithWarning": "Saved – please check:",
     "dismiss": "Dismiss",
     "available": "Available",
@@ -700,7 +700,13 @@
     "parts_one": "Part {{parts}}",
     "parts_other": "Parts {{parts}}",
     "partsOf_one": "Part {{parts}} of {{total}}",
-    "partsOf_other": "Parts {{parts}} of {{total}}"
+    "partsOf_other": "Parts {{parts}} of {{total}}",
+    "contact": "Contact",
+    "contactHint": "E.g. caretaker or booking office – visible to all members.",
+    "contactName": "Name",
+    "contactPhone": "Phone",
+    "contactEmail": "E-mail",
+    "slotCourtHint": "Which parts are available to us? Nothing chosen = whole hall (e.g. part 3 is used by another sport)."
   },
   "privacy": {
     "title": "Personal data",

@@ -318,13 +318,6 @@ class Permissions
         return $this->canInviteToTeam($member, $team);
     }
 
-    /** The hall plan is visible to trainers of any team; only admins edit it. */
-    public function canSeeHalls(TenantMember $member): bool
-    {
-        return $this->isAdmin($member)
-            || $this->ownMemberships($member)->contains(fn (TeamMembership $m) => $m->role === TeamRole::Trainer);
-    }
-
     private function actsForWith(TenantMember $member, Person $person, string $flag): bool
     {
         if (! $this->actsFor($member, $person)) {

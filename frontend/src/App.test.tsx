@@ -579,21 +579,21 @@ describe('cash', () => {
     await waitFor(() => expect(cancelled).toBe(true));
   });
 
-  it('hides cash and halls in the menu of players', async () => {
+  it('hides the cash in the menu of players, halls stay visible', async () => {
     mockApi({ 'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() } });
     renderAt('/ssv-ulm');
 
     fireEvent.click(await screen.findByRole('button', { name: 'Menü öffnen' }));
     expect(screen.getByRole('link', { name: 'Chat' })).toBeInTheDocument();
     expect(screen.queryByRole('link', { name: 'Kasse' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('link', { name: 'Hallen' })).not.toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Hallen' })).toBeInTheDocument();
   });
 });
 
 describe('halls', () => {
   it('assigns a team and warns about an overlap', async () => {
     let sent: Record<string, unknown> = {};
-    const hall = { id: 'h1', name: 'Kuhberghalle', address: null, courts: 3, notes: null, slots: [], bookings: [] as unknown[] };
+    const hall = { id: 'h1', name: 'Kuhberghalle', address: null, courts: 3, contact: null, notes: null, slots: [], bookings: [] as unknown[] };
     const booking = {
       id: 'k1', team: { id: 't2', name: 'Damen 1', color: null, archived: false }, weekday: 2, start_time: '20:00', end_time: '22:00',
       courts: [1, 2], valid_from: null, valid_until: null, notes: null, outside_slots: false,
@@ -654,5 +654,27 @@ describe('positions', () => {
     await waitFor(() => expect(sent).toEqual({ person_id: 'p1', status: 'yes', position: 'outside' }));
     expect(await screen.findByText('Zugesagt als Außenangriff')).toBeInTheDocument();
     expect(screen.getByText('2/3')).toBeInTheDocument();
+  });
+});
+
+describe('halls for players', () => {
+  it('shows times, parts and the contact without edit buttons', async () => {
+    const hall = {
+      id: 'h1', name: 'Kuhberghalle', address: null, courts: 3, notes: null,
+      contact: { name: 'Herr Maier', phone: '0731 123456', email: null },
+      slots: [{ id: 's1', weekday: 2, start_time: '18:00', end_time: '22:00', courts: [1, 2], valid_from: null, valid_until: null }],
+      bookings: [],
+    };
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/halls': { body: { data: [hall], booking: null } },
+    });
+    renderAt('/ssv-ulm/halls');
+
+    expect(await screen.findByText(/18:00–22:00 · Teile 1 \+ 2 von 3/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: '0731 123456' })).toHaveAttribute('href', 'tel:0731123456');
+    expect(screen.getByText(/Herr Maier/)).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Mannschaft zuordnen' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Bearbeiten' })).not.toBeInTheDocument();
   });
 });

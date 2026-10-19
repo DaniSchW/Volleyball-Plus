@@ -355,16 +355,16 @@ Admin-Gesamtübersicht = Aggregation über alle `cash_book` des Mandanten. Keine
 ## 10. Hallen & Belegungsplan
 
 ### 🏢 `halls` ✅
-`name`, `address`, `courts` smallint (Anzahl Hallenteile), `notes`.
+`name`, `address`, `courts` smallint (Anzahl Hallenteile), `contact_name`, `contact_phone`, `contact_email` (Ansprechpartner, z. B. Hausmeister), `notes`.
 
 ### 🏢 `hall_slots` ✅ – verfügbare Zeiten der Halle
-`hall_id`, `weekday` smallint (1–7), `start_time` time, `end_time` time, `valid_from`, `valid_until` date null (z. B. Schulferien ausschließen).
+`hall_id`, `weekday` smallint (1–7), `start_time` time, `end_time` time, `courts` JSON null (verfügbare Hallenteile, z. B. `[1, 2]`, wenn Teil 3 eine andere Sportart nutzt; null = ganze Halle), `valid_from`, `valid_until` date null (z. B. Schulferien ausschließen).
 
 ### 🏢 `hall_bookings` ✅ – Team-Zuordnung
 `hall_id`, `team_id`, `weekday`, `start_time`, `end_time`, `courts` JSON null (Liste der Hallenteile, z. B. `[1, 2]`; null = ganze Halle), `valid_from`, `valid_until`, `notes`.
-Konfliktwarnung: Abfrage auf Überschneidung gleicher `hall_id`/`weekday` mit gemeinsamem Hallenteil mit überlappendem Zeit- und Gültigkeitsintervall. Kein harter Constraint, da laut Spezifikation nur gewarnt wird. Zusätzlich Warnung, wenn eine Belegung nicht in einer verfügbaren Zeit der Halle liegt. *(Später: Serientermine aus einer `hall_booking` erzeugen.)*
+Konfliktwarnung: Abfrage auf Überschneidung gleicher `hall_id`/`weekday` mit gemeinsamem Hallenteil mit überlappendem Zeit- und Gültigkeitsintervall. Kein harter Constraint, da laut Spezifikation nur gewarnt wird. Zusätzlich Warnung, wenn eine Belegung nicht in einer verfügbaren Zeit mit den passenden Hallenteilen liegt. *(Später: Serientermine aus einer `hall_booking` erzeugen.)*
 
-Rechte: lesen = Trainer + Admin, schreiben = nur Admin.
+Rechte: lesen = alle Mitglieder der Abteilung, schreiben = nur Admin.
 
 ---
 

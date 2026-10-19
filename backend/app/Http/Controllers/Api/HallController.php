@@ -14,8 +14,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * Halls, their available times and which team trains when. Trainers see
- * the plan, only admins change it. Overlaps are reported, not blocked.
+ * Halls, their available times and which team trains when. Every member
+ * sees the plan, only admins change it. Overlaps are reported, not blocked.
  */
 class HallController extends Controller
 {
@@ -23,8 +23,6 @@ class HallController extends Controller
 
     public function index(): JsonResponse
     {
-        abort_unless($this->permissions->canSeeHalls($this->current->get()), 403);
-
         return $this->plan();
     }
 
@@ -48,8 +46,9 @@ class HallController extends Controller
     {
         $this->authorizeAdmin();
         $data = $this->hallData($request);
-        $court = HallBooking::query()->where('hall_id', $hall->id)->get()
-            ->flatMap(fn (HallBooking $b) => $b->courtList() ?? [])->filter(fn (int $c) => $c > $data['courts'])->min();
+        $court = HallBooking::query()->where('hall_id', $hall->id)->get()->map(fn (HallBooking $b) => $b->courtList())
+            ->merge(HallSlot::query()->where('hall_id', $hall->id)->get()->map(fn (HallSlot $s) => $s->courtList()))
+            ->flatMap(fn (?array $courts) => $courts ?? [])->filter(fn (int $c) => $c > $data['courts'])->min();
         abort_if($court !== null, 422, __('halls.courts_in_use', ['court' => $court]));
 
         $hall->update($data);
@@ -70,7 +69,7 @@ class HallController extends Controller
     public function storeSlot(Request $request, Hall $hall): JsonResponse
     {
         $this->authorizeAdmin();
-        HallSlot::create(['hall_id' => $hall->id] + $this->timeData($request));
+        HallSlot::create(['hall_id' => $hall->id] + $this->timeData($request) + ['courts' => $this->courts($request, $hall)]);
 
         return $this->plan(201);
     }
@@ -78,7 +77,7 @@ class HallController extends Controller
     public function updateSlot(Request $request, HallSlot $slot): JsonResponse
     {
         $this->authorizeAdmin();
-        $slot->update($this->timeData($request));
+        $slot->update($this->timeData($request) + ['courts' => $this->courts($request, $slot->hall)]);
 
         return $this->plan();
     }
@@ -145,6 +144,9 @@ class HallController extends Controller
             'name' => ['required', 'string', 'max:120'],
             'address' => ['nullable', 'string', 'max:255'],
             'courts' => ['required', 'integer', 'between:1,12'],
+            'contact_name' => ['nullable', 'string', 'max:120'],
+            'contact_phone' => ['nullable', 'string', 'max:40'],
+            'contact_email' => ['nullable', 'email', 'max:255'],
             'notes' => ['nullable', 'string', 'max:1000'],
         ]);
     }
@@ -175,20 +177,29 @@ class HallController extends Controller
     {
         $data = $request->validate([
             'team_id' => ['required', 'string'],
-            // Parts of the hall; empty or all parts = whole hall.
-            'courts' => ['nullable', 'array', 'max:12'],
-            'courts.*' => ['integer', 'min:1', 'distinct'],
             'notes' => ['nullable', 'string', 'max:255'],
         ]);
         $team = Team::query()->whereKey($data['team_id'])->whereNull('archived_at')->first();
         abort_if($team === null, 422, __('events.teams_invalid'));
+
+        return $this->timeData($request) + ['team_id' => $team->id, 'courts' => $this->courts($request, $hall), 'notes' => $data['notes'] ?? null];
+    }
+
+    /**
+     * Parts of the hall; empty or all parts = whole hall (null).
+     *
+     * @return list<int>|null
+     */
+    private function courts(Request $request, Hall $hall): ?array
+    {
+        $data = $request->validate([
+            'courts' => ['nullable', 'array', 'max:12'],
+            'courts.*' => ['integer', 'min:1', 'distinct'],
+        ]);
         $courts = array_map('intval', $data['courts'] ?? []);
         sort($courts);
         abort_if($courts !== [] && max($courts) > $hall->courts, 422, __('halls.court_too_high', ['courts' => $hall->courts]));
-        if (count($courts) === $hall->courts) {
-            $courts = [];
-        }
 
-        return $this->timeData($request) + ['team_id' => $team->id, 'courts' => $courts === [] ? null : $courts, 'notes' => $data['notes'] ?? null];
+        return $courts === [] || count($courts) === $hall->courts ? null : $courts;
     }
 }

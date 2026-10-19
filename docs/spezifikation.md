@@ -103,9 +103,9 @@ Liga-Baum: Für jedes Team wird die Liga aus dem Liga-Baum des Volleyballs ausge
 
 Geschlechtsart des Teams: Beim Team wird definiert, ob es ein Herren-, Damen- oder Mixed-Team ist. Herrenteams können per Quernominierung nur Herren einladen, Damenteams nur Damen. Mixed-Teams können Spieler beider Geschlechter einladen.
 
-Hallen- und Trainingszeitenplan: Es gibt einen Plan für die verfügbaren Hallen und Trainingszeiten der Abteilung. Ein Team kann einer Halle und einer Zeit zugeordnet werden. Belegen zwei Teams dieselbe Halle zur selben Zeit, warnt die App.
+Hallen- und Trainingszeitenplan: Es gibt einen Plan für die verfügbaren Hallen und Trainingszeiten der Abteilung. Ein Team kann einer Halle (ganz oder einzelnen Hallenteilen) und einer Zeit zugeordnet werden. Belegen zwei Teams dieselbe Halle zur selben Zeit, warnt die App.
 
-Hallenübersicht: Es gibt eine Übersicht aller Hallen. Hallen werden in der App mit den jeweiligen verfügbaren Zeiten angelegt. Der Bereich ist für Trainer einsehbar und nur für Admins bearbeitbar.
+Hallenübersicht: Es gibt eine Übersicht aller Hallen. Hallen werden in der App mit den jeweiligen verfügbaren Zeiten und Hallenteilen angelegt (z. B. nur 2 von 3 Teilen, wenn den dritten Teil eine andere Sportart nutzt), dazu ein Ansprechpartner je Halle. Der Bereich ist für alle Mitglieder einsehbar und nur für Admins bearbeitbar.
 
 Infobereich für Spieler: Im oberen Bereich der Spieleransicht gibt es einen Infobereich. Der Trainer kann dort Notizen für einen wählbaren Zeitraum einblenden. Der Admin kann das über alle Teams hinweg.
 

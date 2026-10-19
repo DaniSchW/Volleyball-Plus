@@ -98,6 +98,14 @@ function HallCard({ hall, admin }: { hall: Hall; admin: boolean }) {
             {t('halls.courts', { count: hall.courts })}
             {hall.address && <> · <a className="text-brand-700 underline" target="_blank" rel="noreferrer" href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(hall.address)}`}>{hall.address}</a></>}
           </p>
+          {hall.contact && (
+            <p className="text-sm text-slate-600">
+              {t('halls.contact')}:
+              {hall.contact.name && <> {hall.contact.name}</>}
+              {hall.contact.phone && <>{hall.contact.name ? ' ·' : ''} <a className="text-brand-700 underline" href={`tel:${hall.contact.phone.replace(/\s/g, '')}`}>{hall.contact.phone}</a></>}
+              {hall.contact.email && <>{hall.contact.name || hall.contact.phone ? ' ·' : ''} <a className="text-brand-700 underline" href={`mailto:${hall.contact.email}`}>{hall.contact.email}</a></>}
+            </p>
+          )}
           {hall.notes && <p className="whitespace-pre-line text-sm text-slate-600">{hall.notes}</p>}
 
           {warning && <BookingWarning booking={warning} onClose={() => setWarning(null)} />}
@@ -116,6 +124,7 @@ function HallCard({ hall, admin }: { hall: Hall; admin: boolean }) {
                         <span key={s.id}>
                           {i > 0 && ', '}
                           {s.start_time}–{s.end_time}
+                          {s.courts && ` · ${courtsLabel(s.courts, hall.courts, t)}`}
                           {period(s.valid_from, s.valid_until, t) && ` (${period(s.valid_from, s.valid_until, t)})`}
                           {admin && (
                             <button type="button" className="ml-1 text-red-700" aria-label={t('halls.deleteSlot', { time: `${weekdayName(day)} ${s.start_time}` })} onClick={() => removeSlot.mutate(s.id)}>✕</button>
@@ -198,12 +207,18 @@ function HallForm({ hall, onDone }: { hall?: Hall; onDone?: () => void }) {
   const { t } = useTranslation();
   const tp = useTenantPath();
   const update = usePlanUpdate();
-  const empty = { name: '', address: '', courts: '1', notes: '' };
-  const [form, setForm] = useState(hall ? { name: hall.name, address: hall.address ?? '', courts: String(hall.courts), notes: hall.notes ?? '' } : empty);
+  const empty = { name: '', address: '', courts: '1', contact_name: '', contact_phone: '', contact_email: '', notes: '' };
+  const [form, setForm] = useState(hall ? {
+    name: hall.name, address: hall.address ?? '', courts: String(hall.courts), notes: hall.notes ?? '',
+    contact_name: hall.contact?.name ?? '', contact_phone: hall.contact?.phone ?? '', contact_email: hall.contact?.email ?? '',
+  } : empty);
 
   const save = useMutation({
     mutationFn: () => {
-      const body = { ...form, courts: Number(form.courts) || 1, address: form.address || null, notes: form.notes || null };
+      const body = {
+        ...form, courts: Number(form.courts) || 1, address: form.address || null, notes: form.notes || null,
+        contact_name: form.contact_name || null, contact_phone: form.contact_phone || null, contact_email: form.contact_email || null,
+      };
       return hall ? patch<PlanResponse>(tp(`halls/${hall.id}`), body) : post<PlanResponse>(tp('halls'), body);
     },
     onSuccess: (result) => {
@@ -225,6 +240,15 @@ function HallForm({ hall, onDone }: { hall?: Hall; onDone?: () => void }) {
         <Field label={t('halls.courtsLabel')} type="number" min={1} max={12} required inputMode="numeric" value={form.courts} onChange={(e) => setForm({ ...form, courts: e.target.value })} />
       </div>
       <Field label={t('halls.address')} maxLength={255} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+      <fieldset className="space-y-2">
+        <legend className="mb-1 text-sm font-medium text-slate-700">{t('halls.contact')}</legend>
+        <p className="text-xs text-slate-500">{t('halls.contactHint')}</p>
+        <Field label={t('halls.contactName')} maxLength={120} value={form.contact_name} onChange={(e) => setForm({ ...form, contact_name: e.target.value })} />
+        <div className="grid grid-cols-2 gap-2">
+          <Field label={t('halls.contactPhone')} type="tel" maxLength={40} value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} />
+          <Field label={t('halls.contactEmail')} type="email" maxLength={255} value={form.contact_email} onChange={(e) => setForm({ ...form, contact_email: e.target.value })} />
+        </div>
+      </fieldset>
       <Field label={t('halls.notes')} maxLength={1000} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
       {save.isError && <Notice tone="error">{errorText(save.error, t('errors.generic'))}</Notice>}
       <div className="flex gap-2">
@@ -270,7 +294,8 @@ function TimeForm({ hall, kind, booking, onDone, onWarning }: {
       const body = {
         weekday: Number(form.weekday), start_time: form.start_time, end_time: form.end_time,
         valid_from: form.valid_from || null, valid_until: form.valid_until || null,
-        ...(kind === 'booking' ? { team_id: form.team_id, courts: form.courts, notes: form.notes || null } : {}),
+        courts: form.courts,
+        ...(kind === 'booking' ? { team_id: form.team_id, notes: form.notes || null } : {}),
       };
       if (kind === 'slot') return post<PlanResponse>(tp(`halls/${hall.id}/slots`), body);
       return booking ? patch<PlanResponse>(tp(`hall-bookings/${booking.id}`), body) : post<PlanResponse>(tp(`halls/${hall.id}/bookings`), body);
@@ -303,10 +328,10 @@ function TimeForm({ hall, kind, booking, onDone, onWarning }: {
         <Field label={t('halls.start')} type="time" required value={form.start_time} onChange={(e) => setForm({ ...form, start_time: e.target.value })} />
         <Field label={t('halls.end')} type="time" required value={form.end_time} onChange={(e) => setForm({ ...form, end_time: e.target.value })} />
       </div>
-      {kind === 'booking' && hall.courts > 1 && (
+      {hall.courts > 1 && (
         <fieldset>
           <legend className="mb-1 text-sm font-medium text-slate-700">{t('halls.courtLabel')}</legend>
-          <p className="mb-1 text-xs text-slate-500">{t('halls.courtHint')}</p>
+          <p className="mb-1 text-xs text-slate-500">{kind === 'slot' ? t('halls.slotCourtHint') : t('halls.courtHint')}</p>
           <div className="flex flex-wrap gap-2">
             {Array.from({ length: hall.courts }, (_, i) => i + 1).map((c) => (
               <label key={c} className="flex min-h-11 items-center gap-2 rounded-lg border border-slate-300 px-3 text-sm">

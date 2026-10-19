@@ -32,12 +32,15 @@ class HallPlan
             'name' => $hall->name,
             'address' => $hall->address,
             'courts' => $hall->courts,
+            'contact' => $hall->contact_name || $hall->contact_phone || $hall->contact_email
+                ? ['name' => $hall->contact_name, 'phone' => $hall->contact_phone, 'email' => $hall->contact_email] : null,
             'notes' => $hall->notes,
             'slots' => $hall->slots->map(fn (HallSlot $slot) => [
                 'id' => $slot->id,
                 'weekday' => $slot->weekday,
                 'start_time' => self::hm($slot->start_time),
                 'end_time' => self::hm($slot->end_time),
+                'courts' => $slot->courtList(),
                 'valid_from' => $slot->valid_from?->toDateString(),
                 'valid_until' => $slot->valid_until?->toDateString(),
             ])->values()->all(),
@@ -90,8 +93,8 @@ class HallPlan
     }
 
     /**
-     * Whether a hall time covers the booking. Halls without times entered
-     * do not warn.
+     * Whether a hall time covers the booking – time and parts of the hall.
+     * Halls without times entered do not warn.
      *
      * @param  Collection<int, HallSlot>  $slots
      */
@@ -103,6 +106,7 @@ class HallPlan
 
         return $slots->contains(fn (HallSlot $slot) => $slot->weekday === $booking->weekday
             && self::hm($slot->start_time) <= self::hm($booking->start_time) && self::hm($slot->end_time) >= self::hm($booking->end_time)
+            && self::courtsWithin($booking->courtList(), $slot->courtList())
             && self::periodsOverlap($slot->valid_from?->toDateString(), $slot->valid_until?->toDateString(), $booking->valid_from?->toDateString(), $booking->valid_until?->toDateString()));
     }
 
@@ -125,6 +129,15 @@ class HallPlan
                 'valid_from' => $b->valid_from?->toDateString(),
                 'valid_until' => $b->valid_until?->toDateString(),
             ])->values()->all();
+    }
+
+    /**
+     * @param  list<int>|null  $used  null = whole hall
+     * @param  list<int>|null  $available  null = whole hall
+     */
+    private static function courtsWithin(?array $used, ?array $available): bool
+    {
+        return $available === null || ($used !== null && array_diff($used, $available) === []);
     }
 
     /** @param  list<int>|null  $a  null = whole hall */

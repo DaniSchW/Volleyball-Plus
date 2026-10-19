@@ -653,14 +653,14 @@
     "negative": "negativ"
   },
   "halls": {
-    "hint": "Hallen, verfügbare Zeiten und welche Mannschaft wann trainiert. Ändern können nur Admins.",
+    "hint": "Hallen, verfügbare Zeiten, Ansprechpartner und welche Mannschaft wann trainiert. Ändern können nur Admins.",
     "hintAdmin": "Lege Hallen mit ihren verfügbaren Zeiten an und ordne die Mannschaften zu. Überschneidungen werden markiert, aber nicht verhindert.",
     "none": "Noch keine Hallen angelegt.",
     "empty": "Noch keine Zeiten eingetragen.",
     "conflictCount_one": "{{count}} Belegung überschneidet sich mit einer anderen.",
     "conflictCount_other": "{{count}} Belegungen überschneiden sich mit anderen.",
     "conflictWith": "Überschneidung mit {{team}} ({{time}})",
-    "outsideSlots": "Außerhalb der verfügbaren Hallenzeiten",
+    "outsideSlots": "Außerhalb der verfügbaren Zeiten oder Hallenteile",
     "savedWithWarning": "Gespeichert – bitte prüfen:",
     "dismiss": "Ausblenden",
     "available": "Verfügbar",
@@ -700,7 +700,13 @@
     "parts_one": "Teil {{parts}}",
     "parts_other": "Teile {{parts}}",
     "partsOf_one": "Teil {{parts}} von {{total}}",
-    "partsOf_other": "Teile {{parts}} von {{total}}"
+    "partsOf_other": "Teile {{parts}} von {{total}}",
+    "contact": "Ansprechpartner",
+    "contactHint": "Z. B. Hausmeister oder Hallenvergabe – für alle Mitglieder sichtbar.",
+    "contactName": "Name",
+    "contactPhone": "Telefon",
+    "contactEmail": "E-Mail",
+    "slotCourtHint": "Welche Teile stehen uns zur Verfügung? Nichts gewählt = ganze Halle (z. B. Teil 3 nutzt eine andere Sportart)."
   },
   "privacy": {
     "title": "Persönliche Daten",

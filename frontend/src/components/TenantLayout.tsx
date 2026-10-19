@@ -4,7 +4,7 @@ import { Navigate, Outlet } from 'react-router';
 import { ApiError } from '../lib/api';
 import { changeLanguage, LANGUAGES, type Language } from '../i18n';
 import { useAccount, useTenant, useTenantMe, useTenantSlug } from '../lib/queries';
-import { canSeeHalls, canUseCash } from '../lib/permissions';
+import { canUseCash } from '../lib/permissions';
 import { AppHeader, type MenuSection } from './AppHeader';
 import { Loading, Notice } from './ui';
 
@@ -43,7 +43,7 @@ export function TenantLayout() {
     <div className="min-h-dvh">
       <AppHeader
         tenantSlug={slug} tenantName={tenant.data.name} logoUrl={tenant.data.logo_url} isAdmin={me.data.is_admin}
-        hidden={[...(canUseCash(me.data) ? [] : ['cash']), ...(canSeeHalls(me.data) ? [] : ['halls'])] as MenuSection[]}
+        hidden={canUseCash(me.data) ? [] : (['cash'] as MenuSection[])}
       />
       <main className="mx-auto max-w-3xl px-4 py-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
         <Outlet />

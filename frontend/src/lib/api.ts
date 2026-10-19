@@ -600,14 +600,14 @@ export interface HallSlot {
   weekday: number;
   start_time: string;
   end_time: string;
+  /** Parts of the hall, null = whole hall. */
+  courts: number[] | null;
   valid_from: string | null;
   valid_until: string | null;
 }
 
 export interface HallBooking extends HallSlot {
   team: { id: string; name: string; color: string | null; archived: boolean };
-  /** Parts of the hall, null = whole hall. */
-  courts: number[] | null;
   notes: string | null;
   conflicts: { id: string; team: string; start_time: string; end_time: string; courts: number[] | null }[];
   outside_slots: boolean;
@@ -618,6 +618,7 @@ export interface Hall {
   name: string;
   address: string | null;
   courts: number;
+  contact: { name: string | null; phone: string | null; email: string | null } | null;
   notes: string | null;
   slots: HallSlot[];
   bookings: HallBooking[];

@@ -14,7 +14,7 @@ class Hall extends Model
 {
     use BelongsToTenant, HasUlids;
 
-    protected $fillable = ['name', 'address', 'courts', 'notes'];
+    protected $fillable = ['name', 'address', 'courts', 'contact_name', 'contact_phone', 'contact_email', 'notes'];
 
     protected $attributes = ['courts' => 1];
 

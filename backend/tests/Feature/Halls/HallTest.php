@@ -110,14 +110,39 @@ class HallTest extends TestCase
         $this->bookTeam($hall['id'], $this->team, '19:00', '20:00')->assertUnprocessable();
     }
 
-    public function test_trainers_see_the_plan_only_admins_edit(): void
+    public function test_only_some_parts_available_and_contact(): void
+    {
+        $hall = $this->hall(['contact_name' => 'Herr Maier (Hausmeister)', 'contact_phone' => '0731 123456', 'contact_email' => 'hallen@example.org']);
+        $this->assertSame(['name' => 'Herr Maier (Hausmeister)', 'phone' => '0731 123456', 'email' => 'hallen@example.org'], $hall['contact']);
+        $this->loginAs($this->admin)->postJson('/api/v1/t/ssv-ulm/halls', ['name' => 'X', 'courts' => 1, 'contact_email' => 'kein-mail'])->assertUnprocessable();
+
+        // Part 3 is used by another sport: only parts 1 + 2 are ours.
+        $slot = $this->loginAs($this->admin)->postJson("/api/v1/t/ssv-ulm/halls/{$hall['id']}/slots", [
+            'weekday' => 2, 'start_time' => '18:00', 'end_time' => '22:00', 'courts' => [2, 1],
+        ])->assertCreated()->json('data.0.slots.0');
+        $this->assertSame([1, 2], $slot['courts']);
+
+        $this->assertFalse($this->bookTeam($hall['id'], $this->team, '19:00', '21:00', ['courts' => [1, 2]])->json('booking.outside_slots'));
+        $this->assertTrue($this->bookTeam($hall['id'], $this->other, '19:00', '21:00', ['courts' => [3]])->json('booking.outside_slots'));
+        $this->assertTrue($this->bookTeam($hall['id'], $this->other, '18:00', '19:00')->json('booking.outside_slots'));
+
+        // All parts = whole hall.
+        $this->loginAs($this->admin)->patchJson("/api/v1/t/ssv-ulm/hall-slots/{$slot['id']}", [
+            'weekday' => 2, 'start_time' => '18:00', 'end_time' => '22:00', 'courts' => [1, 2, 3],
+        ])->assertOk()->assertJsonPath('data.0.slots.0.courts', null);
+    }
+
+    public function test_everybody_sees_the_plan_only_admins_edit(): void
     {
         $hall = $this->hall();
         $this->bookTeam($hall['id'], $this->team, '19:30', '21:30')->assertCreated();
 
         $this->loginAs($this->trainer)->getJson('/api/v1/t/ssv-ulm/halls')->assertOk()->assertJsonPath('data.0.bookings.0.team.name', 'Herren 1');
-        $this->loginAs($this->organizer)->getJson('/api/v1/t/ssv-ulm/halls')->assertForbidden();
-        $this->loginAs($this->paul)->getJson('/api/v1/t/ssv-ulm/halls')->assertForbidden();
+        // Everybody in the department sees the plan.
+        $this->loginAs($this->organizer)->getJson('/api/v1/t/ssv-ulm/halls')->assertOk();
+        $this->loginAs($this->paul)->getJson('/api/v1/t/ssv-ulm/halls')->assertOk()->assertJsonPath('data.0.name', 'Kuhberghalle');
+        $this->loginAs($this->paul)->patchJson("/api/v1/t/ssv-ulm/halls/{$hall['id']}", ['name' => 'X', 'courts' => 1])->assertForbidden();
+        $this->loginAs($this->paul)->postJson("/api/v1/t/ssv-ulm/halls/{$hall['id']}/slots", ['weekday' => 1, 'start_time' => '18:00', 'end_time' => '20:00'])->assertForbidden();
         $this->loginAs($this->trainer)->postJson('/api/v1/t/ssv-ulm/halls', ['name' => 'X', 'courts' => 1])->assertForbidden();
         $this->loginAs($this->trainer)->postJson("/api/v1/t/ssv-ulm/halls/{$hall['id']}/bookings", [
             'team_id' => $this->other->id, 'weekday' => 1, 'start_time' => '18:00', 'end_time' => '20:00',

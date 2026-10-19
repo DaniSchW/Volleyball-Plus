@@ -1,4 +1,4 @@
-# Technischer Umsetzungsplan – VolleyOrg
+# Technischer Umsetzungsplan – VolleyOrga
 
 Grundlage: [`spezifikation.md`](spezifikation.md). Das Datenmodell steht in [`datenmodell.md`](datenmodell.md).
 Status: **Vorschlag zur Freigabe** – Rahmenbedingung: Hosting mit **PHP und SQL** (klassisches Webhosting).
@@ -118,7 +118,7 @@ Rollen sind kombinierbar (Trainer in Herren 1, Spieler in Herren 2). Ein Erwachs
 ## 7. Projektstruktur
 
 ```
-volleyorg/
+volleyorga/
 ├─ backend/                 Laravel (API)
 │  ├─ app/Models, app/Policies, app/Http/Controllers/Api
 │  ├─ app/Support/Tenancy   Mandantenkontext, BelongsToTenant-Scope
@@ -193,5 +193,5 @@ volleyorg/
 - Positions-Soll (Phase 10): Pro Termin bzw. Trainingsreihe optional eine Höchstzahl je Position (leer = ohne Grenze). Eine Zusage zählt für die Hauptposition; ist sie voll, für die erste Nebenposition mit freiem Platz; sonst wird die Zusage abgelehnt („Für Zuspiel sind alle Plätze vergeben.“). Wer mehrere Positionen hat, kann „Zusagen als …“ wählen; Verwalter dürfen jemanden auch für eine Position außerhalb des Profils eintragen. Erneutes Zusagen behält den Platz. Spieler ohne Position zählen nur für das Teilnehmermaximum. Belegung je Position (Zahlen, „Zuspiel: 1/2“) sehen alle Eingeladenen. Gespeichert als `events.position_limits` (JSON) und `event_responses.as_position`.
 - DSGVO (Phase 10): Auf der Profilseite „Persönliche Daten“ – für die Person selbst (Erwachsene), die Eltern eines Kindes und Admins (nicht für Trainer). „Daten herunterladen“ liefert eine JSON-Datei mit Profil, Logins (nur die eigene E-Mail), Kinderrechten, Lizenz, Teams, Trainingsgruppen, Zu-/Absagen, Aufgaben, Abstimmungen, Kassenbuchungen zur Person und eigenen Chat-Nachrichten. „Profil löschen“ (Bestätigung durch Eintippen des Vornamens) löscht endgültig: Teams, Gruppen, Quernominierungen, Einladungen/Antworten, Aufgaben, Stimmen, Lizenz, Kinderrechte, Profilbild, Verknüpfungen; die Profildaten werden geleert („Gelöschte Person“). Kassenbuchungen bleiben ohne Personenbezug, Chat-Nachrichten ohne Namen. Ein eigener Login wird in der Abteilung gesperrt; seine Elternverknüpfungen bleiben, damit Kinder geschützt bleiben. Der letzte Admin kann sich nicht löschen.
 - Feinschliff (Phase 10): Erinnerung 24 h vor Beginn an alle, die eine Aufgabe übernommen haben (eine Nachricht je Person, Kategorie „Erinnerungen“, `events.task_reminder_sent_at`). Mitglieder eigener Chats lassen sich nachträglich bearbeiten (der Ersteller bleibt Mitglied).
-- Upload-Paket: `volleyorg.zip` ohne Oberordner – im Hauptordner der Domain entpacken, nichts verschieben. Eine `.htaccess` im Hauptordner leitet alles nach `backend/public` (und HTTP auf HTTPS, außer Let's-Encrypt-Prüfungen unter `/.well-known/acme-challenge/`). Das Startverzeichnis direkt auf `backend/public` zu setzen geht weiterhin.
+- Upload-Paket: `volleyorga.zip` ohne Oberordner – im Hauptordner der Domain entpacken, nichts verschieben. Eine `.htaccess` im Hauptordner leitet alles nach `backend/public` (und HTTP auf HTTPS, außer Let's-Encrypt-Prüfungen unter `/.well-known/acme-challenge/`). Das Startverzeichnis direkt auf `backend/public` zu setzen geht weiterhin.
 - Benachrichtigungen (Phase 3): Kategorien neue Termine, Änderungen/Absagen, Erinnerung, neue Infos. Standard: Push für alles, E-Mail nur bei Änderungen/Absagen; pro Kategorie und Abteilung im Profil einstellbar. Erinnerung einmal 24 h vor der Frist (sonst vor Beginn) an alle ohne Antwort. Eine neue Trainingsreihe wird einmal gemeldet, nicht je Termin. Versand über die Warteschlange im Cron-Lauf, also bis zu einer Cron-Runde verzögert.

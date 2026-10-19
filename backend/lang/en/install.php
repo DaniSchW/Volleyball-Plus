@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'title' => 'Setup – VolleyOrg',
-    'heading' => 'Set up VolleyOrg',
+    'title' => 'Setup – VolleyOrga',
+    'heading' => 'Set up VolleyOrga',
     'intro' => 'This assistant sets up the app without SSH: it checks the server, creates the database tables and the first department, and writes the configuration.',
     'requirements' => 'Requirements',
     'required' => 'required',
@@ -71,7 +71,7 @@ return [
         'migration' => 'The database tables could not be created: :message',
     ],
     'done' => [
-        'title' => 'Set up – VolleyOrg',
+        'title' => 'Set up – VolleyOrga',
         'heading' => 'Setup complete',
         'env_written' => 'The configuration has been saved. The setup code file has been deleted.',
         'env_manual' => 'The file backend/.env could not be written. Save the following content as backend/.env and upload it via FTP. The app becomes active only after that. Then delete the file backend/storage/app/setup-code.txt.',

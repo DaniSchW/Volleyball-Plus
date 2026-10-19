@@ -60,7 +60,7 @@ class CalendarController extends Controller
 
         return response($ics->render($tenant->name, $events, (string) config('app.url'), $tenant->slug), 200, [
             'Content-Type' => 'text/calendar; charset=utf-8',
-            'Content-Disposition' => 'inline; filename="volleyorg.ics"',
+            'Content-Disposition' => 'inline; filename="volleyorga.ics"',
             'Cache-Control' => 'private, max-age=900',
         ]);
     }

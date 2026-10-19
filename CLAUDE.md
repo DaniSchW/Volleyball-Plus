@@ -1,4 +1,4 @@
-# VolleyOrg – Hinweise für die Entwicklung
+# VolleyOrga – Hinweise für die Entwicklung
 
 Fachliche Grundlage: `docs/spezifikation.md`, Entscheidungen in `docs/umsetzungsplan.md` (Abschnitt 9), Tabellen in `docs/datenmodell.md`. Bei neuen Entscheidungen die Dokumente mitpflegen.
 

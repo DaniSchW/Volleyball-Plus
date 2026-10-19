@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds an upload-ready package in release/volleyorg.zip:
+# Builds an upload-ready package in release/volleyorga.zip:
 # backend with production dependencies + the built PWA in backend/public.
 # Nothing needs to be built on the hosting itself.
 #
@@ -33,5 +33,5 @@ cp "$ROOT/deploy/htaccess-root" "$STAGE/.htaccess"
 cp "$ROOT/docs/deployment.md" "$STAGE/INSTALLATION.md"
 
 # Zip the contents (incl. .htaccess), not the folder.
-(cd "$STAGE" && zip -qr "$OUT/volleyorg.zip" .)
-echo "Package: $OUT/volleyorg.zip"
+(cd "$STAGE" && zip -qr "$OUT/volleyorga.zip" .)
+echo "Package: $OUT/volleyorga.zip"

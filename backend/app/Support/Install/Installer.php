@@ -150,7 +150,7 @@ class Installer
         $smtp = $input['mail_mailer'] === 'smtp';
 
         return [
-            'APP_NAME' => 'VolleyOrg',
+            'APP_NAME' => 'VolleyOrga',
             'APP_ENV' => 'production',
             'APP_KEY' => 'base64:'.base64_encode(random_bytes(32)),
             'APP_DEBUG' => false,

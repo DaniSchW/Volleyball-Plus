@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "danischw/volleyorg",
+    "name": "danischw/volleyorga",
     "type": "project",
-    "description": "VolleyOrg – Team-Organisation für Volleyball-Abteilungen (API)",
+    "description": "VolleyOrga – Team-Organisation für Volleyball-Abteilungen (API)",
     "keywords": [
         "volleyball",
         "team",

@@ -159,6 +159,20 @@ class SeriesNoticeCalendarTest extends TestCase
         $this->assertCount(0, $this->loginAs($this->player)->getJson('/api/v1/t/ssv-ulm/notices')->json('data'));
     }
 
+    public function test_every_notice_needs_an_expiry_date(): void
+    {
+        $post = fn (array $data) => $this->loginAs($this->trainer)->withHeader('Accept-Language', 'de')->postJson('/api/v1/t/ssv-ulm/notices', $data + [
+            'scope' => 'team', 'team_id' => $this->team->id, 'title' => 'Hallenschließung', 'visible_from' => '2026-10-19T00:00',
+        ]);
+
+        $post([])->assertUnprocessable()->assertJsonPath('errors.visible_until.0', 'Bitte gib an, wann die Info verfällt.');
+        $post(['visible_until' => null])->assertUnprocessable()->assertJsonValidationErrors('visible_until');
+        // Already expired, or more than a year: refused.
+        $post(['visible_from' => '2026-10-01T00:00', 'visible_until' => '2026-10-02T00:00'])->assertUnprocessable()->assertJsonValidationErrors('visible_until');
+        $post(['visible_until' => '2027-10-20T00:00'])->assertUnprocessable()->assertJsonValidationErrors('visible_until');
+        $post(['visible_until' => '2027-10-18T00:00'])->assertCreated();
+    }
+
     public function test_calendar_subscription(): void
     {
         $this->createSeries();

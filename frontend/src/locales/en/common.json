@@ -266,11 +266,18 @@
     "body": "Text",
     "for": "For",
     "from": "Visible from",
-    "to": "Visible until",
+    "to": "Expires on (required)",
     "publish": "Publish",
     "remove": "Remove",
     "title": "Heading",
-    "until": "until {{date}}"
+    "until": "expires {{date}}",
+    "toHint": "Afterwards the info disappears automatically, at most one year.",
+    "expiresIn": {
+      "day": "Tomorrow",
+      "week": "1 week",
+      "month": "1 month",
+      "quarter": "3 months"
+    }
   },
   "events": {
     "create": "New event",

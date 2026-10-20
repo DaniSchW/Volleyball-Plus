@@ -266,11 +266,18 @@
     "body": "Text",
     "for": "Für",
     "from": "Sichtbar ab",
-    "to": "Sichtbar bis",
+    "to": "Verfällt am (Pflicht)",
     "publish": "Veröffentlichen",
     "remove": "Entfernen",
     "title": "Überschrift",
-    "until": "bis {{date}}"
+    "until": "verfällt am {{date}}",
+    "toHint": "Danach verschwindet die Info automatisch, höchstens ein Jahr.",
+    "expiresIn": {
+      "day": "Morgen",
+      "week": "1 Woche",
+      "month": "1 Monat",
+      "quarter": "3 Monate"
+    }
   },
   "events": {
     "create": "Termin anlegen",

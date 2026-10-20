@@ -784,6 +784,33 @@ describe('documents', () => {
   });
 });
 
+describe('notice expiry', () => {
+  it('cannot publish an info without an expiry date', async () => {
+    let sent: Record<string, unknown> = {};
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME(true) },
+      'GET /t/ssv-ulm/notices': { body: { data: [] } },
+      'GET /t/ssv-ulm/polls': { body: { data: [] } },
+      'GET /t/ssv-ulm/events': { body: { data: [], next_cursor: null } },
+      'GET /t/ssv-ulm/teams': { body: { data: [] } },
+      'POST /t/ssv-ulm/notices': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { status: 201, body: { data: {} } };
+      },
+    });
+    renderAt('/ssv-ulm');
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Info hinzufügen' }));
+    fireEvent.change(screen.getByLabelText('Überschrift'), { target: { value: 'Halle zu' } });
+    expect(screen.getByLabelText('Verfällt am (Pflicht)')).toHaveValue('');
+    expect(screen.getByRole('button', { name: 'Veröffentlichen' })).toBeDisabled();
+    fireEvent.click(screen.getByRole('button', { name: '1 Woche' }));
+    expect(screen.getByLabelText('Verfällt am (Pflicht)')).not.toHaveValue('');
+    fireEvent.click(screen.getByRole('button', { name: 'Veröffentlichen' }));
+    await waitFor(() => expect(String(sent.visible_until)).toMatch(/T23:59$/));
+  });
+});
+
 describe('hall form', () => {
   it('saves address fields and weekly training times', async () => {
     let sent: Record<string, unknown> = {};

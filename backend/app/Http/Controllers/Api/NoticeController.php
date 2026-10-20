@@ -13,6 +13,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Notice area on the start page: trainers post for their team for a chosen
@@ -50,8 +51,9 @@ class NoticeController extends Controller
             'title' => ['required', 'string', 'max:120'],
             'body' => ['nullable', 'string', 'max:2000'],
             'visible_from' => ['required', 'date'],
+            // Every info expires – at the latest one year after it appears.
             'visible_until' => ['required', 'date', 'after:visible_from'],
-        ]);
+        ], ['visible_until.required' => __('app.notice_expiry_required')]);
 
         if ($data['scope'] === EventScope::Tenant->value) {
             abort_unless($this->permissions->isAdmin($member), 403);
@@ -62,10 +64,15 @@ class NoticeController extends Controller
         }
 
         $tz = $this->current->get()->tenant->timezone;
+        $from = Carbon::parse($data['visible_from'], $tz)->utc();
+        $until = Carbon::parse($data['visible_until'], $tz)->utc();
+        if ($until->lessThanOrEqualTo(Carbon::now()) || $until->greaterThan($from->copy()->addYear())) {
+            throw ValidationException::withMessages(['visible_until' => __('app.notice_expiry_range')]);
+        }
         $notice = Notice::create([
             ...$data,
-            'visible_from' => Carbon::parse($data['visible_from'], $tz)->utc(),
-            'visible_until' => Carbon::parse($data['visible_until'], $tz)->utc(),
+            'visible_from' => $from,
+            'visible_until' => $until,
             'created_by' => $member->id,
         ]);
 

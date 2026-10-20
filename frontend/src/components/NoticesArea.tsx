@@ -62,14 +62,21 @@ function NoticeForm({ onDone }: { onDone: () => void }) {
   const options = (teams.data ?? []).filter((team) => me.data?.is_admin || trainerTeams.includes(team.id));
 
   const now = new Date();
-  const inAWeek = new Date(now.getTime() + 7 * 864e5);
+  // Every info expires: no preset, so the expiry date is chosen on purpose.
   const [form, setForm] = useState({
     target: me.data?.is_admin ? 'tenant' : (trainerTeams[0] ?? ''),
     title: '',
     body: '',
     visible_from: toLocalInput(now.toISOString()),
-    visible_until: toLocalInput(inAWeek.toISOString()),
+    visible_until: '',
   });
+  const expiresIn = (days: number) => {
+    const from = new Date(form.visible_from || now.toISOString());
+    const until = new Date(Number.isNaN(from.getTime()) ? now.getTime() : from.getTime());
+    until.setDate(until.getDate() + days);
+    until.setHours(23, 59, 0, 0);
+    set('visible_until')(toLocalInput(until.toISOString()));
+  };
   const set = (key: keyof typeof form) => (value: string) => setForm((f) => ({ ...f, [key]: value }));
 
   const create = useMutation({
@@ -103,13 +110,28 @@ function NoticeForm({ onDone }: { onDone: () => void }) {
         <label className="mb-1 block text-sm font-medium text-slate-700" htmlFor="notice-body">{t('notices.body')}</label>
         <textarea id="notice-body" rows={3} maxLength={2000} className="w-full rounded-lg border border-slate-300 p-3 text-base" value={form.body} onChange={(e) => set('body')(e.target.value)} />
       </div>
-      <div className="grid gap-3 sm:grid-cols-2">
-        <Field label={t('notices.from')} type="datetime-local" required value={form.visible_from} onChange={(e) => set('visible_from')(e.target.value)} />
-        <Field label={t('notices.to')} type="datetime-local" required value={form.visible_until} onChange={(e) => set('visible_until')(e.target.value)} />
+      <Field label={t('notices.from')} type="datetime-local" required value={form.visible_from} onChange={(e) => set('visible_from')(e.target.value)} />
+      <div>
+        <Field
+          label={t('notices.to')}
+          hint={t('notices.toHint')}
+          type="datetime-local"
+          required
+          min={form.visible_from || undefined}
+          value={form.visible_until}
+          onChange={(e) => set('visible_until')(e.target.value)}
+        />
+        <div className="mt-2 flex flex-wrap gap-2">
+          {([[1, 'day'], [7, 'week'], [30, 'month'], [91, 'quarter']] as const).map(([days, key]) => (
+            <button key={key} type="button" className="min-h-9 rounded-full border border-slate-300 px-3 text-sm" onClick={() => expiresIn(days)}>
+              {t(`notices.expiresIn.${key}`)}
+            </button>
+          ))}
+        </div>
       </div>
       {create.isError && <Notice tone="error">{errorText(create.error, t('errors.generic'))}</Notice>}
       <div className="flex gap-2">
-        <Button type="submit" disabled={create.isPending}>{t('notices.publish')}</Button>
+        <Button type="submit" disabled={create.isPending || !form.visible_until}>{t('notices.publish')}</Button>
         <Button variant="secondary" onClick={onDone}>{t('common.cancel')}</Button>
       </div>
     </form>

@@ -13,6 +13,8 @@ return [
     'positions' => ['setter' => 'Zuspiel', 'opposite' => 'Diagonal', 'middle' => 'Mittelblock', 'outside' => 'Außenangriff', 'libero' => 'Libero', 'universal' => 'Universal'],
     'full' => 'Das Teilnehmermaximum ist erreicht – keine weiteren Zusagen möglich.',
     'teams_invalid' => 'Bitte wähle mindestens ein gültiges Team.',
+    'series_invalid' => 'Diese Trainingsreihe gibt es nicht (mehr).',
+    'attendance_not_yet' => 'Die Anwesenheit kann erst ab Beginn des Termins erfasst werden.',
     'series_only_training' => 'Serientermine gibt es nur für Trainings eines einzelnen Teams.',
     'cancelled_prefix' => 'Abgesagt:',
     'default_title' => [

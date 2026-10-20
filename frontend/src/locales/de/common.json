@@ -390,7 +390,18 @@
     "guestsPositionsOnlyInfo": "Gäste können nur auf fehlenden Positionen zusagen.",
     "takeIdealSquad": "Idealkader des Teams übernehmen",
     "idealSquad": "Gesucht für Gäste (Idealkader)",
-    "idealSquadInfo": "Gäste können nur zusagen, solange ihre Position hier noch frei ist."
+    "idealSquadInfo": "Gäste können nur zusagen, solange ihre Position hier noch frei ist.",
+    "noReaction": "Nicht reagiert",
+    "correct": "Nachtragen",
+    "correctTitle": "Antworten und Anwesenheit nachtragen",
+    "correctHint": "Häkchen = war beim Termin da (vorbelegt mit den Zusagen). Antworten lassen sich auch nachträglich ändern – beides zählt für die Statistik.",
+    "correctDone": "Fertig",
+    "saveAttendance": "Anwesenheit speichern",
+    "attendanceRecordedAt": "Anwesenheit erfasst am {{date}}",
+    "attendanceNotRecorded": "Anwesenheit noch nicht erfasst – bis dahin zählt eine Zusage als anwesend.",
+    "present": "da",
+    "absent": "nicht da",
+    "replyOf": "Antwort von {{name}}"
   },
   "notifications": {
     "title": "Benachrichtigungen",
@@ -507,7 +518,18 @@
     "tasksOwn": "Deine übernommenen Aufgaben",
     "tasksNone": "Im Zeitraum wurden keine Aufgaben übernommen.",
     "tasksCount": "{{helper}} Helferdienst · {{other}} sonstige",
-    "pageHint": "Zusagequoten und übernommene Aufgaben findest du je Team. Trainer sehen alle Spieler, Spieler nur sich selbst."
+    "pageHint": "Zusagequoten und übernommene Aufgaben findest du je Team. Trainer sehen alle Spieler, Spieler nur sich selbst.",
+    "noReaction_one": "{{count}}× nicht reagiert",
+    "noReaction_other": "{{count}}× nicht reagiert",
+    "noReactionShort": "nicht reagiert",
+    "noReactionTitle": "Nicht reagiert",
+    "noReactionHint": "Termine im Zeitraum, auf die gar nicht geantwortet wurde.",
+    "noReactionNone": "Alle haben reagiert.",
+    "noReactionOf": "{{count}} von {{invited}}",
+    "attendance": "Training: {{rate}} % da ({{present}} von {{count}})",
+    "present": "da",
+    "absent": "nicht da",
+    "byReply": "laut Antwort"
   },
   "import": {
     "open": "Spielplan importieren",
@@ -848,5 +870,31 @@
     "outside": "AA",
     "libero": "L",
     "universal": "U"
+  },
+  "rules": {
+    "title": "Für mehrere Termine antworten",
+    "link": "Für mehrere Termine antworten (z. B. immer mittwochs)",
+    "intro": "Einmal für viele Termine zu- oder absagen, z. B. „Training mittwochs: Zusage, freitags: Absage“. Gilt für alle kommenden passenden Termine und automatisch auch für neue. Einzelne Termine kannst du danach jederzeit anders beantworten.",
+    "new": "Neue Daueranwort",
+    "person": "Für",
+    "team": "Team",
+    "allTeams": "Alle Teams",
+    "what": "Welche Termine",
+    "allTypes": "Alle Terminarten",
+    "series": "Reihe: {{title}} ({{days}} {{time}})",
+    "weekdays": "Wochentage",
+    "weekdaysHint": "Nichts gewählt = an allen Tagen.",
+    "answer": "Antwort",
+    "reason": "Grund",
+    "reasonHint": "Wird bei jedem Termin als Grund eingetragen (manche Teams verlangen einen).",
+    "overwrite": "Auch bereits beantwortete Termine ändern",
+    "save": "Für alle passenden Termine eintragen",
+    "applied_one": "{{count}} Termin beantwortet.",
+    "applied_other": "{{count}} Termine beantwortet.",
+    "active": "Deine Daueranworten",
+    "none": "Noch keine Daueranworten.",
+    "delete": "Daueranwort entfernen",
+    "deleteHint": "Entfernen beendet die Daueranwort für neue Termine; bereits eingetragene Antworten bleiben.",
+    "noPersons": "Für dein Konto gibt es kein Profil, für das du antworten kannst."
   }
 }

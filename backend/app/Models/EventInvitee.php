@@ -15,4 +15,9 @@ class EventInvitee extends Model
     public $timestamps = false;
 
     protected $fillable = ['event_id', 'person_id', 'source'];
+
+    protected function casts(): array
+    {
+        return ['attended' => 'boolean'];
+    }
 }

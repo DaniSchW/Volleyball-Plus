@@ -338,6 +338,8 @@ export interface ResponseRow {
   as_position: Position | null;
   reason: string | null;
   responded_at: string | null;
+  /** Only for trainers/admins after the start: present (recorded, else accepted). */
+  attended: boolean | null;
 }
 
 export interface EventDetail extends EventSummary {
@@ -356,6 +358,29 @@ export interface EventDetail extends EventSummary {
   position_taken: Partial<Record<Position, number>> | null;
   /** "Only missing positions": places guests may fill (Positions-Soll, else the team's ideal squad). */
   guest_position_needs: Partial<Record<Position, number>> | null;
+  /** Trainers/admins after the start: correct replies and record attendance. */
+  can_record_attendance: boolean;
+  attendance_recorded_at: string | null;
+  deadline_passed: boolean;
+}
+
+export interface RsvpRuleSeries { id: string; title: string; weekdays: number[]; start_time: string; end_time: string }
+
+export interface RsvpRule {
+  id: string;
+  person_id: string;
+  status: RsvpStatus;
+  reason: string | null;
+  team: { id: string; name: string } | null;
+  series: RsvpRuleSeries | null;
+  event_type: 'training' | 'match' | 'extra' | null;
+  weekdays: number[] | null;
+  created_at: string;
+}
+
+export interface RsvpRuleOptions {
+  rules: RsvpRule[];
+  persons: { id: string; name: string; teams: { id: string; name: string; series: RsvpRuleSeries[] }[] }[];
 }
 
 export interface EventPage {
@@ -436,6 +461,12 @@ export interface StatisticsRow {
   open: number;
   late: number;
   rate: number;
+  /** Past events without any reaction. */
+  no_reaction: number;
+  trainings: number;
+  trainings_present: number;
+  /** Present at trainings in % (recorded by the trainer, else accepted); null without trainings. */
+  attendance_rate: number | null;
 }
 
 export interface TeamStatistics {
@@ -452,6 +483,9 @@ export interface HistoryRow {
   status: RsvpStatus | null;
   responded_at: string | null;
   after_deadline: boolean;
+  /** Trainings only: present (recorded, else accepted). */
+  attended: boolean | null;
+  attendance_recorded: boolean;
 }
 
 // ---- schedule import ----

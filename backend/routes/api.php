@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\PersonController;
 use App\Http\Controllers\Api\PlatformController;
 use App\Http\Controllers\Api\PollController;
 use App\Http\Controllers\Api\PushController;
+use App\Http\Controllers\Api\RsvpRuleController;
 use App\Http\Controllers\Api\StatisticsController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\TeamController;
@@ -135,6 +136,10 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
         Route::post('events/{event}/cancel', [EventController::class, 'cancel']);
         Route::post('events/{event}/end-series', [EventController::class, 'endSeries']);
         Route::post('events/{event}/responses', [EventController::class, 'respond']);
+        Route::put('events/{event}/attendance', [EventController::class, 'attendance']);
+        Route::get('rsvp-rules', [RsvpRuleController::class, 'index']);
+        Route::post('rsvp-rules', [RsvpRuleController::class, 'store']);
+        Route::delete('rsvp-rules/{rule}', [RsvpRuleController::class, 'destroy']);
 
         Route::get('chats', [ChatController::class, 'index']);
         Route::post('chats', [ChatController::class, 'store']);

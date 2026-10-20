@@ -25,6 +25,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 
 class EventController extends Controller
@@ -157,6 +158,28 @@ class EventController extends Controller
 
         $person = Person::query()->findOrFail($data['person_id']);
         $rsvp->respond($event, $person, RsvpStatus::from($data['status']), $data['reason'] ?? null, $member, $data['position'] ?? null);
+
+        return response()->json(['data' => $this->presenter->detail($event->refresh(), $member)]);
+    }
+
+    /**
+     * Who was really there (after the start): the listed persons present,
+     * all other invitees absent. Trainers of the event's teams and admins.
+     */
+    public function attendance(Request $request, Event $event): JsonResponse
+    {
+        $member = $this->current->get();
+        abort_unless($this->permissions->canRecordAttendance($member, $event), 403);
+        abort_unless($event->expectsResponses() && $event->starts_at->lessThanOrEqualTo(Carbon::now()), 422, __('events.attendance_not_yet'));
+        $data = $request->validate(['present' => ['present', 'array'], 'present.*' => ['string']]);
+        $present = array_flip($data['present']);
+
+        DB::transaction(function () use ($event, $present) {
+            foreach (EventInvitee::query()->where('event_id', $event->id)->get() as $invitee) {
+                $invitee->forceFill(['attended' => isset($present[$invitee->person_id])])->save();
+            }
+            $event->forceFill(['attendance_recorded_at' => Carbon::now()])->save();
+        });
 
         return response()->json(['data' => $this->presenter->detail($event->refresh(), $member)]);
     }

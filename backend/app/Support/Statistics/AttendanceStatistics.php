@@ -3,7 +3,9 @@
 namespace App\Support\Statistics;
 
 use App\Enums\EventStatus;
+use App\Enums\EventType;
 use App\Enums\ResponseMode;
+use App\Enums\RsvpStatus;
 use App\Enums\TeamRole;
 use App\Models\Event;
 use App\Models\EventInvitee;
@@ -21,8 +23,11 @@ use Illuminate\Support\Collection;
 /**
  * Reply rates of a team's people in a period: for every past event of the
  * team that took replies (not cancelled) and to which the person was
- * invited – accepted, maybe, declined, no answer. Rate = accepted /
- * invited. Answers given or changed after the deadline are counted too.
+ * invited – accepted, maybe, declined, no reaction at all. Rate =
+ * accepted / invited. Answers given or changed after the deadline are
+ * counted too. Training attendance = trainings present / trainings
+ * invited; present is what the trainer recorded afterwards, else an
+ * acceptance.
  *
  * People who are only trainers or organizers of the team are left out;
  * former players and cross-nominated guests stay in (they were invited).
@@ -86,7 +91,8 @@ class AttendanceStatistics
         $eventIds = $events->pluck('id');
         $invitees = EventInvitee::query()->whereIn('event_id', $eventIds)
             ->when($onlyPersons !== null, fn ($q) => $q->whereIn('person_id', $onlyPersons))
-            ->get(['event_id', 'person_id', 'source']);
+            ->get(['event_id', 'person_id', 'source', 'attended']);
+        $trainings = $events->filter(fn (Event $e) => $e->type === EventType::Training)->pluck('id')->flip();
 
         $staffOnly = $this->staffOnly($team);
         $invitees = $invitees->reject(fn (EventInvitee $i) => $staffOnly->has($i->person_id));
@@ -99,11 +105,16 @@ class AttendanceStatistics
         $persons = Person::withTrashed()->whereIn('id', $invitees->pluck('person_id')->unique())->get()->keyBy('id');
         $current = TeamMembership::query()->where('team_id', $team->id)->where('role', TeamRole::Player)->pluck('person_id')->flip();
 
-        return $invitees->groupBy('person_id')->map(function (Collection $rows, string $personId) use ($responses, $late, $persons, $current) {
+        return $invitees->groupBy('person_id')->map(function (Collection $rows, string $personId) use ($responses, $late, $persons, $current, $trainings) {
             $counts = ['yes' => 0, 'maybe' => 0, 'no' => 0, 'open' => 0];
+            $training = ['invited' => 0, 'present' => 0];
             foreach ($rows as $invite) {
                 $status = $responses->get($invite->event_id.'|'.$personId)?->status->value ?? 'open';
                 $counts[$status]++;
+                if ($trainings->has($invite->event_id)) {
+                    $training['invited']++;
+                    $training['present'] += ($invite->attended ?? $status === 'yes') ? 1 : 0;
+                }
             }
             $person = $persons->get($personId);
             $invited = $rows->count();
@@ -120,6 +131,11 @@ class AttendanceStatistics
                 ...$counts,
                 'late' => (int) ($late[$personId] ?? 0),
                 'rate' => $invited > 0 ? (int) round($counts['yes'] * 100 / $invited) : 0,
+                // "open" of past events = did not react at all.
+                'no_reaction' => $counts['open'],
+                'trainings' => $training['invited'],
+                'trainings_present' => $training['present'],
+                'attendance_rate' => $training['invited'] > 0 ? (int) round($training['present'] * 100 / $training['invited']) : null,
             ];
         })
             ->sortBy([['rate', 'desc'], ['invited', 'desc'], fn ($a, $b) => strcmp(mb_strtolower($a['person']['name']), mb_strtolower($b['person']['name']))])
@@ -168,7 +184,7 @@ class AttendanceStatistics
      */
     public function history(Collection $events, string $personId): array
     {
-        $invited = EventInvitee::query()->whereIn('event_id', $events->pluck('id'))->where('person_id', $personId)->pluck('event_id')->flip();
+        $invited = EventInvitee::query()->whereIn('event_id', $events->pluck('id'))->where('person_id', $personId)->get(['event_id', 'attended'])->keyBy('event_id');
         $responses = EventResponse::query()->whereIn('event_id', $invited->keys())->where('person_id', $personId)->get()->keyBy('event_id');
         $late = EventResponseLog::query()->whereIn('event_id', $invited->keys())->where('person_id', $personId)->where('after_deadline', true)
             ->pluck('event_id')->flip();
@@ -178,6 +194,9 @@ class AttendanceStatistics
             'status' => $responses->get($e->id)?->status->value,
             'responded_at' => $responses->get($e->id)?->responded_at?->toIso8601ZuluString(),
             'after_deadline' => $late->has($e->id),
+            'attended' => $e->type === EventType::Training
+                ? ($invited[$e->id]->attended ?? $responses->get($e->id)?->status === RsvpStatus::Yes) : null,
+            'attendance_recorded' => $e->attendance_recorded_at !== null,
         ])->values()->all();
     }
 

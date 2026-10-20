@@ -1,7 +1,8 @@
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
-import { api, errorText, post, POSITIONS, type EventDetail, type Position, type ResponseRow, type RsvpStatus } from '../lib/api';
+import { api, errorText, post, put, POSITIONS, type EventDetail, type Position, type ResponseRow, type RsvpStatus } from '../lib/api';
 import { formatDateTime, formatLongDay, formatTime } from '../lib/dates';
 import { useTenantPath, useTenantSlug } from '../lib/queries';
 import { RsvpControl } from '../components/events/RsvpControl';
@@ -182,6 +183,7 @@ const GROUPS: (RsvpStatus | 'open')[] = ['yes', 'maybe', 'no', 'open'];
 
 function Responses({ event }: { event: EventDetail }) {
   const { t } = useTranslation();
+  const [correcting, setCorrecting] = useState(false);
 
   if (!event.responses) {
     return (
@@ -203,16 +205,28 @@ function Responses({ event }: { event: EventDetail }) {
     return group === 'yes' ? [...rows].sort((a, b) => order(a) - order(b)) : rows;
   };
 
+  if (correcting) return <CorrectReplies event={event} onDone={() => setCorrecting(false)} />;
+
   return (
-    <Card title={t('events.replies')}>
+    <Card
+      title={t('events.replies')}
+      actions={event.can_record_attendance ? (
+        <button type="button" className="rounded px-2 py-1 text-sm text-brand-700" onClick={() => setCorrecting(true)}>{t('events.correct')}</button>
+      ) : undefined}
+    >
+      {event.can_record_attendance && (
+        <p className="mb-3 text-xs text-slate-500">
+          {event.attendance_recorded_at ? t('events.attendanceRecordedAt', { date: formatDateTime(event.attendance_recorded_at) }) : t('events.attendanceNotRecorded')}
+        </p>
+      )}
       <div className="space-y-4">
         {GROUPS.map((group) => {
           const rows = byGroup(group);
           if (rows.length === 0) return null;
           return (
             <div key={group}>
-              <h3 className="mb-1 text-sm font-semibold text-slate-600">
-                {group === 'open' ? t('events.notAnswered') : t(`events.status.${group}`)} ({rows.length})
+              <h3 className={`mb-1 text-sm font-semibold ${group === 'open' && event.deadline_passed ? 'text-red-700' : 'text-slate-600'}`}>
+                {group === 'open' ? (event.deadline_passed ? `⚠️ ${t('events.noReaction')}` : t('events.notAnswered')) : t(`events.status.${group}`)} ({rows.length})
               </h3>
               <ul className="divide-y divide-slate-100">
                 {rows.map((row) => (
@@ -225,6 +239,9 @@ function Responses({ event }: { event: EventDetail }) {
                           .filter(Boolean).join(' · ')}
                       </span>
                     </span>
+                    {row.attended !== null && (
+                      <span className={`shrink-0 text-xs font-medium ${row.attended ? 'text-emerald-700' : 'text-slate-400'}`}>{row.attended ? t('events.present') : t('events.absent')}</span>
+                    )}
                     {row.person.role === 'player' && <PositionBadges row={row} />}
                   </li>
                 ))}
@@ -264,5 +281,75 @@ function PositionBadges({ row }: { row: ResponseRow }) {
         <span key={p} title={t(`positions.${p}`)} className="rounded-md px-1.5 py-0.5 text-[0.65rem] font-medium text-slate-500 ring-1 ring-slate-200">{t(`positionsShort.${p}`)}</span>
       ))}
     </span>
+  );
+}
+
+/**
+ * Afterwards (trainers/admins): correct replies as they really were and
+ * record who was there – both count for the statistics.
+ */
+function CorrectReplies({ event, onDone }: { event: EventDetail; onDone: () => void }) {
+  const { t } = useTranslation();
+  const tp = useTenantPath();
+  const queryClient = useQueryClient();
+  const rows = [...(event.responses ?? [])].sort((a, b) => a.person.name.localeCompare(b.person.name));
+  const [present, setPresent] = useState<Set<string>>(() => new Set(rows.filter((r) => r.attended).map((r) => r.person.id)));
+  const done = ({ data }: { data: EventDetail }) => {
+    queryClient.setQueryData(['event', event.id], data);
+    void queryClient.invalidateQueries({ queryKey: ['statistics'] });
+  };
+
+  const reply = useMutation({
+    mutationFn: ({ personId, status }: { personId: string; status: RsvpStatus }) =>
+      post<{ data: EventDetail }>(tp(`events/${event.id}/responses`), { person_id: personId, status }),
+    onSuccess: done,
+  });
+  const save = useMutation({
+    mutationFn: () => put<{ data: EventDetail }>(tp(`events/${event.id}/attendance`), { present: [...present] }),
+    onSuccess: (result) => {
+      done(result);
+      onDone();
+    },
+  });
+
+  return (
+    <Card title={t('events.correctTitle')}>
+      <p className="mb-3 text-xs text-slate-500">{t('events.correctHint')}</p>
+      <ul className="divide-y divide-slate-100">
+        {rows.map((row) => (
+          <li key={row.person.id} className="flex flex-wrap items-center gap-2 py-2">
+            <label className="flex min-h-11 min-w-0 flex-1 items-center gap-3 text-sm">
+              <input
+                type="checkbox"
+                className="size-5 shrink-0 accent-emerald-600"
+                checked={present.has(row.person.id)}
+                onChange={(e) => setPresent((current) => {
+                  const next = new Set(current);
+                  if (e.target.checked) next.add(row.person.id);
+                  else next.delete(row.person.id);
+                  return next;
+                })}
+              />
+              <span className="min-w-0 truncate">{row.person.name}</span>
+            </label>
+            <select
+              aria-label={t('events.replyOf', { name: row.person.name })}
+              className="min-h-10 rounded-lg border border-slate-300 bg-white px-2 text-sm"
+              value={row.status ?? ''}
+              disabled={reply.isPending}
+              onChange={(e) => e.target.value && reply.mutate({ personId: row.person.id, status: e.target.value as RsvpStatus })}
+            >
+              {!row.status && <option value="">{t('events.noReaction')}</option>}
+              {(['yes', 'maybe', 'no'] as const).map((status) => <option key={status} value={status}>{t(`events.status.${status}`)}</option>)}
+            </select>
+          </li>
+        ))}
+      </ul>
+      {(reply.isError || save.isError) && <Notice tone="error">{errorText(reply.error ?? save.error, t('errors.generic'))}</Notice>}
+      <div className="mt-3 flex flex-wrap gap-2">
+        <Button onClick={() => save.mutate()} disabled={save.isPending}>{t('events.saveAttendance')}</Button>
+        <Button variant="secondary" onClick={onDone}>{t('events.correctDone')}</Button>
+      </div>
+    </Card>
   );
 }

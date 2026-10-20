@@ -690,6 +690,63 @@ describe('positions in the replies', () => {
   });
 });
 
+describe('standing replies', () => {
+  it('answers all Wednesday trainings at once', async () => {
+    let sent: Record<string, unknown> = {};
+    const options = {
+      rules: [],
+      persons: [{ id: 'p1', name: 'Max Muster', teams: [{ id: 't1', name: 'Herren 1', series: [{ id: 's1', title: 'Training', weekdays: [3, 5], start_time: '19:30', end_time: '21:30' }] }] }],
+    };
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/rsvp-rules': { body: { data: options } },
+      'POST /t/ssv-ulm/rsvp-rules': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { status: 201, body: { data: { id: 'r1' }, applied: 8, skipped: [] } };
+      },
+    });
+    renderAt('/ssv-ulm/replies');
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Mi' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Für alle passenden Termine eintragen' }));
+
+    await waitFor(() => expect(sent).toMatchObject({ person_id: 'p1', status: 'yes', team_id: 't1', event_type: 'training', weekdays: [3], overwrite: true, series_id: null }));
+    expect(await screen.findByText('8 Termine beantwortet.')).toBeInTheDocument();
+  });
+});
+
+describe('after the event', () => {
+  it('marks missing reactions and lets trainers record attendance', async () => {
+    let sent: Record<string, unknown> = {};
+    const row = (id: string, name: string, status: string | null, attended: boolean) => ({
+      person: { id, name, avatar_url: null, primary_position: null, positions: [], role: 'player', is_guest: false },
+      status, as_position: null, reason: null, responded_at: null, attended,
+    });
+    const detail = {
+      ...EVENT, description: null, names_visible: true, series_id: null, series: null, team_ids: ['t1'], cross_nomination_opens_at: null,
+      guests_open_at: null, positions: null, tasks: [], task_summary: null, position_limits: null, position_taken: null, guest_position_needs: null,
+      can_record_attendance: true, attendance_recorded_at: null, deadline_passed: true, my: [],
+      responses: [row('p1', 'Anna Berg', 'yes', true), row('p2', 'Ole Ohne', null, false)],
+    };
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/events/e1': { body: { data: detail } },
+      'PUT /t/ssv-ulm/events/e1/attendance': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { body: { data: { ...detail, attendance_recorded_at: '2026-10-20T20:00:00Z' } } };
+      },
+    });
+    renderAt('/ssv-ulm/events/e1');
+
+    expect(await screen.findByText('⚠️ Nicht reagiert (1)')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Nachtragen' }));
+    fireEvent.click(screen.getByLabelText('Ole Ohne'));
+    fireEvent.click(screen.getByLabelText('Anna Berg'));
+    fireEvent.click(screen.getByRole('button', { name: 'Anwesenheit speichern' }));
+    await waitFor(() => expect(sent).toEqual({ present: ['p2'] }));
+  });
+});
+
 describe('hall form', () => {
   it('saves address fields and weekly training times', async () => {
     let sent: Record<string, unknown> = {};

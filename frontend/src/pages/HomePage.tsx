@@ -25,6 +25,11 @@ export function HomePage() {
             </Link>
           )}
         </div>
+        {(me.data?.persons.length ?? 0) > 0 && (
+          <Link to={`/${slug}/replies`} className="mb-3 flex min-h-11 items-center gap-2 rounded-lg border border-brand-100 bg-white px-3 text-sm font-medium text-brand-700">
+            <span aria-hidden="true">📆</span> {t('rules.link')}
+          </Link>
+        )}
         <EventFeed />
       </section>
     </div>

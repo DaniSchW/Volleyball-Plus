@@ -19,6 +19,7 @@ use App\Support\Auth\Permissions;
 use App\Support\Teams\GuestWindow;
 use App\Support\Tenancy\TenantContext;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 /**
@@ -89,8 +90,14 @@ class EventPresenter
             || $event->teams->contains(fn (Team $t) => $this->permissions->isTrainerOf($viewer, $t))
             || $event->teams->every(fn (Team $t) => $t->reasons_visible_to_teammates);
 
+        $started = $event->starts_at->lessThanOrEqualTo(Carbon::now());
+        $canRecord = $started && $event->expectsResponses() && $this->permissions->canRecordAttendance($viewer, $event);
         $data['description'] = $event->description;
         $data['names_visible'] = $showNames;
+        // Afterwards trainers/admins correct replies and record who was there.
+        $data['can_record_attendance'] = $canRecord;
+        $data['attendance_recorded_at'] = $event->attendance_recorded_at?->toIso8601ZuluString();
+        $data['deadline_passed'] = $event->deadlinePassed();
         $data['series_id'] = $event->series_id;
         $data['series'] = $event->series ? [
             'weekdays' => array_map('intval', $event->series->weekdays),
@@ -112,12 +119,13 @@ class EventPresenter
             ->map(fn ($n) => (int) $n)->all() : null;
 
         if ($showNames) {
-            $invitees = EventInvitee::query()->where('event_id', $event->id)->pluck('source', 'person_id');
+            $inviteRows = EventInvitee::query()->where('event_id', $event->id)->get(['person_id', 'source', 'attended'])->keyBy('person_id');
+            $invitees = $inviteRows->map(fn (EventInvitee $i) => $i->source);
             $persons = Person::query()->whereIn('id', $invitees->keys())->get()->keyBy('id');
             $responses = EventResponse::query()->where('event_id', $event->id)->get()->keyBy('person_id');
             $roles = $this->rolesInEvent($event);
 
-            $data['responses'] = $persons->map(function (Person $person) use ($responses, $showReasons, $roles, $invitees) {
+            $data['responses'] = $persons->map(function (Person $person) use ($responses, $showReasons, $roles, $invitees, $inviteRows, $canRecord) {
                 $response = $responses->get($person->id);
 
                 return [
@@ -134,6 +142,8 @@ class EventPresenter
                     'as_position' => $response?->as_position,
                     'reason' => $showReasons ? $response?->reason : null,
                     'responded_at' => $response?->responded_at?->toIso8601ZuluString(),
+                    // Not recorded: whoever accepted counts as present.
+                    'attended' => $canRecord ? ($inviteRows[$person->id]->attended ?? $response?->status === RsvpStatus::Yes) : null,
                 ];
             })->sortBy(fn ($row) => mb_strtolower($row['person']['name']))->values()->all();
 

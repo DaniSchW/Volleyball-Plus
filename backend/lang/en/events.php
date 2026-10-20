@@ -13,6 +13,8 @@ return [
     'positions' => ['setter' => 'Setter', 'opposite' => 'Opposite', 'middle' => 'Middle blocker', 'outside' => 'Outside hitter', 'libero' => 'Libero', 'universal' => 'Universal'],
     'full' => 'The maximum number of participants is reached – no more acceptances possible.',
     'teams_invalid' => 'Please choose at least one valid team.',
+    'series_invalid' => 'This training series does not exist (anymore).',
+    'attendance_not_yet' => 'Attendance can only be recorded once the event has started.',
     'series_only_training' => 'Recurring events are only available for trainings of a single team.',
     'cancelled_prefix' => 'Cancelled:',
     'default_title' => [

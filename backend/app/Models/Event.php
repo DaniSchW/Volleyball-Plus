@@ -48,6 +48,7 @@ class Event extends Model
             'meet_at' => 'datetime',
             'rsvp_deadline' => 'datetime',
             'cross_nomination_opens_at' => 'datetime',
+            'attendance_recorded_at' => 'datetime',
             'max_participants' => 'integer',
             'series_exception' => 'boolean',
             'reminder_sent_at' => 'datetime',

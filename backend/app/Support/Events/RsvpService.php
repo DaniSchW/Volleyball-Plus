@@ -33,13 +33,20 @@ class RsvpService
 {
     public function __construct(private Permissions $permissions, private GuestWindow $guests) {}
 
-    public function respond(Event $event, Person $person, RsvpStatus $status, ?string $reason, TenantMember $actor, ?string $position = null): EventResponse
+    /**
+     * $viaRule: answered by a standing reply – deadlines and limits apply
+     * like for the person themselves, even if the rule's author manages the event.
+     */
+    public function respond(Event $event, Person $person, RsvpStatus $status, ?string $reason, TenantMember $actor, ?string $position = null, bool $viaRule = false): EventResponse
     {
-        $manager = $this->permissions->canManageEvent($actor, $event);
+        $manager = ! $viaRule && $this->permissions->canManageEvent($actor, $event);
+        $own = $this->permissions->canRespondFor($actor, $person);
 
-        if (! $manager && ! $this->permissions->canRespondFor($actor, $person)) {
+        if (! $manager && ! $own) {
             throw new AccessDeniedHttpException(__('events.not_allowed'));
         }
+        // Trainers correcting somebody else's reply (also afterwards): no reason needed, no limits.
+        $forOther = $manager && ! $own;
         if (! $event->expectsResponses()) {
             throw ValidationException::withMessages(['status' => __('events.no_replies')]);
         }
@@ -59,30 +66,30 @@ class RsvpService
         }
 
         $reason = trim((string) $reason) ?: null;
-        if ($reason === null && $this->reasonRequired($event, $status)) {
+        if ($reason === null && ! $forOther && $this->reasonRequired($event, $status)) {
             throw ValidationException::withMessages(['reason' => __('events.reason_required')]);
         }
 
-        $own = array_values(array_unique(array_filter([$person->primary_position?->value, ...($person->secondary_positions ?? [])])));
-        if ($position !== null && ! in_array($position, $own, true) && ! $manager) {
+        $positions = array_values(array_unique(array_filter([$person->primary_position?->value, ...($person->secondary_positions ?? [])])));
+        if ($position !== null && ! in_array($position, $positions, true) && ! $manager) {
             throw ValidationException::withMessages(['position' => __('events.position_not_yours')]);
         }
 
         $neededOnly = $guest && ! $manager && $event->guests_positions_only;
 
-        return DB::transaction(function () use ($event, $person, $status, $reason, $actor, $afterDeadline, $own, $position, $neededOnly) {
+        return DB::transaction(function () use ($event, $person, $status, $reason, $actor, $afterDeadline, $positions, $position, $neededOnly, $forOther) {
             // Lock the event so the participant limit holds with simultaneous replies.
             $locked = Event::query()->lockForUpdate()->findOrFail($event->id);
             $current = EventResponse::query()->where('event_id', $event->id)->where('person_id', $person->id)->first();
 
-            if ($status === RsvpStatus::Yes && $current?->status !== RsvpStatus::Yes && $locked->max_participants !== null) {
+            if ($status === RsvpStatus::Yes && $current?->status !== RsvpStatus::Yes && $locked->max_participants !== null && ! $forOther) {
                 $yes = EventResponse::query()->where('event_id', $event->id)->where('status', RsvpStatus::Yes)->count();
                 if ($yes >= $locked->max_participants) {
                     throw ValidationException::withMessages(['status' => __('events.full')]);
                 }
             }
 
-            $asPosition = $status === RsvpStatus::Yes ? $this->positionFor($locked, $person, $own, $position, $current, $neededOnly) : null;
+            $asPosition = $status === RsvpStatus::Yes ? $this->positionFor($locked, $person, $positions, $position, $current, $neededOnly, $forOther) : null;
 
             $response = $current ?? new EventResponse(['event_id' => $event->id, 'person_id' => $person->id]);
             $old = $current?->status;
@@ -110,12 +117,13 @@ class RsvpService
     /**
      * The position the "yes" counts for. Without limits simply the chosen or
      * main position; with limits the first one that still has a place.
+     * $lenient: trainers correcting a reply – limits never refuse it.
      * $neededOnly (guests): only positions still missing by the Positions-Soll
      * or, without one, by the team's ideal squad.
      *
      * @param  list<string>  $own
      */
-    private function positionFor(Event $event, Person $person, array $own, ?string $chosen, ?EventResponse $current, bool $neededOnly = false): ?string
+    private function positionFor(Event $event, Person $person, array $own, ?string $chosen, ?EventResponse $current, bool $neededOnly = false, bool $lenient = false): ?string
     {
         $limits = $neededOnly ? $event->guestPositionNeeds() : ($event->position_limits ?? []);
         $candidates = $chosen !== null ? [$chosen] : $own;
@@ -141,6 +149,11 @@ class RsvpService
             if (! isset($limits[$candidate]) || (int) ($taken[$candidate] ?? 0) < $limits[$candidate]) {
                 return $candidate;
             }
+        }
+
+        // Corrections by trainers are entered as they happened, even beyond the limits.
+        if ($lenient) {
+            return $candidates[0];
         }
 
         throw ValidationException::withMessages(['status' => __('events.position_full', [

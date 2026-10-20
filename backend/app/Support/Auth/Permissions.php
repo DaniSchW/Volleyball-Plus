@@ -283,6 +283,15 @@ class Permissions
     }
 
     /**
+     * Afterwards: record who was really there and correct replies of past
+     * events (for the statistics) – admins and the teams' trainers.
+     */
+    public function canRecordAttendance(TenantMember $member, Event $event): bool
+    {
+        return $this->isAdmin($member) || $event->teams->contains(fn (Team $team) => $this->isTrainerOf($member, $team));
+    }
+
+    /**
      * Accept/decline for a person: for oneself, as parent for the child, or
      * as a child when the parents allow it.
      */

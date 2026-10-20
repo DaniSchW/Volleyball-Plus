@@ -79,6 +79,7 @@ export function TeamStatistics({ team }: { team: Team }) {
       {stats.isPending && <Loading />}
       {stats.isError && <Notice tone="error">{t('errors.generic')}</Notice>}
       {stats.data && <Result team={team} stats={stats.data} qs={qs} />}
+      {stats.data?.can_see_all && <NoReaction rows={stats.data.rows} />}
       {stats.data && <TaskStats team={team} qs={query(stats.data.period, [])} />}
     </div>
   );
@@ -138,7 +139,6 @@ function RateBar({ row }: { row: StatisticsRow }) {
     t('stats.accepted', { yes: row.yes, invited: row.invited }),
     row.maybe > 0 && `? ${row.maybe}`,
     row.no > 0 && `✕ ${row.no}`,
-    row.open > 0 && t('events.open', { count: row.open }),
     row.late > 0 && t('stats.late', { count: row.late }),
   ].filter(Boolean).join(' · ');
   const marker = row.is_guest ? t('events.guest') : !row.is_current ? t('stats.former') : null;
@@ -155,8 +155,45 @@ function RateBar({ row }: { row: StatisticsRow }) {
       <span className="mt-1 block h-3 w-full overflow-hidden rounded bg-slate-100" aria-hidden="true">
         <span className="block h-full rounded bg-brand-600" style={{ width: `${row.rate}%` }} />
       </span>
-      <span className="mt-0.5 block text-xs text-slate-500">{details}</span>
+      <span className="mt-0.5 block text-xs text-slate-500">
+        {details}
+        {row.no_reaction > 0 && <span className="font-medium text-red-700"> · {t('stats.noReaction', { count: row.no_reaction })}</span>}
+      </span>
+      {row.attendance_rate !== null && (
+        <span className="mt-1 flex items-center gap-2 text-xs text-slate-600">
+          <span className="block h-2 flex-1 overflow-hidden rounded bg-slate-100" aria-hidden="true">
+            <span className="block h-full rounded bg-emerald-500" style={{ width: `${row.attendance_rate}%` }} />
+          </span>
+          <span className="shrink-0 tabular-nums">{t('stats.attendance', { rate: row.attendance_rate, present: row.trainings_present, count: row.trainings })}</span>
+        </span>
+      )}
     </span>
+  );
+}
+
+/** Who did not react at all (past events without any answer) – for trainers and admins. */
+function NoReaction({ rows }: { rows: StatisticsRow[] }) {
+  const { t } = useTranslation();
+  const list = rows.filter((row) => row.no_reaction > 0).sort((a, b) => b.no_reaction - a.no_reaction);
+
+  return (
+    <Card title={t('stats.noReactionTitle')}>
+      <p className="mb-2 text-xs text-slate-500">{t('stats.noReactionHint')}</p>
+      {list.length === 0 ? (
+        <p className="text-sm text-slate-500">{t('stats.noReactionNone')}</p>
+      ) : (
+        <ul className="divide-y divide-slate-100">
+          {list.map((row) => (
+            <li key={row.person.id} className="flex items-baseline justify-between gap-3 py-2 text-sm">
+              <span className="min-w-0 truncate">{row.person.name}</span>
+              <span className="shrink-0 rounded-full bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-800">
+                {t('stats.noReactionOf', { count: row.no_reaction, invited: row.invited })}
+              </span>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
   );
 }
 
@@ -208,10 +245,15 @@ function History({ team, personId, qs }: { team: Team; personId: string; qs: str
             <span className="block text-xs text-slate-500">
               {row.responded_at ? t('stats.answeredAt', { date: formatDateTime(row.responded_at) }) : t('stats.noAnswer')}
               {row.after_deadline && ` · ${t('stats.afterDeadline')}`}
+              {row.attended !== null && (
+                <span className={row.attended ? 'text-emerald-700' : 'text-slate-600'}>
+                  {' · '}{row.attended ? t('stats.present') : t('stats.absent')}{row.attendance_recorded ? '' : ` (${t('stats.byReply')})`}
+                </span>
+              )}
             </span>
           </Link>
-          <span className="shrink-0 text-xs">
-            {row.status ? `${STATUS_ICON[row.status]} ${t(`events.status.${row.status}`)}` : '–'}
+          <span className={`shrink-0 text-xs ${row.status ? '' : 'font-medium text-red-700'}`}>
+            {row.status ? `${STATUS_ICON[row.status]} ${t(`events.status.${row.status}`)}` : t('stats.noReactionShort')}
           </span>
         </li>
       ))}

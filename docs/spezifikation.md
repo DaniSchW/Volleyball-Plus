@@ -172,3 +172,7 @@ Dies ist der aktuelle Stand des Brainstormings und kann in weiteren Iterationen 
 Positionen in der Rückmeldeliste: Bei den Spielern im Termin steht ihre Position als Kürzel, damit der Trainer schnell sieht, wer auf welcher Position kommt.
 
 Konto löschen: Jede Person kann ihr ganzes Konto selbst löschen – abgesichert durch erneutes Eintippen der E-Mail-Adresse. Plattform-Admins können gesperrte Vereine endgültig löschen.
+
+Für mehrere Termine antworten: Ein Spieler kann für eine Terminart oder eine Trainingsreihe auf einmal zu- oder absagen, auch nur für bestimmte Wochentage („mittwochs kann ich immer, freitags nie“). Danach lassen sich einzelne Termine wieder anders beantworten.
+
+Nicht reagiert und Anwesenheit: Wer zu einem Termin bis zur Frist nicht reagiert hat, wird extra markiert und in der Statistik ausgewertet. Die Statistik zeigt außerdem die Anwesenheit im Training in Prozent; dazu können Trainer und Admins bei vergangenen Terminen Antworten und Anwesenheit nachtragen.

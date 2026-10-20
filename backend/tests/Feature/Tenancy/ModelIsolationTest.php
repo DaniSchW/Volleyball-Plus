@@ -38,6 +38,7 @@ use App\Models\PollOption;
 use App\Models\PollTeam;
 use App\Models\PollVote;
 use App\Models\RefereeLicense;
+use App\Models\RsvpRule;
 use App\Models\StoredFile;
 use App\Models\Task;
 use App\Models\TaskAssignment;
@@ -64,7 +65,8 @@ class ModelIsolationTest extends TestCase
         Event::class, EventSeries::class, EventTeam::class, EventInvitee::class, EventResponse::class,
         EventResponseLog::class, Opponent::class, Notice::class, CalendarFeed::class,
         NotificationPreference::class, League::class, CrossNomination::class, TrainingGroup::class, TrainingGroupMember::class,
-        RefereeLicense::class, Task::class, TaskAssignment::class, Poll::class, PollTeam::class, PollOption::class, PollVote::class,
+        RefereeLicense::class,
+        RsvpRule::class, Task::class, TaskAssignment::class, Poll::class, PollTeam::class, PollOption::class, PollVote::class,
         Chat::class, ChatAttachment::class, ChatMember::class, ChatTopic::class, ChatMessage::class, ChatReadState::class,
         ActivityLog::class, CashBook::class, CashEntry::class, Hall::class, HallSlot::class, HallBooking::class,
     ];
@@ -138,6 +140,7 @@ class ModelIsolationTest extends TestCase
             HallSlot::create(['hall_id' => $hall->id, 'weekday' => 2, 'start_time' => '18:00:00', 'end_time' => '22:00:00']);
             HallBooking::create(['hall_id' => $hall->id, 'team_id' => $team->id, 'weekday' => 2, 'start_time' => '19:30:00', 'end_time' => '21:30:00']);
             NotificationPreference::create(['tenant_member_id' => $member->id, 'category' => 'notice', 'push' => false, 'email' => false]);
+            RsvpRule::create(['person_id' => $person->id, 'team_id' => $team->id, 'event_type' => 'training', 'weekdays' => [3], 'status' => 'yes', 'created_by' => $member->id]);
         });
 
         $this->inTenant($a, function () use ($a) {

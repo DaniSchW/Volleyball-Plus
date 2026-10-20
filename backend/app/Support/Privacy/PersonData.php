@@ -20,6 +20,7 @@ use App\Models\Poll;
 use App\Models\PollOption;
 use App\Models\PollVote;
 use App\Models\RefereeLicense;
+use App\Models\RsvpRule;
 use App\Models\Task;
 use App\Models\TaskAssignment;
 use App\Models\TeamMembership;
@@ -128,6 +129,7 @@ class PersonData
             EventInvitee::query()->where('person_id', $person->id)->delete();
             TaskAssignment::query()->where('person_id', $person->id)->delete();
             PollVote::query()->where('person_id', $person->id)->delete();
+            RsvpRule::query()->where('person_id', $person->id)->delete();
             RefereeLicense::query()->where('person_id', $person->id)->delete();
             MinorPermission::query()->where('person_id', $person->id)->delete();
             InvitationUse::query()->where('person_id', $person->id)->update(['person_id' => null]);

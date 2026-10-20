@@ -390,7 +390,18 @@
     "guestsPositionsOnlyInfo": "Guests can only accept on missing positions.",
     "takeIdealSquad": "Use the team’s ideal squad",
     "idealSquad": "Wanted for guests (ideal squad)",
-    "idealSquadInfo": "Guests can only accept as long as their position has a place here."
+    "idealSquadInfo": "Guests can only accept as long as their position has a place here.",
+    "noReaction": "No reaction",
+    "correct": "Correct",
+    "correctTitle": "Correct replies and attendance",
+    "correctHint": "Ticked = was there (preset with the acceptances). Replies can be changed afterwards, too – both count for the statistics.",
+    "correctDone": "Done",
+    "saveAttendance": "Save attendance",
+    "attendanceRecordedAt": "Attendance recorded on {{date}}",
+    "attendanceNotRecorded": "Attendance not recorded yet – until then an acceptance counts as present.",
+    "present": "there",
+    "absent": "absent",
+    "replyOf": "Reply of {{name}}"
   },
   "notifications": {
     "title": "Notifications",
@@ -507,7 +518,18 @@
     "tasksOwn": "Your tasks taken",
     "tasksNone": "No tasks taken in this period.",
     "tasksCount": "{{helper}} helper service · {{other}} other",
-    "pageHint": "Acceptance rates and tasks taken are shown per team. Trainers see all players, players only themselves."
+    "pageHint": "Acceptance rates and tasks taken are shown per team. Trainers see all players, players only themselves.",
+    "noReaction_one": "{{count}}× no reaction",
+    "noReaction_other": "{{count}}× no reaction",
+    "noReactionShort": "no reaction",
+    "noReactionTitle": "No reaction",
+    "noReactionHint": "Events in the period that were not answered at all.",
+    "noReactionNone": "Everybody reacted.",
+    "noReactionOf": "{{count}} of {{invited}}",
+    "attendance": "Training: {{rate}} % there ({{present}} of {{count}})",
+    "present": "there",
+    "absent": "absent",
+    "byReply": "by reply"
   },
   "import": {
     "open": "Import schedule",
@@ -848,5 +870,31 @@
     "outside": "OH",
     "libero": "L",
     "universal": "U"
+  },
+  "rules": {
+    "title": "Answer several events",
+    "link": "Answer several events (e.g. always on Wednesdays)",
+    "intro": "Accept or decline many events at once, e.g. “Wednesday trainings: yes, Friday: no”. Applies to all upcoming matching events and automatically to new ones. You can still answer single events differently at any time.",
+    "new": "New standing reply",
+    "person": "For",
+    "team": "Team",
+    "allTeams": "All teams",
+    "what": "Which events",
+    "allTypes": "All event types",
+    "series": "Series: {{title}} ({{days}} {{time}})",
+    "weekdays": "Weekdays",
+    "weekdaysHint": "None chosen = every day.",
+    "answer": "Answer",
+    "reason": "Reason",
+    "reasonHint": "Entered as reason for every event (some teams require one).",
+    "overwrite": "Also change events already answered",
+    "save": "Answer all matching events",
+    "applied_one": "{{count}} event answered.",
+    "applied_other": "{{count}} events answered.",
+    "active": "Your standing replies",
+    "none": "No standing replies yet.",
+    "delete": "Remove standing reply",
+    "deleteHint": "Removing ends the standing reply for new events; answers already entered stay.",
+    "noPersons": "Your account has no profile you can answer for."
   }
 }

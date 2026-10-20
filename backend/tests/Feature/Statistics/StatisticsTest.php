@@ -138,4 +138,33 @@ class StatisticsTest extends TestCase
         $this->loginAs($this->paul)->getJson($url)->assertForbidden();
         $this->loginAs($this->organizer)->getJson($url)->assertForbidden();
     }
+
+    public function test_trainers_record_attendance_and_correct_past_replies(): void
+    {
+        $url = "/api/v1/t/ssv-ulm/events/{$this->events['t1']}";
+        // Not recorded yet: whoever accepted counts as present.
+        $rows = collect($this->loginAs($this->trainer)->getJson($url)->assertJsonPath('data.can_record_attendance', true)->json('data.responses'))->keyBy('person.name');
+        $this->assertSame([true, true], [$rows['Paul Spieler']['attended'], $rows['Mia Mit']['attended']]);
+        $this->assertFalse($this->loginAs($this->paul)->getJson($url)->json('data.can_record_attendance'));
+
+        // Mia accepted but did not come.
+        $present = ['present' => [$this->personOf($this->paul)->id]];
+        $this->loginAs($this->organizer)->putJson("{$url}/attendance", $present)->assertForbidden();
+        $this->loginAs($this->paul)->putJson("{$url}/attendance", $present)->assertForbidden();
+        $this->loginAs($this->trainer)->putJson("/api/v1/t/ssv-ulm/events/{$this->events['future']}/attendance", $present)->assertUnprocessable();
+        $rows = collect($this->loginAs($this->trainer)->putJson("{$url}/attendance", $present)->assertOk()->json('data.responses'))->keyBy('person.name');
+        $this->assertSame([true, false], [$rows['Paul Spieler']['attended'], $rows['Mia Mit']['attended']]);
+
+        // A past decline corrected by the trainer (no reason needed): Mia was there after all.
+        $this->loginAs($this->trainer)->postJson("/api/v1/t/ssv-ulm/events/{$this->events['t2']}/responses", [
+            'person_id' => $this->personOf($this->mia)->id, 'status' => 'yes',
+        ])->assertOk();
+
+        $rows = collect($this->loginAs($this->trainer)->getJson("/api/v1/t/ssv-ulm/teams/{$this->team->id}/statistics?types[]=training")->json('data.rows'))->keyBy('person.name');
+        $this->assertSame([2, 2, 100, 0], [$rows['Paul Spieler']['trainings'], $rows['Paul Spieler']['trainings_present'], $rows['Paul Spieler']['attendance_rate'], $rows['Paul Spieler']['no_reaction']]);
+        $this->assertSame([2, 1, 50], [$rows['Mia Mit']['trainings'], $rows['Mia Mit']['trainings_present'], $rows['Mia Mit']['attendance_rate']]);
+
+        $history = $this->loginAs($this->trainer)->getJson("/api/v1/t/ssv-ulm/teams/{$this->team->id}/statistics/persons/{$this->personOf($this->mia)->id}?types[]=training")->json('data');
+        $this->assertSame([[true, false], [false, true]], array_map(fn ($h) => [$h['attended'], $h['attendance_recorded']], $history));
+    }
 }

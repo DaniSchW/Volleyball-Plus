@@ -44,14 +44,20 @@ class InviteeSync
             ->whereNotIn('person_id', $should->keys())
             ->delete();
 
+        $new = [];
         foreach ($should as $personId => $source) {
             $invitee = $existing->get($personId);
             if ($invitee === null) {
-                EventInvitee::query()->firstOrCreate(['event_id' => $event->id, 'person_id' => $personId], ['source' => $source]);
+                if (EventInvitee::query()->firstOrCreate(['event_id' => $event->id, 'person_id' => $personId], ['source' => $source])->wasRecentlyCreated) {
+                    $new[] = $personId;
+                }
             } elseif ($invitee->source !== $source) {
                 $invitee->forceFill(['source' => $source])->save();
             }
         }
+
+        // Standing replies ("always yes on Wednesdays") answer the new invitations.
+        app(RsvpRules::class)->applyToNewInvitees($event, $new);
     }
 
     /** After a roster or hierarchy change: all upcoming events of these teams. */

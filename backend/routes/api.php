@@ -15,6 +15,7 @@ use App\Http\Controllers\Api\HallController;
 use App\Http\Controllers\Api\HealthController;
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\LeagueController;
+use App\Http\Controllers\Api\LegalController;
 use App\Http\Controllers\Api\LogoController;
 use App\Http\Controllers\Api\MatchImportController;
 use App\Http\Controllers\Api\MemberController;
@@ -40,6 +41,8 @@ Route::post('auth/consume', [AuthController::class, 'consume'])->middleware('thr
 // Start page: login without a club in the URL, registration of a new club.
 Route::post('auth/login', [AuthController::class, 'requestGlobalLink']);
 Route::post('clubs/register', [PlatformController::class, 'register'])->middleware('throttle:5,60');
+// Imprint, privacy policy, terms: operator data (public).
+Route::get('legal', [LegalController::class, 'show']);
 
 // The account across departments.
 Route::middleware('auth')->group(function () {
@@ -57,6 +60,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('platform/clubs/{id}', [PlatformController::class, 'reject']);
     Route::post('platform/clubs/{id}/delete', [PlatformController::class, 'destroy']);
     Route::get('platform/accounts', [AccountAdminController::class, 'index']);
+    Route::put('platform/legal', [LegalController::class, 'update']);
     Route::post('platform/accounts/{id}/delete', [AccountAdminController::class, 'destroy']);
 
     Route::get('push/key', [PushController::class, 'key']);

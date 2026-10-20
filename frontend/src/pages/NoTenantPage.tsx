@@ -5,6 +5,7 @@ import { Link, Navigate } from 'react-router';
 import { errorText, post } from '../lib/api';
 import { useAccount } from '../lib/queries';
 import { Button, Field, Loading, Notice } from '../components/ui';
+import { LegalLinks } from '../components/LegalLinks';
 
 /**
  * Start page of the platform: logged in → the account's clubs (one club:
@@ -66,6 +67,7 @@ export function NoTenantPage() {
           {t('start.register')}
         </Link>
       </div>
+      <LegalLinks />
     </div>
   );
 }

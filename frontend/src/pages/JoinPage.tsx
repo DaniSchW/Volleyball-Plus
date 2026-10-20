@@ -1,7 +1,8 @@
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useTranslation } from 'react-i18next';
-import { useNavigate, useParams } from 'react-router';
+import { Trans, useTranslation } from 'react-i18next';
+import { Link, useNavigate, useParams } from 'react-router';
+import { LegalLinks } from '../components/LegalLinks';
 import { api, errorText, post, type PublicInvitation } from '../lib/api';
 import { useAccount, useTenantSlug } from '../lib/queries';
 import { Button, Field, Loading, Notice, Select } from '../components/ui';
@@ -145,8 +146,12 @@ export function JoinPage() {
           <Button type="submit" className="w-full" disabled={accept.isPending}>
             {t('join.submit')}
           </Button>
+          <p className="text-xs text-slate-500">
+            <Trans i18nKey="join.acceptTerms" components={{ terms: <Link to="/agb" className="text-brand-700 underline" target="_blank" rel="noreferrer" />, privacy: <Link to="/datenschutz" className="text-brand-700 underline" target="_blank" rel="noreferrer" /> }} />
+          </p>
         </form>
       )}
+      <LegalLinks />
     </div>
   );
 }

@@ -94,7 +94,8 @@
     "emailHint": "Wir schicken dir einen Link, um die Adresse zu bestätigen.",
     "submit": "Beitreten",
     "adminHeading": "Einladung als Admin – {{tenant}}",
-    "departmentHeading": "Einladung zu {{tenant}}"
+    "departmentHeading": "Einladung zu {{tenant}}",
+    "acceptTerms": "Mit dem Beitritt gelten die <terms>AGB</terms>; wie wir mit deinen Daten umgehen, steht in der <privacy>Datenschutzerklärung</privacy>."
   },
   "teams": {
     "none": "Noch keine Teams.",
@@ -219,7 +220,10 @@
     "deleteAccountChildren": "Die Profile deiner Kinder bleiben im Verein, du hast aber keinen Zugriff mehr darauf.",
     "deleteAccountKept": "Chatnachrichten und Kassenbuchungen bleiben ohne deinen Namen erhalten.",
     "deleteAccountConfirm": "Zur Bestätigung deine E-Mail-Adresse eingeben ({{email}})",
-    "deleteAccountButton": "Konto endgültig löschen"
+    "deleteAccountButton": "Konto endgültig löschen",
+    "marketing": "Neuigkeiten per E-Mail",
+    "marketingLabel": "Ich möchte Neuigkeiten und Angebote rund um VolleyOrga per E-Mail erhalten",
+    "marketingHint": "Freiwillig und jederzeit hier abbestellbar – ohne Haken bekommst du nur E-Mails, die zur Nutzung gehören (Anmeldelinks, Benachrichtigungen). Siehe <terms>AGB § 8</terms> und <privacy>Datenschutz</privacy>."
   },
   "child": {
     "title": "Was darf das Kind selbst?",
@@ -820,7 +824,8 @@
     "gender": "Geschlecht",
     "note": "Nachricht an uns (optional)",
     "accept": "Ich bin berechtigt, die Volleyballabteilung dieses Vereins anzumelden, und bin mit der Speicherung der Angaben einverstanden.",
-    "submit": "Registrierung absenden"
+    "submit": "Registrierung absenden",
+    "acceptTerms": "Ich bin berechtigt, die Volleyballabteilung dieses Vereins anzumelden, und akzeptiere die <terms>AGB einschließlich Auftragsverarbeitung</terms> sowie die <privacy>Datenschutzerklärung</privacy>."
   },
   "platform": {
     "title": "Plattform-Verwaltung",
@@ -843,7 +848,8 @@
     "deleteConfirm": "„{{name}}“ mit allen Daten endgültig löschen? Zur Bestätigung das Kürzel „{{slug}}“ eingeben:",
     "tabs": {
       "clubs": "Vereine",
-      "accounts": "Konten"
+      "accounts": "Konten",
+      "legal": "Rechtliches"
     },
     "accounts": {
       "hint": "Alle Konten der Plattform. Konten, die über 2 Jahre nicht genutzt wurden, bekommen automatisch eine E-Mail und werden 14 Tage später gelöscht (außer dem einzigen Admin eines Vereins).",
@@ -852,7 +858,8 @@
       "filters": {
         "all": "Alle",
         "inactive": "Über 2 Jahre nicht genutzt",
-        "warned": "Löschung angekündigt"
+        "warned": "Löschung angekündigt",
+        "marketing": "Werbung erlaubt"
       },
       "title_one": "{{count}} Konto",
       "title_other": "{{count}} Konten",
@@ -866,7 +873,24 @@
       "deletionDue": "Löschung angekündigt – fällig am {{date}}",
       "delete": "Löschen",
       "deleteConfirm": "Konto {{email}} mit allen Profildaten in allen Vereinen löschen? Zur Bestätigung die E-Mail-Adresse eingeben:",
-      "page": "Seite {{page}} von {{of}}"
+      "page": "Seite {{page}} von {{of}}",
+      "marketingSince": "Werbe-E-Mails erlaubt seit {{date}}"
+    },
+    "legal": {
+      "title": "Angaben für Impressum, Datenschutz und AGB",
+      "hint": "Diese Angaben erscheinen im Impressum, in der Datenschutzerklärung und in den AGB. Pflicht: Name, Anschrift und E-Mail.",
+      "fields": {
+        "name": "Name (Vor- und Nachname)",
+        "company": "Firma (optional)",
+        "street": "Straße und Hausnummer",
+        "postal_code": "PLZ",
+        "city": "Ort",
+        "country": "Land",
+        "email": "E-Mail",
+        "phone": "Telefon",
+        "vat_id": "USt-IdNr. (falls vorhanden)"
+      },
+      "disclaimer": "Die Texte sind eine sorgfältige Vorlage, aber keine Rechtsberatung. Lass sie vor dem Start am besten von einer Fachperson prüfen."
     }
   },
   "activity": {
@@ -956,5 +980,15 @@
     "edit": "„{{title}}“ bearbeiten",
     "delete": "Löschen",
     "deleteConfirm": "„{{title}}“ endgültig löschen?"
+  },
+  "legal": {
+    "imprint": "Impressum",
+    "privacy": "Datenschutz",
+    "terms": "AGB",
+    "links": "Rechtliches",
+    "back": "Zurück",
+    "updated": "Stand: {{date}}",
+    "germanOnly": "Die rechtlichen Texte sind nur auf Deutsch verbindlich.",
+    "incomplete": "Die Angaben zum Betreiber sind noch nicht vollständig eingetragen."
   }
 }

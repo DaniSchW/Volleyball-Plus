@@ -1,10 +1,10 @@
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router';
-import { api, del, errorText, post, type SessionInfo } from '../lib/api';
+import { api, del, errorText, patch, post, type SessionInfo } from '../lib/api';
 import { useAccount, useTenantMe, useTenantSlug } from '../lib/queries';
-import { Button, Card, Field, Loading, Notice, PageTitle } from '../components/ui';
+import { Button, Card, Field, Loading, Notice, PageTitle, Toggle } from '../components/ui';
 import { NotificationsCard } from '../components/NotificationsCard';
 import { forgetPushOnLogout } from '../lib/push';
 import { ShareLink } from './TeamPage';
@@ -64,6 +64,8 @@ export function ProfilePage() {
 
       <CalendarCard />
 
+      <MarketingCard optIn={!!account.data?.marketing_opt_in} />
+
       <Card title={t('profile.devices')}>
         <p className="mb-2 text-xs text-slate-500">{t('profile.devicesHint', { email: account.data?.email })}</p>
         <ul className="divide-y divide-slate-100">
@@ -89,6 +91,25 @@ export function ProfilePage() {
 
       <DeleteAccountCard email={account.data?.email ?? ''} />
     </div>
+  );
+}
+
+/** Promotional e-mails only with explicit consent (terms § 8) – off by default, revocable any time. */
+function MarketingCard({ optIn }: { optIn: boolean }) {
+  const { t } = useTranslation();
+  const queryClient = useQueryClient();
+  const save = useMutation({
+    mutationFn: (value: boolean) => patch('/me', { marketing_opt_in: value }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['account'] }),
+  });
+
+  return (
+    <Card title={t('profile.marketing')}>
+      <Toggle label={t('profile.marketingLabel')} checked={optIn} disabled={save.isPending} onChange={(value) => save.mutate(value)} />
+      <p className="mt-1 text-xs text-slate-500">
+        <Trans i18nKey="profile.marketingHint" components={{ terms: <Link to="/agb" className="text-brand-700 underline" />, privacy: <Link to="/datenschutz" className="text-brand-700 underline" /> }} />
+      </p>
+    </Card>
   );
 }
 

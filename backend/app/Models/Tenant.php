@@ -33,7 +33,7 @@ class Tenant extends Model
     /** Paths at the top level of the app that can never be a club's slug. */
     public const RESERVED_SLUGS = [
         'api', 'app', 'assets', 'cron', 'icons', 'install', 'login', 'logout', 'platform', 'plattform',
-        'register', 'registrieren', 'admin', 'sw', 'manifest', 'workbox', 'favicon', 'robots', 'up', 'health',
+        'register', 'registrieren', 'admin', 'impressum', 'datenschutz', 'agb', 'imprint', 'privacy', 'terms', 'sw', 'manifest', 'workbox', 'favicon', 'robots', 'up', 'health',
     ];
 
     protected $attributes = [

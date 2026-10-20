@@ -97,7 +97,23 @@ export interface Account {
   is_platform_admin: boolean;
   /** SUPERADMIN_EMAILS: also sees and deletes all accounts. */
   is_superadmin: boolean;
+  /** Consent to promotional e-mails. */
+  marketing_opt_in: boolean;
   tenants: { slug: string; name: string }[];
+}
+
+export interface LegalDetails {
+  name: string | null;
+  company: string | null;
+  street: string | null;
+  postal_code: string | null;
+  city: string | null;
+  country: string | null;
+  email: string | null;
+  phone: string | null;
+  vat_id: string | null;
+  updated_on: string | null;
+  complete: boolean;
 }
 
 export interface PlatformAccount {
@@ -107,6 +123,7 @@ export interface PlatformAccount {
   last_active_at: string | null;
   deletion_warned_at: string | null;
   deletion_due_at: string | null;
+  marketing_opt_in_at: string | null;
   is_platform_admin: boolean;
   is_superadmin: boolean;
   clubs: { name: string; slug: string; is_admin: boolean; active: boolean }[];

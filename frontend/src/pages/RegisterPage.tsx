@@ -1,6 +1,7 @@
+import { LegalLinks } from '../components/LegalLinks';
 import { useState, type FormEvent } from 'react';
 import { useMutation } from '@tanstack/react-query';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { ApiError, errorText, post } from '../lib/api';
 import { Button, Field, Notice, Select } from '../components/ui';
@@ -87,12 +88,15 @@ export function RegisterPage() {
           <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" value={form.website} onChange={(e) => set('website', e.target.value)} />
           <label className="flex items-start gap-3 text-sm">
             <input type="checkbox" required className="mt-0.5 size-5 shrink-0 accent-brand-700" checked={form.accept} onChange={(e) => set('accept', e.target.checked)} />
-            <span>{t('register.accept')}</span>
+            <span>
+              <Trans i18nKey="register.acceptTerms" components={{ terms: <Link to="/agb" className="text-brand-700 underline" target="_blank" rel="noreferrer" />, privacy: <Link to="/datenschutz" className="text-brand-700 underline" target="_blank" rel="noreferrer" /> }} />
+            </span>
           </label>
           {register.isError && !fieldError('slug') && <Notice tone="error">{errorText(register.error, t('errors.generic'))}</Notice>}
           <Button type="submit" className="w-full" disabled={register.isPending}>{t('register.submit')}</Button>
         </form>
       )}
+      <LegalLinks />
     </div>
   );
 }

@@ -813,6 +813,30 @@ describe('notice expiry', () => {
   });
 });
 
+describe('legal pages', () => {
+  const legal = {
+    name: 'Erika Muster', company: null, street: 'Musterweg 1', postal_code: '89073', city: 'Ulm', country: 'Deutschland',
+    email: 'service@example.org', phone: null, vat_id: null, updated_on: '2026-10-20', complete: true,
+  };
+
+  it('shows the imprint with the operator details and links to the other texts', async () => {
+    mockApi({ 'GET /legal': { body: { data: legal } } });
+    renderAt('/impressum');
+    expect(await screen.findByRole('heading', { name: 'Impressum' })).toBeInTheDocument();
+    expect((await screen.findAllByText(/Musterweg 1/)).length).toBeGreaterThan(0);
+    expect(screen.getByRole('link', { name: 'service@example.org' })).toHaveAttribute('href', 'mailto:service@example.org');
+    expect(screen.getByRole('link', { name: 'AGB' })).toHaveAttribute('href', '/agb');
+  });
+
+  it('marks missing details and explains promotional e-mails in the terms', async () => {
+    mockApi({ 'GET /legal': { body: { data: { ...legal, name: null, street: null, complete: false } } } });
+    renderAt('/agb');
+    expect(await screen.findByText('Die Angaben zum Betreiber sind noch nicht vollständig eingetragen.')).toBeInTheDocument();
+    expect(screen.getByText('§ 8 Werbung und E-Mails')).toBeInTheDocument();
+    expect(screen.getByText(/Name des Betreibers – noch nicht eingetragen/)).toBeInTheDocument();
+  });
+});
+
 describe('hall form', () => {
   it('saves address fields and weekly training times', async () => {
     let sent: Record<string, unknown> = {};

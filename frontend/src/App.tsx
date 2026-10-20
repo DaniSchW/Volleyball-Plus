@@ -28,6 +28,7 @@ import { RegisterPage } from './pages/RegisterPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { TeamPage } from './pages/TeamPage';
 import { TeamsPage } from './pages/TeamsPage';
+import { LegalPage } from './pages/LegalPage';
 
 export const routes: RouteObject[] = [
   { path: '/', element: <NoTenantPage /> },
@@ -35,6 +36,9 @@ export const routes: RouteObject[] = [
   { path: '/login/confirm', element: <LoginConfirmPage /> },
   { path: '/register', element: <RegisterPage /> },
   { path: '/platform', element: <PlatformPage /> },
+  { path: '/impressum', element: <LegalPage kind="imprint" /> },
+  { path: '/datenschutz', element: <LegalPage kind="privacy" /> },
+  { path: '/agb', element: <LegalPage kind="terms" /> },
   // Public pages of a department.
   { path: '/:tenant/login', element: <LoginPage /> },
   { path: '/:tenant/login/confirm', element: <LoginConfirmPage /> },

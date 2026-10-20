@@ -5,7 +5,7 @@ import { api, errorText, post, type PlatformAccount } from '../../lib/api';
 import { formatDateTime } from '../../lib/dates';
 import { Button, Card, Field, Loading, Notice } from '../ui';
 
-type Filter = 'all' | 'inactive' | 'warned';
+type Filter = 'all' | 'inactive' | 'warned' | 'marketing';
 type Page = { data: PlatformAccount[]; meta: { total: number; page: number; last_page: number } };
 
 /**
@@ -40,7 +40,7 @@ export function PlatformAccounts({ ownEmail }: { ownEmail: string }) {
       <p className="text-sm text-slate-600">{t('platform.accounts.hint')}</p>
       <Field label={t('platform.accounts.search')} type="search" value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} />
       <div role="group" aria-label={t('platform.accounts.filter')} className="flex flex-wrap gap-2">
-        {(['all', 'inactive', 'warned'] as const).map((value) => (
+        {(['all', 'inactive', 'warned', 'marketing'] as const).map((value) => (
           <button
             key={value}
             type="button"
@@ -76,6 +76,7 @@ export function PlatformAccounts({ ownEmail }: { ownEmail: string }) {
                     <p className="text-xs text-slate-500">
                       {t('platform.accounts.lastActive', { date: a.last_active_at ? formatDateTime(a.last_active_at) : '–' })}
                     </p>
+                    {a.marketing_opt_in_at && <p className="text-xs text-emerald-700">✉️ {t('platform.accounts.marketingSince', { date: formatDateTime(a.marketing_opt_in_at) })}</p>}
                     {a.deletion_due_at && (
                       <p className="text-xs font-medium text-red-700">⚠️ {t('platform.accounts.deletionDue', { date: formatDateTime(a.deletion_due_at) })}</p>
                     )}

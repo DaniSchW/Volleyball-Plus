@@ -1,3 +1,4 @@
+import { LegalLinks } from './LegalLinks';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
@@ -125,6 +126,7 @@ export function AppHeader({ tenantSlug, tenantName, logoUrl, isAdmin, hidden = [
                   ))}
                 </select>
               </label>
+              <LegalLinks className="mt-3 !justify-start" onClick={() => setOpen(false)} />
             </div>
           </nav>
         )}

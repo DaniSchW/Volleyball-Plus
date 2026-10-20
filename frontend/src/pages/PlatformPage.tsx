@@ -7,6 +7,7 @@ import { formatDateTime } from '../lib/dates';
 import { useAccount } from '../lib/queries';
 import { Button, Card, Loading, Notice } from '../components/ui';
 import { PlatformAccounts } from '../components/platform/PlatformAccounts';
+import { LegalForm } from '../components/platform/LegalForm';
 
 /**
  * Platform admins: approve clubs that registered, suspend or reactivate
@@ -16,7 +17,7 @@ export function PlatformPage() {
   const { t } = useTranslation();
   const account = useAccount();
   const queryClient = useQueryClient();
-  const [tab, setTab] = useState<'clubs' | 'accounts'>('clubs');
+  const [tab, setTab] = useState<'clubs' | 'accounts' | 'legal'>('clubs');
   const clubs = useQuery({
     queryKey: ['platform-clubs'],
     queryFn: async () => (await api<{ data: PlatformClub[] }>('/platform/clubs')).data,
@@ -49,7 +50,7 @@ export function PlatformPage() {
       </div>
       {account.data.is_superadmin && (
         <div role="tablist" className="flex gap-1 rounded-lg bg-slate-100 p-1">
-          {(['clubs', 'accounts'] as const).map((value) => (
+          {(['clubs', 'accounts', 'legal'] as const).map((value) => (
             <button
               key={value}
               role="tab"
@@ -64,6 +65,7 @@ export function PlatformPage() {
         </div>
       )}
       {tab === 'accounts' && account.data.is_superadmin && <PlatformAccounts ownEmail={account.data.email} />}
+      {tab === 'legal' && account.data.is_superadmin && <LegalForm />}
       {tab === 'clubs' && action.isError && <Notice tone="error">{errorText(action.error, t('errors.generic'))}</Notice>}
       {destroy.isError && <Notice tone="error">{errorText(destroy.error, t('errors.generic'))}</Notice>}
 

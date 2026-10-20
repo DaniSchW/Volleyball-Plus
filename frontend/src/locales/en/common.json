@@ -94,7 +94,8 @@
     "emailHint": "We will send you a link to confirm the address.",
     "submit": "Join",
     "adminHeading": "Invitation as admin – {{tenant}}",
-    "departmentHeading": "Invitation to {{tenant}}"
+    "departmentHeading": "Invitation to {{tenant}}",
+    "acceptTerms": "Joining means the <terms>terms</terms> apply; how we handle your data is described in the <privacy>privacy policy</privacy>."
   },
   "teams": {
     "none": "No teams yet.",
@@ -219,7 +220,10 @@
     "deleteAccountChildren": "Your children’s profiles stay in the club, but you no longer have access to them.",
     "deleteAccountKept": "Chat messages and cash bookings stay without your name.",
     "deleteAccountConfirm": "Type your e-mail address to confirm ({{email}})",
-    "deleteAccountButton": "Delete account for good"
+    "deleteAccountButton": "Delete account for good",
+    "marketing": "News by e-mail",
+    "marketingLabel": "I want to receive news and offers about VolleyOrga by e-mail",
+    "marketingHint": "Voluntary and revocable here at any time – without it you only get e-mails that belong to using the app (login links, notifications). See <terms>terms § 8</terms> and <privacy>privacy</privacy>."
   },
   "child": {
     "title": "What may the child do by itself?",
@@ -820,7 +824,8 @@
     "gender": "Gender",
     "note": "Message to us (optional)",
     "accept": "I am entitled to register this club's volleyball department and agree to the storage of the data.",
-    "submit": "Send registration"
+    "submit": "Send registration",
+    "acceptTerms": "I am authorised to register this club’s volleyball department and accept the <terms>terms including data processing</terms> and the <privacy>privacy policy</privacy>."
   },
   "platform": {
     "title": "Platform administration",
@@ -843,7 +848,8 @@
     "deleteConfirm": "Delete “{{name}}” with all data for good? Type the short name “{{slug}}” to confirm:",
     "tabs": {
       "clubs": "Clubs",
-      "accounts": "Accounts"
+      "accounts": "Accounts",
+      "legal": "Legal"
     },
     "accounts": {
       "hint": "All accounts of the platform. Accounts unused for more than 2 years automatically get an e-mail and are deleted 14 days later (except the only admin of a club).",
@@ -852,7 +858,8 @@
       "filters": {
         "all": "All",
         "inactive": "Unused for over 2 years",
-        "warned": "Deletion announced"
+        "warned": "Deletion announced",
+        "marketing": "Marketing allowed"
       },
       "title_one": "{{count}} account",
       "title_other": "{{count}} accounts",
@@ -866,7 +873,24 @@
       "deletionDue": "Deletion announced – due {{date}}",
       "delete": "Delete",
       "deleteConfirm": "Delete account {{email}} with all profile data in all clubs? Type the e-mail address to confirm:",
-      "page": "Page {{page}} of {{of}}"
+      "page": "Page {{page}} of {{of}}",
+      "marketingSince": "Marketing e-mails allowed since {{date}}"
+    },
+    "legal": {
+      "title": "Details for imprint, privacy policy and terms",
+      "hint": "These details appear in the imprint, the privacy policy and the terms. Required: name, address and e-mail.",
+      "fields": {
+        "name": "Name (first and last name)",
+        "company": "Company (optional)",
+        "street": "Street and number",
+        "postal_code": "Postcode",
+        "city": "City",
+        "country": "Country",
+        "email": "E-mail",
+        "phone": "Phone",
+        "vat_id": "VAT ID (if any)"
+      },
+      "disclaimer": "The texts are a careful template, but no legal advice. Best have them checked by an expert before going live."
     }
   },
   "activity": {
@@ -956,5 +980,15 @@
     "edit": "Edit “{{title}}”",
     "delete": "Delete",
     "deleteConfirm": "Delete “{{title}}” for good?"
+  },
+  "legal": {
+    "imprint": "Imprint",
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "links": "Legal",
+    "back": "Back",
+    "updated": "As of {{date}}",
+    "germanOnly": "The legal texts are only binding in German.",
+    "incomplete": "The operator details have not been entered completely yet."
   }
 }

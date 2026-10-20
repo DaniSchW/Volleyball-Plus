@@ -180,3 +180,5 @@ Nicht reagiert und Anwesenheit: Wer zu einem Termin bis zur Frist nicht reagiert
 Dokumentenablage: Es gibt eine Ablage für Dokumente, übergeordnet für den ganzen Verein (z. B. die Vereinsmeldung als PDF, für alle sichtbar) und je Mannschaft (z. B. die Aufbauanleitung für den Spieltag nur in Herren 1). Dokumente lassen sich in Ordner sortieren.
 
 Superadmin und Kontenpflege: Der Betreiber hat eine Superadmin-Oberfläche mit allen Konten und kann Konten bei Bedarf löschen. Ein Konto, das insgesamt länger als 2 Jahre nicht genutzt wurde, bekommt eine E-Mail, dass es in 14 Tagen gelöscht wird; wer sich vorher anmeldet, behält es.
+
+Rechtliches: Impressum, Datenschutzerklärung und AGB sind von jeder Seite erreichbar; die Betreiberangaben pflegt der Superadmin. Die AGB regeln auch Werbung: Werbe-E-Mails gibt es nur mit ausdrücklicher Einwilligung im Profil.

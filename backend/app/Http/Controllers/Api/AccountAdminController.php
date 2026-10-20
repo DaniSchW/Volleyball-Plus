@@ -22,7 +22,7 @@ class AccountAdminController extends Controller
         $this->authorizeSuperadmin($request);
         $data = $request->validate([
             'search' => ['nullable', 'string', 'max:100'],
-            'filter' => ['nullable', 'in:all,inactive,warned'],
+            'filter' => ['nullable', 'in:all,inactive,warned,marketing'],
             'page' => ['nullable', 'integer', 'min:1'],
         ]);
         $inactiveSince = now()->subDays((int) config('platform.inactive_after_days'));
@@ -32,6 +32,7 @@ class AccountAdminController extends Controller
             ->when($data['search'] ?? null, fn ($q, $search) => $q->where('email', 'like', '%'.mb_strtolower($search).'%'))
             ->when(($data['filter'] ?? 'all') === 'inactive', fn ($q) => $q->where('last_active_at', '<', $inactiveSince))
             ->when(($data['filter'] ?? 'all') === 'warned', fn ($q) => $q->whereNotNull('deletion_warned_at'))
+            ->when(($data['filter'] ?? 'all') === 'marketing', fn ($q) => $q->whereNotNull('marketing_opt_in_at'))
             ->orderBy('email')
             ->paginate(50);
 
@@ -49,6 +50,7 @@ class AccountAdminController extends Controller
                 'last_active_at' => $a->last_active_at?->toIso8601ZuluString(),
                 'deletion_warned_at' => $a->deletion_warned_at?->toIso8601ZuluString(),
                 'deletion_due_at' => $a->deletion_warned_at?->copy()->addDays((int) config('platform.deletion_notice_days'))->toIso8601ZuluString(),
+                'marketing_opt_in_at' => $a->marketing_opt_in_at?->toIso8601ZuluString(),
                 'is_platform_admin' => (bool) $a->is_platform_admin,
                 'is_superadmin' => $a->isSuperadmin(),
                 'clubs' => ($members[$a->id] ?? collect())->map(fn ($m) => [

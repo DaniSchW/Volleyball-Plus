@@ -459,3 +459,5 @@ erDiagram
 - `event_invitees`: `attended` bool null (null = nicht erfasst, dann zählt eine Zusage); `events`: `attendance_recorded_at`.
 - 🏢 `documents` ✅: `team_id` null (null = für alle), `folder` (80) null, `title` (160), `description` null, `file_id` (→ `files`, `purpose = document`), `name` (Dateiname), `uploaded_by` (Mitglied), Zeitstempel.
 - `accounts`: `last_active_at` (zuletzt genutzt), `deletion_warned_at` (Löschung wegen Inaktivität angekündigt).
+- `accounts`: `marketing_opt_in_at` (Einwilligung in Werbe-E-Mails, null = keine).
+- `settings` `platform.legal`: Betreiberangaben für Impressum, Datenschutz und AGB.

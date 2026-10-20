@@ -28,6 +28,7 @@ class Account extends Authenticatable
             'last_login_at' => 'datetime',
             'last_active_at' => 'datetime',
             'deletion_warned_at' => 'datetime',
+            'marketing_opt_in_at' => 'datetime',
         ];
     }
 

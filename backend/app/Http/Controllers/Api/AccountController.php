@@ -37,15 +37,26 @@ class AccountController extends Controller
             'locale' => $account->locale,
             'is_platform_admin' => $account->isPlatformAdmin(),
             'is_superadmin' => $account->isSuperadmin(),
+            // Promotional e-mails only with this consent (terms § 8).
+            'marketing_opt_in' => $account->marketing_opt_in_at !== null,
             'tenants' => $tenants->map(fn ($t) => ['slug' => $t->slug, 'name' => $t->name])->all(),
         ]]);
     }
 
     public function update(Request $request): JsonResponse
     {
-        $data = $request->validate(['locale' => ['required', Rule::in(SetLocale::SUPPORTED)]]);
-
-        $request->user()->forceFill(['locale' => $data['locale']])->save();
+        $data = $request->validate([
+            'locale' => ['sometimes', Rule::in(SetLocale::SUPPORTED)],
+            'marketing_opt_in' => ['sometimes', 'boolean'],
+        ]);
+        $account = $request->user();
+        if (isset($data['locale'])) {
+            $account->forceFill(['locale' => $data['locale']]);
+        }
+        if (array_key_exists('marketing_opt_in', $data)) {
+            $account->forceFill(['marketing_opt_in_at' => $data['marketing_opt_in'] ? ($account->marketing_opt_in_at ?? now()) : null]);
+        }
+        $account->save();
 
         return $this->show($request);
     }

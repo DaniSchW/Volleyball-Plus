@@ -1,3 +1,4 @@
+import { LegalLinks } from '../components/LegalLinks';
 import { useState, type FormEvent } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -41,6 +42,7 @@ export function LoginPage() {
         </form>
       )}
       <p className="text-center text-xs text-slate-500">{t('login.inviteOnly')}</p>
+      <LegalLinks />
     </div>
   );
 }

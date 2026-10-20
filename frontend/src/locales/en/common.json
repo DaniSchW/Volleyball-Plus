@@ -1064,5 +1064,13 @@
     "updated": "As of {{date}}",
     "germanOnly": "The legal texts are only binding in German.",
     "incomplete": "The operator details have not been entered completely yet."
+  },
+  "install": {
+    "title": "VolleyOrga as an app",
+    "text": "Install VolleyOrga on your phone – with its own icon on the home screen and push notifications.",
+    "button": "Install app",
+    "later": "Later",
+    "iosStep1": "In Safari tap “Share” at the bottom",
+    "iosStep2": "Choose “Add to Home Screen” – done!"
   }
 }

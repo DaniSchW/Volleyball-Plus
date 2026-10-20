@@ -171,13 +171,15 @@ describe('login', () => {
       'GET /me': { body: ACCOUNT },
       'GET /t/ssv-ulm/me': { body: ME() },
     });
-    const router = renderAt('/ssv-ulm/login/confirm?token=abc');
+    const replace = vi.fn();
+    vi.stubGlobal('location', { ...window.location, replace });
+    renderAt('/ssv-ulm/login/confirm?token=abc');
 
     const button = await screen.findByRole('button', { name: 'Jetzt anmelden' });
     expect(fetchMock.mock.calls.some(([url]) => String(url).endsWith('/auth/consume'))).toBe(false);
 
     fireEvent.click(button);
-    await waitFor(() => expect(router.state.location.pathname).toBe('/ssv-ulm'));
+    await waitFor(() => expect(replace).toHaveBeenCalledWith('/ssv-ulm'));
     const [, init] = fetchMock.mock.calls.find(([url]) => String(url).endsWith('/auth/consume'))!;
     expect(JSON.parse(String((init as RequestInit).body))).toEqual({ token: 'abc' });
   });

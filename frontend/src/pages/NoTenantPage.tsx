@@ -1,3 +1,4 @@
+import { InstallApp } from '../components/InstallApp';
 import { useState, type FormEvent } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -67,6 +68,7 @@ export function NoTenantPage() {
           {t('start.register')}
         </Link>
       </div>
+      <InstallApp />
       <LegalLinks />
     </div>
   );

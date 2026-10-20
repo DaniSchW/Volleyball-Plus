@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate, useSearchParams } from 'react-router';
+import { Link, useSearchParams } from 'react-router';
 import { errorText, post } from '../lib/api';
 import { useTenant, useTenantSlug } from '../lib/queries';
 import { Button, Notice } from '../components/ui';
@@ -14,15 +14,16 @@ export function LoginConfirmPage() {
   const slug = useTenantSlug();
   const tenant = useTenant();
   const [params] = useSearchParams();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
 
   const consume = useMutation({
     mutationFn: () => post<{ data: { tenant: string | null } }>('/auth/consume', { token: params.get('token') ?? '' }),
     onSuccess: async ({ data }) => {
-      await queryClient.invalidateQueries();
+      // Forget everything cached while logged out (e.g. "no account"), so the next page loads fresh.
+      queryClient.clear();
       // Without a club (login from the start page) the start page lists the clubs.
-      navigate(data.tenant ? `/${data.tenant}` : '/', { replace: true });
+      // A full page load (like a manual reload) so the app starts with the new session cookie.
+      window.location.replace(data.tenant ? `/${data.tenant}` : '/');
     },
   });
 

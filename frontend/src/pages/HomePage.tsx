@@ -1,3 +1,4 @@
+import { InstallApp } from '../components/InstallApp';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { EventFeed } from '../components/events/EventFeed';
@@ -24,6 +25,7 @@ export function HomePage() {
         <p className="mt-1 text-2xl font-bold tracking-tight">{greeting}</p>
         <p className="mt-1 text-sm text-white/85">{t('home.tagline')}</p>
       </div>
+      <InstallApp />
       <NoticesArea />
       <OpenPolls />
       <section aria-labelledby="upcoming-heading">

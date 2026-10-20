@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { App } from './App';
 import './i18n';
+// Catch the browser's install offer before React starts.
+import './lib/install';
 import './index.css';
 
 const queryClient = new QueryClient({

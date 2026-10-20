@@ -1064,5 +1064,13 @@
     "updated": "Stand: {{date}}",
     "germanOnly": "Die rechtlichen Texte sind nur auf Deutsch verbindlich.",
     "incomplete": "Die Angaben zum Betreiber sind noch nicht vollständig eingetragen."
+  },
+  "install": {
+    "title": "VolleyOrga als App",
+    "text": "Installiere VolleyOrga auf deinem Handy – mit eigenem Symbol auf dem Startbildschirm und Push-Nachrichten.",
+    "button": "App installieren",
+    "later": "Später",
+    "iosStep1": "In Safari unten auf „Teilen“ tippen",
+    "iosStep2": "„Zum Home-Bildschirm“ wählen – fertig!"
   }
 }

@@ -1,3 +1,4 @@
+import { InstallApp } from '../components/InstallApp';
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trans, useTranslation } from 'react-i18next';
@@ -60,6 +61,7 @@ export function ProfilePage() {
         {me.data?.persons.length === 0 && <p className="text-sm text-slate-500">{t('profile.noProfiles')}</p>}
       </Card>
 
+      <InstallApp always />
       <NotificationsCard />
 
       <CalendarCard />

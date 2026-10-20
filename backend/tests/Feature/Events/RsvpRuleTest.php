@@ -122,4 +122,23 @@ class RsvpRuleTest extends TestCase
         $this->loginAs($other)->deleteJson("/api/v1/t/ssv-ulm/rsvp-rules/{$result['data']['id']}")->assertForbidden();
         $this->loginAs($this->paul)->postJson('/api/v1/t/ssv-ulm/rsvp-rules', ['person_id' => $person, 'status' => 'yes', 'team_id' => 'x'])->assertUnprocessable();
     }
+
+    public function test_a_standing_reply_can_end(): void
+    {
+        $this->event('2026-10-21', data: ['repeat' => ['weekdays' => [3], 'ends_on' => '2026-11-25']]);
+        $person = $this->personOf($this->paul)->id;
+
+        $rule = $this->loginAs($this->paul)->postJson('/api/v1/t/ssv-ulm/rsvp-rules', [
+            'person_id' => $person, 'status' => 'no', 'reason' => 'Verletzt', 'valid_until' => '2026-11-04',
+        ])->assertCreated()->assertJsonPath('applied', 3)->assertJsonPath('data.valid_until', '2026-11-04')->json('data');
+        $this->assertSame(['2026-10-21', '2026-10-28', '2026-11-04'], array_keys($this->answers()));
+
+        // New events after the end are not answered either.
+        $this->event('2026-11-12', data: ['title' => 'Zusatztraining']);
+        $this->assertArrayNotHasKey('2026-11-12', $this->answers());
+
+        $this->loginAs($this->paul)->postJson('/api/v1/t/ssv-ulm/rsvp-rules', ['person_id' => $person, 'status' => 'no', 'valid_until' => '2026-10-01'])->assertUnprocessable();
+        $this->assertSame('2027-06-30', $this->loginAs($this->paul)->getJson('/api/v1/t/ssv-ulm/rsvp-rules')->json('data.season_end'));
+        $this->assertNotNull($rule['id']);
+    }
 }

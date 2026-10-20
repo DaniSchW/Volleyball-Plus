@@ -13,17 +13,18 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * A standing reply of a person ("always yes on Wednesday trainings of
  * Herren 1"). Applied to the matching upcoming events and to new ones
  * when they are created; single events can still be answered differently.
- * Empty filters match everything (team, series, type, weekdays 1 = Monday).
+ * Empty filters match everything (team, series, type, weekdays 1 = Monday);
+ * valid_until (optional, inclusive) ends it, e.g. at the end of the season.
  */
 class RsvpRule extends Model
 {
     use BelongsToTenant, HasUlids;
 
-    protected $fillable = ['person_id', 'team_id', 'series_id', 'event_type', 'weekdays', 'status', 'reason', 'created_by'];
+    protected $fillable = ['person_id', 'team_id', 'series_id', 'event_type', 'weekdays', 'valid_until', 'status', 'reason', 'created_by'];
 
     protected function casts(): array
     {
-        return ['status' => RsvpStatus::class, 'event_type' => EventType::class, 'weekdays' => 'array'];
+        return ['status' => RsvpStatus::class, 'event_type' => EventType::class, 'weekdays' => 'array', 'valid_until' => 'date:Y-m-d'];
     }
 
     /**

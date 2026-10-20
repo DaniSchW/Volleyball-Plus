@@ -97,6 +97,10 @@ class RsvpRules
 
     public function matches(RsvpRule $rule, Event $event): bool
     {
+        $day = $event->starts_at->copy()->setTimezone($this->tenants->get()->timezone);
+        if ($rule->valid_until !== null && $day->toDateString() > $rule->valid_until->toDateString()) {
+            return false;
+        }
         if ($rule->team_id !== null && ! $event->teams->contains('id', $rule->team_id)) {
             return false;
         }
@@ -107,9 +111,7 @@ class RsvpRules
             return false;
         }
         if (! empty($rule->weekdays)) {
-            $weekday = $event->starts_at->copy()->setTimezone($this->tenants->get()->timezone)->dayOfWeekIso;
-
-            return in_array($weekday, array_map('intval', $rule->weekdays), true);
+            return in_array($day->dayOfWeekIso, array_map('intval', $rule->weekdays), true);
         }
 
         return true;

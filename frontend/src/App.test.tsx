@@ -720,7 +720,7 @@ describe('standing replies', () => {
   it('answers all Wednesday trainings at once', async () => {
     let sent: Record<string, unknown> = {};
     const options = {
-      rules: [],
+      rules: [], season_end: '2027-06-30',
       persons: [{ id: 'p1', name: 'Max Muster', teams: [{ id: 't1', name: 'Herren 1', series: [{ id: 's1', title: 'Training', weekdays: [3, 5], start_time: '19:30', end_time: '21:30' }] }] }],
     };
     mockApi({
@@ -734,9 +734,10 @@ describe('standing replies', () => {
     renderAt('/ssv-ulm/replies');
 
     fireEvent.click(await screen.findByRole('button', { name: 'Mi' }));
+    fireEvent.change(screen.getByLabelText('Gilt bis'), { target: { value: 'season' } });
     fireEvent.click(screen.getByRole('button', { name: 'Für alle passenden Termine eintragen' }));
 
-    await waitFor(() => expect(sent).toMatchObject({ person_id: 'p1', status: 'yes', team_id: 't1', event_type: 'training', weekdays: [3], overwrite: true, series_id: null }));
+    await waitFor(() => expect(sent).toMatchObject({ person_id: 'p1', status: 'yes', team_id: 't1', event_type: 'training', weekdays: [3], overwrite: true, series_id: null, valid_until: '2027-06-30' }));
     expect(await screen.findByText('8 Termine beantwortet.')).toBeInTheDocument();
   });
 });

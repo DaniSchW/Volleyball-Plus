@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api, del, errorText, post, type RsvpRule, type RsvpRuleOptions, type RsvpStatus } from '../lib/api';
-import { formatDay, weekdayName } from '../lib/dates';
+import { formatDate, formatDay, weekdayName } from '../lib/dates';
 import { useTenantPath, useTenantSlug } from '../lib/queries';
 import { Button, Card, Field, Loading, Notice, PageTitle, Select, Toggle } from '../components/ui';
 
@@ -101,7 +101,8 @@ function describe(rule: RsvpRule, t: (key: string, o?: Record<string, unknown>) 
     ? `${rule.series.title} (${rule.series.weekdays.map((d) => weekdayName(d, 'short')).join(', ')} ${rule.series.start_time})`
     : rule.event_type ? t(`events.types.${rule.event_type}`) : t('rules.allTypes');
   const days = !rule.series && rule.weekdays?.length ? rule.weekdays.map((d) => weekdayName(d, 'short')).join(', ') : null;
-  return [rule.team?.name ?? t('rules.allTeams'), what, days].filter(Boolean).join(' · ');
+  const until = rule.valid_until ? t('rules.untilShort', { date: formatDate(rule.valid_until) }) : null;
+  return [rule.team?.name ?? t('rules.allTeams'), what, days, until].filter(Boolean).join(' · ');
 }
 
 function RuleForm({ options, onSaved }: { options: RsvpRuleOptions; onSaved: (result: Result) => void }) {
@@ -117,6 +118,10 @@ function RuleForm({ options, onSaved }: { options: RsvpRuleOptions; onSaved: (re
   const [status, setStatus] = useState<RsvpStatus>('yes');
   const [reason, setReason] = useState('');
   const [overwrite, setOverwrite] = useState(true);
+  // '' = no end, 'season' = end of the season, 'date' = own date
+  const [end, setEnd] = useState<'' | 'season' | 'date'>('');
+  const [endDate, setEndDate] = useState('');
+  const validUntil = end === 'season' ? options.season_end : end === 'date' ? endDate || null : null;
   const series = what.startsWith('series:') ? team?.series.find((s) => `series:${s.id}` === what) : undefined;
 
   const save = useMutation({
@@ -128,6 +133,7 @@ function RuleForm({ options, onSaved }: { options: RsvpRuleOptions; onSaved: (re
       series_id: series?.id ?? null,
       event_type: what.startsWith('type:') ? what.slice(5) : null,
       weekdays: series ? [] : weekdays,
+      valid_until: validUntil,
       overwrite,
     }),
     onSuccess: (result) => {
@@ -204,6 +210,14 @@ function RuleForm({ options, onSaved }: { options: RsvpRuleOptions; onSaved: (re
           </div>
         </fieldset>
         {status !== 'yes' && <Field label={t('rules.reason')} maxLength={255} value={reason} onChange={(e) => setReason(e.target.value)} hint={t('rules.reasonHint')} />}
+        <Select label={t('rules.until')} value={end} onChange={(e) => setEnd(e.target.value as typeof end)}>
+          <option value="">{t('rules.untilNone')}</option>
+          <option value="season">{t('rules.untilSeason', { date: formatDate(options.season_end) })}</option>
+          <option value="date">{t('rules.untilDate')}</option>
+        </Select>
+        {end === 'date' && (
+          <Field label={t('rules.untilDateLabel')} type="date" required min={new Date().toISOString().slice(0, 10)} value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+        )}
         <Toggle label={t('rules.overwrite')} checked={overwrite} onChange={setOverwrite} />
         {save.isError && <Notice tone="error">{errorText(save.error, t('errors.generic'))}</Notice>}
         <Button type="submit" className="w-full" disabled={save.isPending}>{t('rules.save')}</Button>

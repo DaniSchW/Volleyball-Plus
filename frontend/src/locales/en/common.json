@@ -978,7 +978,13 @@
     "none": "No standing replies yet.",
     "delete": "Remove standing reply",
     "deleteHint": "Removing ends the standing reply for new events; answers already entered stay.",
-    "noPersons": "Your account has no profile you can answer for."
+    "noPersons": "Your account has no profile you can answer for.",
+    "until": "Valid until",
+    "untilNone": "No end",
+    "untilSeason": "End of season ({{date}})",
+    "untilDate": "Until a date …",
+    "untilDateLabel": "Last day",
+    "untilShort": "until {{date}}"
   },
   "documents": {
     "intro": "Documents for the whole club (e.g. the club registration) and for single teams (e.g. set-up instructions for match days). You see the documents of your teams.",

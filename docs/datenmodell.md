@@ -455,7 +455,7 @@ erDiagram
 - `teams`: `ideal_positions` JSON null (Idealkader: Position → Anzahl, 0 = keine).
 - `halls`: `street` (120), `house_number` (20), `postal_code` (10), `city` (80), alle optional; `address` wird beim Speichern daraus zusammengesetzt.
 - Konto löschen: `accounts.email` wird zu `deleted-<id>@invalid`, Sitzungen, Push-Abos und Anmeldelinks werden gelöscht, `tenant_members.status = disabled`.
-- 🏢 `rsvp_rules` ✅ (Daueranworten): `person_id`, `team_id` null, `series_id` null, `event_type` null, `weekdays` JSON null (1 = Montag), `status`, `reason`, `created_by` (Mitglied).
+- 🏢 `rsvp_rules` ✅ (Daueranworten): `person_id`, `team_id` null, `series_id` null, `event_type` null, `weekdays` JSON null (1 = Montag), `valid_until` date null (Ende, einschließlich), `status`, `reason`, `created_by` (Mitglied).
 - `event_invitees`: `attended` bool null (null = nicht erfasst, dann zählt eine Zusage); `events`: `attendance_recorded_at`.
 - 🏢 `documents` ✅: `team_id` null (null = für alle), `folder` (80) null, `title` (160), `description` null, `file_id` (→ `files`, `purpose = document`), `name` (Dateiname), `uploaded_by` (Mitglied), Zeitstempel.
 - `accounts`: `last_active_at` (zuletzt genutzt), `deletion_warned_at` (Löschung wegen Inaktivität angekündigt).

@@ -978,7 +978,13 @@
     "none": "Noch keine Daueranworten.",
     "delete": "Daueranwort entfernen",
     "deleteHint": "Entfernen beendet die Daueranwort für neue Termine; bereits eingetragene Antworten bleiben.",
-    "noPersons": "Für dein Konto gibt es kein Profil, für das du antworten kannst."
+    "noPersons": "Für dein Konto gibt es kein Profil, für das du antworten kannst.",
+    "until": "Gilt bis",
+    "untilNone": "Ohne Ende",
+    "untilSeason": "Saisonende ({{date}})",
+    "untilDate": "Bis zu einem Datum …",
+    "untilDateLabel": "Letzter Tag",
+    "untilShort": "bis {{date}}"
   },
   "documents": {
     "intro": "Dokumente für den ganzen Verein (z. B. Vereinsmeldung) und für einzelne Mannschaften (z. B. Aufbauanleitung für den Spieltag). Du siehst die Dokumente deiner Teams.",

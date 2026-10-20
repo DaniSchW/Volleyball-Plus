@@ -14,6 +14,7 @@ use App\Models\TeamMembership;
 use App\Support\Auth\CurrentMember;
 use App\Support\Auth\Permissions;
 use App\Support\Events\RsvpRules;
+use App\Support\Statistics\AttendanceStatistics;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -25,7 +26,7 @@ use Illuminate\Validation\Rule;
  */
 class RsvpRuleController extends Controller
 {
-    public function __construct(private CurrentMember $current, private Permissions $permissions, private RsvpRules $rules) {}
+    public function __construct(private CurrentMember $current, private Permissions $permissions, private RsvpRules $rules, private AttendanceStatistics $statistics) {}
 
     public function index(): JsonResponse
     {
@@ -37,6 +38,8 @@ class RsvpRuleController extends Controller
 
         return response()->json(['data' => [
             'rules' => $rules->map(fn (RsvpRule $r) => $this->present($r))->values()->all(),
+            // For "until the end of the season".
+            'season_end' => $this->statistics->presets()['season']['to'],
             'persons' => $persons->map(fn (Person $p) => [
                 'id' => $p->id,
                 'name' => $p->first_name.' '.$p->last_name,
@@ -57,6 +60,7 @@ class RsvpRuleController extends Controller
             'event_type' => ['nullable', Rule::in([EventType::Training->value, EventType::Match->value, EventType::Extra->value])],
             'weekdays' => ['nullable', 'array', 'max:7'],
             'weekdays.*' => ['integer', 'between:1,7', 'distinct'],
+            'valid_until' => ['nullable', 'date_format:Y-m-d', 'after_or_equal:today'],
             'overwrite' => ['sometimes', 'boolean'],
         ]);
         $person = Person::query()->findOrFail($data['person_id']);
@@ -75,6 +79,7 @@ class RsvpRuleController extends Controller
             'series_id' => $series?->id,
             'event_type' => $series !== null ? null : ($data['event_type'] ?? null),
             'weekdays' => $series !== null || $weekdays === [] ? null : $weekdays,
+            'valid_until' => $data['valid_until'] ?? null,
             'status' => $data['status'],
             'reason' => $data['status'] === RsvpStatus::Yes->value ? null : (trim((string) ($data['reason'] ?? '')) ?: null),
             'created_by' => $member->id,
@@ -108,6 +113,7 @@ class RsvpRuleController extends Controller
             'series' => $rule->series ? $this->presentSeries($rule->series) : null,
             'event_type' => $rule->event_type?->value,
             'weekdays' => $rule->weekdays,
+            'valid_until' => $rule->valid_until?->toDateString(),
             'created_at' => $rule->created_at?->toIso8601ZuluString(),
         ];
     }

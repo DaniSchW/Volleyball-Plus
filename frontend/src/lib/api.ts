@@ -406,11 +406,14 @@ export interface RsvpRule {
   series: RsvpRuleSeries | null;
   event_type: 'training' | 'match' | 'extra' | null;
   weekdays: number[] | null;
+  /** Inclusive end (e.g. end of the season); null = no end. */
+  valid_until: string | null;
   created_at: string;
 }
 
 export interface RsvpRuleOptions {
   rules: RsvpRule[];
+  season_end: string;
   persons: { id: string; name: string; teams: { id: string; name: string; series: RsvpRuleSeries[] }[] }[];
 }
 

@@ -423,7 +423,10 @@
     "attendanceNotRecorded": "Anwesenheit noch nicht erfasst – bis dahin zählt eine Zusage als anwesend.",
     "present": "da",
     "absent": "nicht da",
-    "replyOf": "Antwort von {{name}}"
+    "replyOf": "Antwort von {{name}}",
+    "uploadOpponentLogo": "Logo des Gegners hochladen",
+    "changeOpponentLogo": "Logo ändern",
+    "uploadingLogo": "Wird hochgeladen …"
   },
   "notifications": {
     "title": "Benachrichtigungen",

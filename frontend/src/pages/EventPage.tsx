@@ -64,8 +64,13 @@ export function EventPage() {
             </div>
             <span className="text-slate-400">{t('events.versus')}</span>
             <div className="flex flex-col items-center gap-1">
-              {e.opponent_logo_url ? <img src={e.opponent_logo_url} alt="" className="size-16 object-contain" /> : <span className="size-16" />}
+              {e.opponent_logo_url ? (
+                <img src={e.opponent_logo_url} alt="" className="size-16 object-contain" />
+              ) : (
+                <span aria-hidden="true" className="flex size-16 items-center justify-center rounded-full bg-slate-100 text-2xl text-slate-400">🛡️</span>
+              )}
               <span className="text-sm">{e.opponent?.name ?? '–'}</span>
+              {e.can_manage && e.opponent && <OpponentLogoUpload opponentId={e.opponent.id} hasLogo={!!e.opponent_logo_url} eventId={e.id} />}
             </div>
           </div>
           {e.is_home !== null && <p className="mt-2 text-center text-xs text-slate-500">{e.is_home ? t('events.home') : t('events.away')}</p>}
@@ -353,3 +358,32 @@ function CorrectReplies({ event, onDone }: { event: EventDetail; onDone: () => v
     </Card>
   );
 }
+
+/** Trainers/admins: upload the opponent's logo right at the match (shown at all matches against them). */
+function OpponentLogoUpload({ opponentId, hasLogo, eventId }: { opponentId: string; hasLogo: boolean; eventId: string }) {
+  const { t } = useTranslation();
+  const tp = useTenantPath();
+  const queryClient = useQueryClient();
+  const upload = useMutation({
+    mutationFn: (file: File) => {
+      const body = new FormData();
+      body.append('image', file);
+      return post(tp(`opponents/${opponentId}/logo`), body);
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['event', eventId] });
+      void queryClient.invalidateQueries({ queryKey: ['events'] });
+    },
+  });
+
+  return (
+    <div className="mt-1">
+      <label className="inline-flex min-h-9 cursor-pointer items-center rounded-full border border-slate-300 px-3 text-xs font-medium text-brand-700 hover:bg-slate-50">
+        {upload.isPending ? t('events.uploadingLogo') : hasLogo ? t('events.changeOpponentLogo') : t('events.uploadOpponentLogo')}
+        <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" disabled={upload.isPending} onChange={(ev) => ev.target.files?.[0] && upload.mutate(ev.target.files[0])} />
+      </label>
+      {upload.isError && <p className="mt-1 max-w-40 text-xs text-red-700">{errorText(upload.error, t('errors.generic'))}</p>}
+    </div>
+  );
+}
+

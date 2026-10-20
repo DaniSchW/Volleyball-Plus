@@ -423,7 +423,10 @@
     "attendanceNotRecorded": "Attendance not recorded yet – until then an acceptance counts as present.",
     "present": "there",
     "absent": "absent",
-    "replyOf": "Reply of {{name}}"
+    "replyOf": "Reply of {{name}}",
+    "uploadOpponentLogo": "Upload opponent logo",
+    "changeOpponentLogo": "Change logo",
+    "uploadingLogo": "Uploading …"
   },
   "notifications": {
     "title": "Notifications",

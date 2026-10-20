@@ -67,15 +67,12 @@ export function EventCard({ event }: { event: EventSummary }) {
                 .filter(Boolean).join(' · ')}
             </p>
           </div>
-          {event.type === 'match' && (event.own_logo_url || event.opponent_logo_url) && (
+          {/* Logos only once the opponent has one – otherwise just "gegen" would be shown. */}
+          {event.type === 'match' && event.opponent_logo_url && (
             <div className="flex shrink-0 items-center gap-1">
               {event.own_logo_url && <img src={event.own_logo_url} alt="" className="size-9 rounded object-contain" />}
               <span className="text-xs text-slate-400">{t('events.versus')}</span>
-              {event.opponent_logo_url ? (
-                <img src={event.opponent_logo_url} alt={event.opponent?.name ?? ''} className="size-9 rounded object-contain" />
-              ) : (
-                <span className="size-9" />
-              )}
+              <img src={event.opponent_logo_url} alt={event.opponent?.name ?? ''} className="size-9 rounded object-contain" />
             </div>
           )}
         </div>

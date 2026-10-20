@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { routes } from './App';
@@ -537,6 +537,41 @@ describe('task templates', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Auf 1 Termin übertragen' }));
     await waitFor(() => expect(applied).toEqual({ event_ids: ['e7'] }));
     expect(await screen.findByText('2 Aufgaben in 1 Termine übernommen.')).toBeInTheDocument();
+  });
+});
+
+describe('opponent logo', () => {
+  it('uploads the opponent logo at the match; the list shows logos only once the opponent has one', async () => {
+    let uploaded: FormData | null = null;
+    const match = {
+      ...EVENT, id: 'e9', type: 'match', title: 'Spiel gegen SG Ailingen', opponent: { id: 'op1', name: 'SG Ailingen' }, is_home: false,
+      own_logo_url: '/logo.png', opponent_logo_url: null,
+    };
+    const detail = {
+      ...match, description: null, names_visible: false, series_id: null, series: null, team_ids: ['t1'], cross_nomination_opens_at: null,
+      guests_open_at: null, responses: null, positions: null, tasks: [], task_summary: null, position_limits: null, position_taken: null,
+      guest_position_needs: null, can_manage: true, can_record_attendance: false, attendance_recorded_at: null,
+    };
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/notices': { body: { data: [] } }, 'GET /t/ssv-ulm/polls': { body: { data: [] } },
+      'GET /t/ssv-ulm/events?': { body: { data: [match], next_cursor: null } },
+      'GET /t/ssv-ulm/events/e9': { body: { data: detail } },
+      'GET /t/ssv-ulm/task-templates': { body: { data: { templates: [], teams: [], can_create_for_all: false } } },
+      'POST /t/ssv-ulm/opponents/op1/logo': (init) => {
+        uploaded = init.body as FormData;
+        return { body: { data: { logo_url: '/x.png' } } };
+      },
+    });
+    const router = renderAt('/ssv-ulm');
+
+    expect(await screen.findByText('Spiel gegen SG Ailingen')).toBeInTheDocument();
+    expect(screen.queryByText('gegen')).not.toBeInTheDocument();
+
+    await act(async () => { await router.navigate('/ssv-ulm/events/e9'); });
+    const input = (await screen.findByText('Logo des Gegners hochladen')).parentElement!.querySelector('input')!;
+    fireEvent.change(input, { target: { files: [new File(['png'], 'ailingen.png', { type: 'image/png' })] } });
+    await waitFor(() => expect(uploaded?.get('image')).toBeInstanceOf(File));
   });
 });
 

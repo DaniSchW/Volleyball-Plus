@@ -53,6 +53,8 @@ class NoticeController extends Controller
             'visible_from' => ['required', 'date'],
             // Every info expires – at the latest one year after it appears.
             'visible_until' => ['required', 'date', 'after:visible_from'],
+            // Push/e-mail once the info is visible (per member's settings); off = info only on the start page.
+            'notify' => ['sometimes', 'boolean'],
         ], ['visible_until.required' => __('app.notice_expiry_required')]);
 
         if ($data['scope'] === EventScope::Tenant->value) {
@@ -69,12 +71,18 @@ class NoticeController extends Controller
         if ($until->lessThanOrEqualTo(Carbon::now()) || $until->greaterThan($from->copy()->addYear())) {
             throw ValidationException::withMessages(['visible_until' => __('app.notice_expiry_range')]);
         }
+        $notify = (bool) ($data['notify'] ?? true);
+        unset($data['notify']);
         $notice = Notice::create([
             ...$data,
             'visible_from' => $from,
             'visible_until' => $until,
             'created_by' => $member->id,
         ]);
+        if (! $notify) {
+            // Marked as announced: the cron sends nothing for it.
+            $notice->forceFill(['notified_at' => Carbon::now()])->save();
+        }
 
         return response()->json(['data' => $this->present($notice->load('team'))], 201);
     }

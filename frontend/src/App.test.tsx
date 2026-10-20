@@ -806,8 +806,10 @@ describe('notice expiry', () => {
     expect(screen.getByRole('button', { name: 'Veröffentlichen' })).toBeDisabled();
     fireEvent.click(screen.getByRole('button', { name: '1 Woche' }));
     expect(screen.getByLabelText('Verfällt am (Pflicht)')).not.toHaveValue('');
+    expect(screen.getByRole('checkbox', { name: 'Push-Nachricht senden' })).toBeChecked();
     fireEvent.click(screen.getByRole('button', { name: 'Veröffentlichen' }));
     await waitFor(() => expect(String(sent.visible_until)).toMatch(/T23:59$/));
+    expect(sent.notify).toBe(true);
   });
 });
 

@@ -277,7 +277,10 @@
       "week": "1 Woche",
       "month": "1 Monat",
       "quarter": "3 Monate"
-    }
+    },
+    "notify": "Push-Nachricht senden",
+    "notifyHint": "Geht an alle, für die die Info gilt, sobald sie sichtbar ist – je nach ihren Einstellungen per Push oder E-Mail.",
+    "notifyOff": "Keine Nachricht – die Info erscheint nur auf der Startseite."
   },
   "events": {
     "create": "Termin anlegen",

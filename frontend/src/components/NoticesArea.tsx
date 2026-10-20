@@ -5,7 +5,7 @@ import { api, del, errorText, post, type Notice as NoticeType, type Team } from 
 import { formatDateTime, toLocalInput } from '../lib/dates';
 import { trainerTeamIds } from '../lib/permissions';
 import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
-import { Button, Field, Notice, Select } from './ui';
+import { Button, Field, Notice, Select, Toggle } from './ui';
 
 /** Notice area on top of the start page; trainers post for their team, admins for everyone. */
 export function NoticesArea() {
@@ -63,6 +63,7 @@ function NoticeForm({ onDone }: { onDone: () => void }) {
 
   const now = new Date();
   // Every info expires: no preset, so the expiry date is chosen on purpose.
+  const [notify, setNotify] = useState(true);
   const [form, setForm] = useState({
     target: me.data?.is_admin ? 'tenant' : (trainerTeams[0] ?? ''),
     title: '',
@@ -87,6 +88,7 @@ function NoticeForm({ onDone }: { onDone: () => void }) {
       body: form.body || null,
       visible_from: form.visible_from,
       visible_until: form.visible_until,
+      notify,
     }),
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ['notices', slug] });
@@ -128,6 +130,10 @@ function NoticeForm({ onDone }: { onDone: () => void }) {
             </button>
           ))}
         </div>
+      </div>
+      <div>
+        <Toggle label={t('notices.notify')} checked={notify} onChange={setNotify} />
+        <p className="mt-1 text-xs text-slate-500">{notify ? t('notices.notifyHint') : t('notices.notifyOff')}</p>
       </div>
       {create.isError && <Notice tone="error">{errorText(create.error, t('errors.generic'))}</Notice>}
       <div className="flex gap-2">

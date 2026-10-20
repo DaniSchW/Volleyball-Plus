@@ -236,6 +236,18 @@ class NotificationTest extends TestCase
         $this->assertNotNull($this->inTenant($this->tenant, fn () => Notice::first()->notified_at));
     }
 
+    public function test_notices_without_push(): void
+    {
+        $this->loginAs($this->trainer)->postJson('/api/v1/t/ssv-ulm/notices', [
+            'scope' => 'team', 'team_id' => $this->team->id, 'title' => 'Nur zur Info', 'notify' => false,
+            'visible_from' => '2026-10-19T00:00', 'visible_until' => '2026-11-08T00:00',
+        ])->assertCreated();
+
+        $this->artisan('app:send-notifications')->assertSuccessful();
+        $this->assertSame([], $this->pushesTo($this->player));
+        $this->assertSame('Nur zur Info', $this->loginAs($this->player)->getJson('/api/v1/t/ssv-ulm/notices')->json('data.0.title'));
+    }
+
     public function test_ssl_failure_is_mailed_to_admins_once_per_login(): void
     {
         $this->member($this->tenant, 'ada@example.org', 'Ada', 'Admin', admin: true);

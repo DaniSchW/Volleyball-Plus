@@ -277,7 +277,10 @@
       "week": "1 week",
       "month": "1 month",
       "quarter": "3 months"
-    }
+    },
+    "notify": "Send push notification",
+    "notifyHint": "Goes to everybody the info is for, as soon as it is visible – by push or e-mail according to their settings.",
+    "notifyOff": "No notification – the info only appears on the start page."
   },
   "events": {
     "create": "New event",

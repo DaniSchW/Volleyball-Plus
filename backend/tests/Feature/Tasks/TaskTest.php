@@ -212,4 +212,18 @@ class TaskTest extends TestCase
         $this->loginAs($this->paul)->getJson($this->url('task-templates'))->assertOk()->assertJsonPath('data.templates', []);
         $this->loginAs($this->organizer)->deleteJson($this->url("task-templates/{$template['id']}"))->assertOk();
     }
+
+    public function test_organizers_enter_replies_for_players(): void
+    {
+        $this->inTenant($this->tenant, fn () => $this->team->forceFill(['decline_reason_required' => true])->save());
+        $training = $this->event('training');
+        $paul = $this->personOf($this->paul)->id;
+
+        // After talking to Paul: entered by the organizer, no reason needed.
+        $this->loginAs($this->organizer)->postJson($this->url("events/{$training['id']}/responses"), ['person_id' => $paul, 'status' => 'no'])->assertOk();
+        $this->loginAs($this->organizer)->postJson($this->url("events/{$training['id']}/responses"), ['person_id' => $paul, 'status' => 'yes'])
+            ->assertOk()->assertJsonPath('data.counts.yes', 1);
+        // Players cannot do that for each other.
+        $this->loginAs($this->mia)->postJson($this->url("events/{$training['id']}/responses"), ['person_id' => $paul, 'status' => 'no', 'reason' => 'x'])->assertForbidden();
+    }
 }

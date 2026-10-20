@@ -575,6 +575,32 @@ describe('opponent logo', () => {
   });
 });
 
+describe('replies entered by the trainer', () => {
+  it('sets a player to accepted right in the list', async () => {
+    let sent: Record<string, unknown> = {};
+    const row = { person: { id: 'p2', name: 'Paul Spieler', avatar_url: null, primary_position: null, positions: [], role: 'player', is_guest: false }, status: null, as_position: null, reason: null, responded_at: null, attended: null };
+    const detail = {
+      ...EVENT, description: null, names_visible: true, series_id: null, series: null, team_ids: ['t1'], cross_nomination_opens_at: null,
+      guests_open_at: null, positions: null, tasks: [], task_summary: null, position_limits: null, position_taken: null, guest_position_needs: null,
+      can_manage: true, can_record_attendance: false, attendance_recorded_at: null, deadline_passed: false, my: [], responses: [row],
+    };
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/events/e1': { body: { data: detail } },
+      'GET /t/ssv-ulm/task-templates': { body: { data: { templates: [], teams: [], can_create_for_all: false } } },
+      'POST /t/ssv-ulm/events/e1/responses': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { body: { data: { ...detail, responses: [{ ...row, status: 'yes' }] } } };
+      },
+    });
+    renderAt('/ssv-ulm/events/e1');
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Paul Spieler: Zusage eintragen' }));
+    await waitFor(() => expect(sent).toEqual({ person_id: 'p2', status: 'yes' }));
+    await waitFor(() => expect(screen.getByRole('button', { name: 'Paul Spieler: Zusage eintragen' })).toHaveAttribute('aria-pressed', 'true'));
+  });
+});
+
 describe('chat', () => {
   it('shows messages and sends a reply', async () => {
     let sent: Record<string, unknown> = {};

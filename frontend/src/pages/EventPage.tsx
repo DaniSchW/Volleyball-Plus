@@ -211,6 +211,8 @@ function Responses({ event }: { event: EventDetail }) {
   };
 
   if (correcting) return <CorrectReplies event={event} onDone={() => setCorrecting(false)} />;
+  // Trainers, organizers and admins enter replies for players (e.g. after talking to them).
+  const canEnter = event.can_manage && event.status !== 'cancelled';
 
   return (
     <Card
@@ -219,6 +221,7 @@ function Responses({ event }: { event: EventDetail }) {
         <button type="button" className="rounded px-2 py-1 text-sm text-brand-700" onClick={() => setCorrecting(true)}>{t('events.correct')}</button>
       ) : undefined}
     >
+      {canEnter && !event.can_record_attendance && <p className="mb-3 text-xs text-slate-500">{t('events.enterForPlayers')}</p>}
       {event.can_record_attendance && (
         <p className="mb-3 text-xs text-slate-500">
           {event.attendance_recorded_at ? t('events.attendanceRecordedAt', { date: formatDateTime(event.attendance_recorded_at) }) : t('events.attendanceNotRecorded')}
@@ -235,7 +238,7 @@ function Responses({ event }: { event: EventDetail }) {
               </h3>
               <ul className="divide-y divide-slate-100">
                 {rows.map((row) => (
-                  <li key={row.person.id} className="flex items-center gap-3 py-2">
+                  <li key={row.person.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 py-2">
                     <Avatar url={row.person.avatar_url} name={row.person.name} size={32} />
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm">{row.person.name}</span>
@@ -248,6 +251,7 @@ function Responses({ event }: { event: EventDetail }) {
                       <span className={`shrink-0 text-xs font-medium ${row.attended ? 'text-emerald-700' : 'text-slate-400'}`}>{row.attended ? t('events.present') : t('events.absent')}</span>
                     )}
                     {row.person.role === 'player' && <PositionBadges row={row} />}
+                    {canEnter && <ReplySwitch event={event} row={row} />}
                   </li>
                 ))}
               </ul>
@@ -384,6 +388,45 @@ function OpponentLogoUpload({ opponentId, hasLogo, eventId }: { opponentId: stri
       </label>
       {upload.isError && <p className="mt-1 max-w-40 text-xs text-red-700">{errorText(upload.error, t('errors.generic'))}</p>}
     </div>
+  );
+}
+
+const SWITCH: { status: RsvpStatus; icon: string; on: string }[] = [
+  { status: 'yes', icon: '✓', on: 'bg-emerald-600 text-white ring-emerald-600' },
+  { status: 'maybe', icon: '?', on: 'bg-amber-500 text-white ring-amber-500' },
+  { status: 'no', icon: '✕', on: 'bg-red-600 text-white ring-red-600' },
+];
+
+/** Enter or change somebody's reply right in the list (no reason needed, limits do not apply). */
+function ReplySwitch({ event, row }: { event: EventDetail; row: ResponseRow }) {
+  const { t } = useTranslation();
+  const tp = useTenantPath();
+  const queryClient = useQueryClient();
+  const set = useMutation({
+    mutationFn: (status: RsvpStatus) => post<{ data: EventDetail }>(tp(`events/${event.id}/responses`), { person_id: row.person.id, status }),
+    onSuccess: ({ data }) => {
+      queryClient.setQueryData(['event', event.id], data);
+      void queryClient.invalidateQueries({ queryKey: ['events'] });
+    },
+  });
+
+  return (
+    <span className="ml-11 flex shrink-0 items-center gap-1 sm:ml-0" role="group" aria-label={t('events.replyOf', { name: row.person.name })}>
+      {SWITCH.map(({ status, icon, on }) => (
+        <button
+          key={status}
+          type="button"
+          aria-pressed={row.status === status}
+          aria-label={t('events.setReply', { name: row.person.name, status: t(`events.status.${status}`) })}
+          disabled={set.isPending || row.status === status}
+          onClick={() => set.mutate(status)}
+          className={`flex size-8 items-center justify-center rounded-full text-sm font-bold ring-1 transition ${row.status === status ? on : 'bg-white text-slate-500 ring-slate-300 hover:bg-slate-50'}`}
+        >
+          {icon}
+        </button>
+      ))}
+      {set.isError && <span className="text-xs text-red-700">{errorText(set.error, t('errors.generic'))}</span>}
+    </span>
   );
 }
 

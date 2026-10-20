@@ -426,7 +426,9 @@
     "replyOf": "Antwort von {{name}}",
     "uploadOpponentLogo": "Logo des Gegners hochladen",
     "changeOpponentLogo": "Logo ändern",
-    "uploadingLogo": "Wird hochgeladen …"
+    "uploadingLogo": "Wird hochgeladen …",
+    "enterForPlayers": "Mit ✓ ? ✕ trägst du die Antwort eines Spielers direkt ein, z. B. nach einem Gespräch.",
+    "setReply": "{{name}}: {{status}} eintragen"
   },
   "notifications": {
     "title": "Benachrichtigungen",

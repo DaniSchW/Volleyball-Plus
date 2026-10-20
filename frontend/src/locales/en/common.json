@@ -426,7 +426,9 @@
     "replyOf": "Reply of {{name}}",
     "uploadOpponentLogo": "Upload opponent logo",
     "changeOpponentLogo": "Change logo",
-    "uploadingLogo": "Uploading …"
+    "uploadingLogo": "Uploading …",
+    "enterForPlayers": "With ✓ ? ✕ you enter a player’s reply directly, e.g. after talking to them.",
+    "setReply": "Enter {{status}} for {{name}}"
   },
   "notifications": {
     "title": "Notifications",

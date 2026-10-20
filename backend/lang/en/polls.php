@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'no_channel' => 'Please choose push or e-mail.',
+    'reminded' => 'Notified: :push by push, :email by e-mail.',
     'not_allowed' => 'You may not vote for this person.',
     'not_eligible' => 'This person is not in any team of the poll.',
     'closed' => 'The poll has ended.',

@@ -5,13 +5,16 @@ namespace Tests\Feature\Polls;
 use App\Enums\PersonRelation;
 use App\Enums\TeamRole;
 use App\Jobs\SendPush;
+use App\Mail\NotificationMail;
 use App\Models\MinorPermission;
 use App\Models\PersonAccount;
+use App\Models\PushSubscription;
 use App\Models\Team;
 use App\Models\Tenant;
 use App\Models\TenantMember;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
@@ -54,12 +57,24 @@ class PollTest extends TestCase
         $this->addToTeam($this->team, $this->personOf($this->paul));
         $this->addToTeam($this->team, $this->personOf($this->mia));
         $this->addToTeam($this->other, $this->personOf($this->lena));
+        // Paul and Mia have push on their phones.
+        foreach ([$this->paul, $this->mia] as $member) {
+            $this->device($member);
+        }
     }
 
     protected function tearDown(): void
     {
         Carbon::setTestNow();
         parent::tearDown();
+    }
+
+    private function device(TenantMember $member): void
+    {
+        PushSubscription::create([
+            'account_id' => $member->account_id, 'endpoint' => 'https://push.example/'.$member->id, 'endpoint_hash' => hash('sha256', $member->id),
+            'public_key' => 'k', 'auth_token' => 'a',
+        ]);
     }
 
     private function create(TenantMember $as, array $data = []): TestResponse
@@ -162,5 +177,45 @@ class PollTest extends TestCase
         $this->assertFalse($this->loginAs($kid)->getJson("/api/v1/t/ssv-ulm/polls/{$poll['id']}")->json('data.my.0.can_vote'));
         $this->vote($kid, $poll['id'], $kidPerson->id, [$poll['options'][0]['id']])->assertForbidden();
         $this->vote($parent, $poll['id'], $kidPerson->id, [$poll['options'][0]['id']])->assertOk();
+    }
+
+    public function test_push_or_email_on_creation_and_reminders(): void
+    {
+        Mail::fake();
+        $niko = $this->member($this->tenant, 'niko@example.org', 'Niko', 'Ohnepush');
+        $this->addToTeam($this->team, $this->personOf($niko));
+
+        // Default: push where possible, e-mail to those without push (Niko).
+        $poll = $this->create($this->trainer)->assertCreated()->json('data');
+        $this->assertCount(2, Queue::pushed(SendPush::class));
+        Mail::assertQueued(NotificationMail::class, 1);
+        Mail::assertQueued(NotificationMail::class, fn (NotificationMail $m) => $m->hasTo('niko@example.org') && $m->title === 'Neue Umfrage: Wann grillen wir?');
+
+        // Only e-mail to everybody, no push.
+        Mail::fake();
+        Queue::fake();
+        $this->create($this->trainer, ['notify_push' => false, 'notify_email' => 'all'])->assertCreated();
+        Queue::assertNotPushed(SendPush::class);
+        Mail::assertQueued(NotificationMail::class, 3);
+
+        // Reminder only to those who have not voted yet.
+        $this->vote($this->paul, $poll['id'], $this->paul, [$poll['options'][0]['id']])->assertOk();
+        Mail::fake();
+        Queue::fake();
+        $this->loginAs($this->paul)->postJson("/api/v1/t/ssv-ulm/polls/{$poll['id']}/remind", ['push' => true, 'email' => 'without_push'])->assertForbidden();
+        $this->loginAs($this->trainer)->postJson("/api/v1/t/ssv-ulm/polls/{$poll['id']}/remind", ['push' => false, 'email' => 'none'])->assertUnprocessable();
+        $this->loginAs($this->trainer)->postJson("/api/v1/t/ssv-ulm/polls/{$poll['id']}/remind", ['push' => true, 'email' => 'without_push'])
+            ->assertOk()->assertJsonPath('data', ['push' => 1, 'email' => 1])->assertJsonPath('message', 'Benachrichtigt: 1 per Push, 1 per E-Mail.');
+        $this->assertSame('Erinnerung: Umfrage „Wann grillen wir?“', Queue::pushed(SendPush::class)->first()->payload['title']);
+        Mail::assertQueued(NotificationMail::class, fn (NotificationMail $m) => $m->hasTo('niko@example.org'));
+
+        // To everybody, also who voted.
+        Queue::fake();
+        $this->loginAs($this->trainer)->postJson("/api/v1/t/ssv-ulm/polls/{$poll['id']}/remind", ['push' => true, 'email' => 'none', 'only_open' => false])
+            ->assertOk()->assertJsonPath('data.push', 2);
+
+        // Not after the end.
+        $this->loginAs($this->trainer)->postJson("/api/v1/t/ssv-ulm/polls/{$poll['id']}/close")->assertOk();
+        $this->loginAs($this->trainer)->postJson("/api/v1/t/ssv-ulm/polls/{$poll['id']}/remind", ['push' => true, 'email' => 'none'])->assertUnprocessable();
     }
 }

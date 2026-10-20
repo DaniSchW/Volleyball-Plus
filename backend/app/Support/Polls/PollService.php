@@ -35,7 +35,7 @@ class PollService
      * @param  array<string, mixed>  $data  validated input
      * @param  Collection<int, Team>  $teams
      */
-    public function create(array $data, Collection $teams, TenantMember $creator): Poll
+    public function create(array $data, Collection $teams, TenantMember $creator, bool $push = true, string $email = 'without_push'): Poll
     {
         $poll = DB::transaction(function () use ($data, $teams, $creator) {
             $poll = Poll::create([
@@ -52,12 +52,31 @@ class PollService
             return $poll;
         });
 
-        $this->notifier->toPersons(NotificationCategory::Poll, $this->eligiblePersonIds($poll), fn (string $locale) => [
+        $this->notifier->toPersonsDirect(NotificationCategory::Poll, $this->eligiblePersonIds($poll), fn (string $locale) => [
             'title' => __('notifications.poll.title', ['title' => $poll->title], $locale),
             'body' => Str::limit((string) $poll->description, 140),
-        ], '/polls?poll='.$poll->id, $creator);
+        ], '/polls?poll='.$poll->id, $push, $email, $creator);
 
         return $poll;
+    }
+
+    /**
+     * Reminder for a running poll – by default only to those who have not voted yet.
+     *
+     * @return array{push: int, email: int}
+     */
+    public function remind(Poll $poll, TenantMember $sender, bool $push, string $email, bool $onlyOpen): array
+    {
+        $persons = $this->eligiblePersonIds($poll);
+        if ($onlyOpen) {
+            $persons = $persons->diff(PollVote::query()->where('poll_id', $poll->id)->pluck('person_id'))->values();
+        }
+        $closes = $poll->closes_at;
+
+        return $this->notifier->toPersonsDirect(NotificationCategory::Poll, $persons, fn (string $locale) => [
+            'title' => __('notifications.poll.reminder', ['title' => $poll->title], $locale),
+            'body' => $closes ? __('notifications.poll.until', ['date' => $this->notifier->when($closes, $locale)], $locale) : Str::limit((string) $poll->description, 140),
+        ], '/polls?poll='.$poll->id, $push, $email, $sender);
     }
 
     /**

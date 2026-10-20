@@ -1,3 +1,4 @@
+import { NotifyChoice, type EmailMode } from '../components/polls/NotifyChoice';
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
@@ -46,6 +47,7 @@ function CreatePoll({ teams, isAdmin, onDone }: { teams: Team[]; isAdmin: boolea
   const [form, setForm] = useState({
     title: '', description: '', allTeams: false, team_ids: teams.length === 1 ? [teams[0].id] : ([] as string[]),
     options: ['', ''], multiple_choice: false, anonymous: false, allow_free_text: false, closes_at: '',
+    notify_push: true, notify_email: 'without_push' as EmailMode,
   });
   const set = <K extends keyof typeof form>(key: K, value: (typeof form)[K]) => setForm((f) => ({ ...f, [key]: value }));
 
@@ -56,6 +58,7 @@ function CreatePoll({ teams, isAdmin, onDone }: { teams: Team[]; isAdmin: boolea
       options: form.options.map((o) => o.trim()).filter(Boolean),
       multiple_choice: form.multiple_choice, anonymous: form.anonymous, allow_free_text: form.allow_free_text,
       closes_at: form.closes_at || null,
+      notify_push: form.notify_push, notify_email: form.notify_email,
     }),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['polls'] });
@@ -105,6 +108,7 @@ function CreatePoll({ teams, isAdmin, onDone }: { teams: Team[]; isAdmin: boolea
           <Toggle label={t('polls.anonymousLabel')} checked={form.anonymous} onChange={(v) => set('anonymous', v)} />
           <Toggle label={t('polls.allowFreeText')} checked={form.allow_free_text} onChange={(v) => set('allow_free_text', v)} />
           <Field label={t('polls.closesAt')} type="datetime-local" value={form.closes_at} onChange={(e) => set('closes_at', e.target.value)} hint={t('invitations.optional')} />
+          <NotifyChoice push={form.notify_push} email={form.notify_email} onPush={(v) => set('notify_push', v)} onEmail={(v) => set('notify_email', v)} />
           {create.isError && <Notice tone="error">{errorText(create.error, t('errors.generic'))}</Notice>}
           <div className="flex gap-2">
             <Button type="submit" disabled={create.isPending}>{t('polls.publish')}</Button>

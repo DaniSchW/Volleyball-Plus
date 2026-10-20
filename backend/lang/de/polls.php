@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'no_channel' => 'Bitte wähle Push oder E-Mail.',
+    'reminded' => 'Benachrichtigt: :push per Push, :email per E-Mail.',
     'not_allowed' => 'Du darfst für diese Person nicht abstimmen.',
     'not_eligible' => 'Diese Person gehört zu keinem Team der Umfrage.',
     'closed' => 'Die Umfrage ist beendet.',

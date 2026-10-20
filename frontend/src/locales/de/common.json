@@ -635,7 +635,21 @@
     "closesAt": "Abstimmen bis",
     "publish": "Veröffentlichen",
     "pending_one": "{{count}} offene Umfrage – jetzt abstimmen",
-    "pending_other": "{{count}} offene Umfragen – jetzt abstimmen"
+    "pending_other": "{{count}} offene Umfragen – jetzt abstimmen",
+    "notify": {
+      "push": "Push-Nachricht senden",
+      "email": "Per E-Mail",
+      "emailWithoutPush": "Nur an die, die keine Push-Nachricht bekommen",
+      "emailAll": "An alle",
+      "emailNone": "Keine E-Mail",
+      "hint": "Push geht an alle, die Push auf einem Gerät aktiviert haben. Wer kein Push hat, bekommt so trotzdem eine E-Mail."
+    },
+    "remind": {
+      "button": "Erinnern",
+      "title": "Teilnehmer benachrichtigen",
+      "onlyOpen": "Nur an die, die noch nicht abgestimmt haben",
+      "send": "Jetzt senden"
+    }
   },
   "chat": {
     "create": "Chat erstellen",

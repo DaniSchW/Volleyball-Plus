@@ -24,7 +24,7 @@ return [
     ],
     'task_reminder' => ['title' => 'Deine Aufgabe: :tasks', 'body' => ':title · :when'],
     'imported' => ['title' => '{1} :team: 1 neuer Termin im Spielplan|[2,*] :team: :count neue Termine im Spielplan', 'body' => 'Als Nächstes: :title, :when'],
-    'poll' => ['title' => 'Neue Umfrage: :title'],
+    'poll' => ['title' => 'Neue Umfrage: :title', 'reminder' => 'Erinnerung: Umfrage „:title“', 'until' => 'Abstimmen bis :date'],
     'notice' => ['title' => 'Neue Info: :title'],
     'adult' => [
         'guardian_title' => ':name verwaltet das Profil jetzt selbst',

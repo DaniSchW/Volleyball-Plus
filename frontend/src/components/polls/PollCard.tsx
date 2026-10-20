@@ -4,7 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { del, errorText, post, type Poll } from '../../lib/api';
 import { formatDateTime } from '../../lib/dates';
 import { useTenantPath } from '../../lib/queries';
-import { Button, Card, Notice } from '../ui';
+import { Button, Card, Notice, Toggle } from '../ui';
+import { NotifyChoice, type EmailMode } from './NotifyChoice';
 
 /** One poll: vote (for oneself or a child), results as bars once visible. */
 export function PollCard({ poll }: { poll: Poll }) {
@@ -14,6 +15,8 @@ export function PollCard({ poll }: { poll: Poll }) {
   const done = () => void queryClient.invalidateQueries({ queryKey: ['polls'] });
   const close = useMutation({ mutationFn: () => post(tp(`polls/${poll.id}/close`)), onSuccess: done });
   const remove = useMutation({ mutationFn: () => del(tp(`polls/${poll.id}`)), onSuccess: done });
+  const [reminding, setReminding] = useState(false);
+  const [reminded, setReminded] = useState<string | null>(null);
 
   const meta = [
     poll.scope === 'tenant' ? t('polls.allTeams') : poll.teams.map((team) => team.name).join(', '),
@@ -29,14 +32,43 @@ export function PollCard({ poll }: { poll: Poll }) {
         {poll.description && <p className="whitespace-pre-line text-sm text-slate-700">{poll.description}</p>}
         {poll.my.map((voter) => <Ballot key={voter.person_id} poll={poll} voter={voter} showName={poll.my.length > 1 || !voter.is_self} />)}
         {poll.results_visible ? <Results poll={poll} /> : <p className="text-xs text-slate-500">{t('polls.resultsAfterVote')}</p>}
-        {poll.can_manage && (
+        {reminded && <Notice tone="success">{reminded}</Notice>}
+        {poll.can_manage && reminding && <RemindForm poll={poll} onDone={(message) => { setReminding(false); setReminded(message); }} />}
+        {poll.can_manage && !reminding && (
           <div className="flex flex-wrap gap-2 border-t border-slate-100 pt-3">
+            {!poll.is_closed && <Button variant="secondary" onClick={() => setReminding(true)}>🔔 {t('polls.remind.button')}</Button>}
             {!poll.is_closed && <Button variant="secondary" onClick={() => close.mutate()}>{t('polls.close')}</Button>}
             <Button variant="danger" onClick={() => window.confirm(t('polls.deleteConfirm')) && remove.mutate()}>{t('polls.delete')}</Button>
           </div>
         )}
       </div>
     </Card>
+  );
+}
+
+/** Notify again: by default only who has not voted yet. */
+function RemindForm({ poll, onDone }: { poll: Poll; onDone: (message: string | null) => void }) {
+  const { t } = useTranslation();
+  const tp = useTenantPath();
+  const [push, setPush] = useState(true);
+  const [email, setEmail] = useState<EmailMode>('without_push');
+  const [onlyOpen, setOnlyOpen] = useState(true);
+  const send = useMutation({
+    mutationFn: () => post<{ message: string }>(tp(`polls/${poll.id}/remind`), { push, email, only_open: onlyOpen }),
+    onSuccess: (result) => onDone(result.message),
+  });
+
+  return (
+    <div className="space-y-3 border-t border-slate-100 pt-3">
+      <h3 className="text-sm font-semibold">{t('polls.remind.title')}</h3>
+      <Toggle label={t('polls.remind.onlyOpen')} checked={onlyOpen} onChange={setOnlyOpen} />
+      <NotifyChoice push={push} email={email} onPush={setPush} onEmail={setEmail} />
+      {send.isError && <Notice tone="error">{errorText(send.error, t('errors.generic'))}</Notice>}
+      <div className="flex flex-wrap gap-2">
+        <Button disabled={send.isPending || (!push && email === 'none')} onClick={() => send.mutate()}>{t('polls.remind.send')}</Button>
+        <Button variant="secondary" onClick={() => onDone(null)}>{t('common.cancel')}</Button>
+      </div>
+    </div>
   );
 }
 

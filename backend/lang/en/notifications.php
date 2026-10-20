@@ -24,7 +24,7 @@ return [
     ],
     'task_reminder' => ['title' => 'Your task: :tasks', 'body' => ':title · :when'],
     'imported' => ['title' => '{1} :team: 1 new date in the schedule|[2,*] :team: :count new dates in the schedule', 'body' => 'Next: :title, :when'],
-    'poll' => ['title' => 'New poll: :title'],
+    'poll' => ['title' => 'New poll: :title', 'reminder' => 'Reminder: poll “:title”', 'until' => 'Vote until :date'],
     'notice' => ['title' => 'New notice: :title'],
     'adult' => [
         'guardian_title' => ':name now manages the profile',

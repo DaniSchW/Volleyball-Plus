@@ -174,6 +174,7 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
         Route::post('polls/{poll}/votes', [PollController::class, 'vote']);
         Route::delete('polls/{poll}/votes/{person}', [PollController::class, 'withdraw']);
         Route::post('polls/{poll}/close', [PollController::class, 'close']);
+        Route::post('polls/{poll}/remind', [PollController::class, 'remind'])->middleware('throttle:10,60');
         Route::delete('polls/{poll}', [PollController::class, 'destroy']);
 
         Route::get('tasks', [TaskController::class, 'index']);

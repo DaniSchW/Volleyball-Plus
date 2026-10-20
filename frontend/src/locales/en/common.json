@@ -635,7 +635,21 @@
     "closesAt": "Vote until",
     "publish": "Publish",
     "pending_one": "{{count}} open poll – vote now",
-    "pending_other": "{{count}} open polls – vote now"
+    "pending_other": "{{count}} open polls – vote now",
+    "notify": {
+      "push": "Send push notification",
+      "email": "By e-mail",
+      "emailWithoutPush": "Only to those who get no push",
+      "emailAll": "To everybody",
+      "emailNone": "No e-mail",
+      "hint": "Push goes to everybody who switched on push on a device. Whoever has no push still gets an e-mail this way."
+    },
+    "remind": {
+      "button": "Remind",
+      "title": "Notify participants",
+      "onlyOpen": "Only to those who have not voted yet",
+      "send": "Send now"
+    }
   },
   "chat": {
     "create": "Create chat",

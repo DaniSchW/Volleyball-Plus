@@ -62,6 +62,8 @@ class PollController extends Controller
             'anonymous' => ['boolean'],
             'allow_free_text' => ['boolean'],
             'closes_at' => ['nullable', 'date', 'after:now'],
+            'notify_push' => ['sometimes', 'boolean'],
+            'notify_email' => ['sometimes', Rule::in(['none', 'without_push', 'all'])],
         ]);
 
         if ($data['scope'] === EventScope::Tenant->value) {
@@ -76,7 +78,7 @@ class PollController extends Controller
             $data['closes_at'] = Carbon::parse($data['closes_at'], $member->tenant->timezone)->utc();
         }
 
-        $poll = $this->polls->create($data, $teams, $member);
+        $poll = $this->polls->create($data, $teams, $member, (bool) ($data['notify_push'] ?? true), $data['notify_email'] ?? 'without_push');
 
         return response()->json(['data' => $this->polls->present($poll->refresh(), $member)], 201);
     }
@@ -102,6 +104,24 @@ class PollController extends Controller
         $this->polls->withdraw($poll, $person, $member);
 
         return response()->json(['data' => $this->polls->present($poll, $member)]);
+    }
+
+    /** Notify the participants again (push and/or e-mail), by default only who has not voted yet. */
+    public function remind(Request $request, Poll $poll): JsonResponse
+    {
+        $member = $this->current->get();
+        abort_unless($this->polls->canManage($member, $poll), 403);
+        abort_if($poll->isClosed(), 422, __('polls.closed'));
+        $data = $request->validate([
+            'push' => ['required', 'boolean'],
+            'email' => ['required', Rule::in(['none', 'without_push', 'all'])],
+            'only_open' => ['sometimes', 'boolean'],
+        ]);
+        abort_if(! $data['push'] && $data['email'] === 'none', 422, __('polls.no_channel'));
+
+        $sent = $this->polls->remind($poll, $member, $data['push'], $data['email'], (bool) ($data['only_open'] ?? true));
+
+        return response()->json(['data' => $sent, 'message' => __('polls.reminded', $sent)]);
     }
 
     public function close(Poll $poll): JsonResponse

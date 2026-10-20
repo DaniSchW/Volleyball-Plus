@@ -470,6 +470,32 @@ describe('tasks and polls', () => {
     expect(screen.getByText('1 von 5 haben abgestimmt')).toBeInTheDocument();
     expect(screen.getByText('Max Muster')).toBeInTheDocument();
   });
+
+  it('lets the trainer remind those who have not voted by push and e-mail', async () => {
+    let sent: Record<string, unknown> = {};
+    const poll = {
+      id: 'q1', title: 'Wann grillen wir?', description: null, scope: 'team', teams: [{ id: 't1', name: 'Herren 1' }], multiple_choice: false,
+      anonymous: false, allow_free_text: false, closes_at: null, is_closed: false, created_at: '2026-10-19T10:00:00Z', can_manage: true,
+      results_visible: true, voter_count: 1, eligible_count: 5,
+      options: [{ id: 'o1', label: 'Samstag', count: 1, voters: ['Max Muster'] }], free_texts: [], my: [],
+    };
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/teams': { body: { data: [] } },
+      'GET /t/ssv-ulm/polls': { body: { data: [poll] } },
+      'POST /t/ssv-ulm/polls/q1/remind': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { body: { data: { push: 3, email: 1 }, message: 'Benachrichtigt: 3 per Push, 1 per E-Mail.' } };
+      },
+    });
+    renderAt('/ssv-ulm/polls');
+
+    fireEvent.click(await screen.findByRole('button', { name: '🔔 Erinnern' }));
+    expect(screen.getByRole('checkbox', { name: 'Nur an die, die noch nicht abgestimmt haben' })).toBeChecked();
+    fireEvent.click(screen.getByRole('button', { name: 'Jetzt senden' }));
+    await waitFor(() => expect(sent).toEqual({ push: true, email: 'without_push', only_open: true }));
+    expect(await screen.findByText('Benachrichtigt: 3 per Push, 1 per E-Mail.')).toBeInTheDocument();
+  });
 });
 
 describe('chat', () => {

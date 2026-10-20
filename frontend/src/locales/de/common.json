@@ -16,7 +16,8 @@
     "profile": "Profil",
     "members": "Mitglieder & Admins",
     "language": "Sprache",
-    "activity": "Änderungsprotokoll"
+    "activity": "Änderungsprotokoll",
+    "documents": "Dokumente"
   },
   "home": {
     "infoArea": "Infos",
@@ -117,7 +118,8 @@
       "groups": "Gruppen",
       "guests": "Gäste",
       "events": "Termine",
-      "statistics": "Statistik"
+      "statistics": "Statistik",
+      "documents": "Dokumente"
     },
     "empty": "Noch niemand im Team.",
     "role": "Rolle",
@@ -860,7 +862,8 @@
       "tenant_member": "Mitglied",
       "chat": "Chat",
       "league": "Liga",
-      "training_group": "Trainingsgruppe"
+      "training_group": "Trainingsgruppe",
+      "document": "Dokument"
     }
   },
   "positionsShort": {
@@ -896,5 +899,25 @@
     "delete": "Daueranwort entfernen",
     "deleteHint": "Entfernen beendet die Daueranwort für neue Termine; bereits eingetragene Antworten bleiben.",
     "noPersons": "Für dein Konto gibt es kein Profil, für das du antworten kannst."
+  },
+  "documents": {
+    "intro": "Dokumente für den ganzen Verein (z. B. Vereinsmeldung) und für einzelne Mannschaften (z. B. Aufbauanleitung für den Spieltag). Du siehst die Dokumente deiner Teams.",
+    "forEverybody": "Für alle",
+    "none": "Noch keine Dokumente.",
+    "upload": "Dokument hochladen",
+    "uploadButton": "Hochladen",
+    "uploading": "Wird hochgeladen …",
+    "file": "Datei",
+    "fileHint": "PDF, Word, Excel, PowerPoint, LibreOffice, Bilder, Videos, Text – bis {{mb}} MB.",
+    "titleLabel": "Titel",
+    "description": "Beschreibung",
+    "folder": "Ordner",
+    "folderHint": "Optional, z. B. „Spieltag“ oder „Verband“ – gleiche Ordner werden zusammengefasst.",
+    "place": "Sichtbar für",
+    "visibleAll": "Sichtbar für alle Mitglieder des Vereins.",
+    "visibleTeam": "Sichtbar nur für dieses Team (Spieler, Eltern, Trainer, Betreuer) und Admins.",
+    "edit": "„{{title}}“ bearbeiten",
+    "delete": "Löschen",
+    "deleteConfirm": "„{{title}}“ endgültig löschen?"
   }
 }

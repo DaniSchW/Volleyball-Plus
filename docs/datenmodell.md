@@ -457,3 +457,4 @@ erDiagram
 - Konto löschen: `accounts.email` wird zu `deleted-<id>@invalid`, Sitzungen, Push-Abos und Anmeldelinks werden gelöscht, `tenant_members.status = disabled`.
 - 🏢 `rsvp_rules` ✅ (Daueranworten): `person_id`, `team_id` null, `series_id` null, `event_type` null, `weekdays` JSON null (1 = Montag), `status`, `reason`, `created_by` (Mitglied).
 - `event_invitees`: `attended` bool null (null = nicht erfasst, dann zählt eine Zusage); `events`: `attendance_recorded_at`.
+- 🏢 `documents` ✅: `team_id` null (null = für alle), `folder` (80) null, `title` (160), `description` null, `file_id` (→ `files`, `purpose = document`), `name` (Dateiname), `uploaded_by` (Mitglied), Zeitstempel.

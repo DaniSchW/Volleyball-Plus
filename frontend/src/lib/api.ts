@@ -701,3 +701,27 @@ export interface TeamHallTime {
   valid_from: string | null;
   valid_until: string | null;
 }
+
+// ---- documents ----
+
+export interface DocumentItem {
+  id: string;
+  title: string;
+  description: string | null;
+  folder: string | null;
+  /** null = for everybody in the department */
+  team: { id: string; name: string } | null;
+  name: string;
+  mime_type: string | null;
+  size_bytes: number;
+  uploaded_at: string;
+  url: string;
+  can_manage: boolean;
+}
+
+export interface DocumentList {
+  can_upload: boolean;
+  teams: { id: string; name: string; can_upload: boolean }[];
+  documents: DocumentItem[];
+  max_mb: number;
+}

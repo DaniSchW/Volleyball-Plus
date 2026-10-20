@@ -20,6 +20,7 @@ import { PollsPage } from './pages/PollsPage';
 import { StatsPage } from './pages/StatsPage';
 import { TasksPage } from './pages/TasksPage';
 import { RsvpRulesPage } from './pages/RsvpRulesPage';
+import { DocumentsPage } from './pages/DocumentsPage';
 import { NoTenantPage } from './pages/NoTenantPage';
 import { PersonPage } from './pages/PersonPage';
 import { PlatformPage } from './pages/PlatformPage';
@@ -61,6 +62,7 @@ export const routes: RouteObject[] = [
       { path: 'polls', element: <PollsPage /> },
       { path: 'tasks', element: <TasksPage /> },
       { path: 'replies', element: <RsvpRulesPage /> },
+      { path: 'documents', element: <DocumentsPage /> },
       { path: 'stats', element: <StatsPage /> },
       { path: 'cash', element: <CashPage /> },
       { path: 'cash/:bookId', element: <CashBookPage /> },

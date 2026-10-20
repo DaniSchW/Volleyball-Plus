@@ -11,6 +11,7 @@ import { Avatar, Button, Card, Field, Loading, Notice, PageTitle, Select, Toggle
 import { EventFeed } from '../components/events/EventFeed';
 import { LogoUpload } from '../components/LogoUpload';
 import { AddFromDepartment } from '../components/team/AddFromDepartment';
+import { Documents } from '../components/documents/Documents';
 import { RefereeBadge } from '../components/team/RefereeBadge';
 import { TeamBaseData } from '../components/team/TeamBaseData';
 import { TeamGuests } from '../components/team/TeamGuests';
@@ -18,7 +19,7 @@ import { TeamHallTimes } from '../components/team/TeamHallTimes';
 import { TeamStatistics } from '../components/team/TeamStatistics';
 import { TrainingGroups } from '../components/team/TrainingGroups';
 
-type Tab = 'roster' | 'events' | 'statistics' | 'groups' | 'guests' | 'invitations' | 'settings';
+type Tab = 'roster' | 'events' | 'statistics' | 'documents' | 'groups' | 'guests' | 'invitations' | 'settings';
 
 export function TeamPage() {
   const { t } = useTranslation();
@@ -37,7 +38,9 @@ export function TeamPage() {
 
   const managed = team.data.can_invite;
   const tabs: Tab[] = [
-    'roster', 'events', 'statistics', 'groups',
+    'roster', 'events', 'statistics',
+    ...(team.data.can_see ? (['documents'] as Tab[]) : []),
+    'groups',
     ...(managed && !team.data.is_youth ? (['guests'] as Tab[]) : []),
     ...(managed ? (['invitations'] as Tab[]) : []),
     ...(team.data.can_manage ? (['settings'] as Tab[]) : []),
@@ -70,6 +73,7 @@ export function TeamPage() {
       )}
       {tab === 'statistics' && <TeamStatistics team={team.data} />}
       {tab === 'groups' && <TrainingGroups team={team.data} />}
+      {tab === 'documents' && <Documents teamId={team.data.id} />}
       {tab === 'guests' && <TeamGuests team={team.data} />}
       {tab === 'invitations' && <Invitations team={team.data} />}
       {tab === 'settings' && team.data.settings && (

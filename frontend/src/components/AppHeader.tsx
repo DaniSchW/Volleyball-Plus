@@ -5,9 +5,9 @@ import { useQueryClient } from '@tanstack/react-query';
 import { patch } from '../lib/api';
 import { changeLanguage, LANGUAGES, type Language } from '../i18n';
 
-export type MenuSection = 'events' | 'teams' | 'chat' | 'polls' | 'tasks' | 'stats' | 'cash' | 'halls' | 'profile' | 'members' | 'activity';
+export type MenuSection = 'events' | 'teams' | 'chat' | 'polls' | 'tasks' | 'documents' | 'stats' | 'cash' | 'halls' | 'profile' | 'members' | 'activity';
 
-const MENU: MenuSection[] = ['events', 'teams', 'chat', 'polls', 'tasks', 'stats', 'cash', 'halls', 'profile'];
+const MENU: MenuSection[] = ['events', 'teams', 'chat', 'polls', 'tasks', 'documents', 'stats', 'cash', 'halls', 'profile'];
 
 /** Icon and colour per menu entry – helps to find things quickly. */
 const ICONS: Record<MenuSection, [string, string]> = {
@@ -16,6 +16,7 @@ const ICONS: Record<MenuSection, [string, string]> = {
   chat: ['💬', 'bg-sky-100'],
   polls: ['🗳️', 'bg-violet-100'],
   tasks: ['🤝', 'bg-amber-100'],
+  documents: ['📁', 'bg-yellow-100'],
   stats: ['📊', 'bg-rose-100'],
   cash: ['💶', 'bg-lime-100'],
   halls: ['🏟️', 'bg-orange-100'],

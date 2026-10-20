@@ -102,14 +102,35 @@ class AttachmentStore
         }
     }
 
-    private function storeAsIs(UploadedFile $upload, string $extension, string $mime, TenantMember $member, bool $isImage): StoredFile
+    /**
+     * The file as it is (documents keep pictures in full quality), checked
+     * like chat uploads. Returns the file and a clean name.
+     *
+     * @return array{0: StoredFile, 1: string}
+     */
+    public function storeFile(UploadedFile $upload, TenantMember $member, string $purpose): array
+    {
+        $extension = mb_strtolower($upload->getClientOriginalExtension());
+        $type = self::TYPES[$extension] ?? null;
+        if ($type === null || ! in_array((string) $upload->getMimeType(), $type[2], true)) {
+            throw ValidationException::withMessages(['file' => __('chat.file_type', ['types' => implode(', ', array_keys(self::TYPES))])]);
+        }
+        if ($upload->getSize() > self::maxBytes()) {
+            throw ValidationException::withMessages(['file' => __('chat.file_too_big', ['mb' => (int) floor(self::maxBytes() / 1048576)])]);
+        }
+        $name = Str::limit(trim(pathinfo($upload->getClientOriginalName(), PATHINFO_FILENAME)) ?: 'datei', 180, '').'.'.$extension;
+
+        return [$this->storeAsIs($upload, $extension, $type[1], $member, false, $purpose), $name];
+    }
+
+    private function storeAsIs(UploadedFile $upload, string $extension, string $mime, TenantMember $member, bool $isImage, string $purpose = 'chat_attachment'): StoredFile
     {
         $size = $isImage ? @getimagesize($upload->getRealPath()) : false;
         if ($isImage && $size === false) {
             throw ValidationException::withMessages(['file' => __('persons.image_invalid')]);
         }
 
-        $key = 'tenants/'.$this->tenants->id().'/chat_attachment/'.Str::ulid().'.'.$extension;
+        $key = 'tenants/'.$this->tenants->id().'/'.$purpose.'/'.Str::ulid().'.'.$extension;
         Storage::disk('local')->putFileAs(dirname($key), $upload, basename($key));
 
         return StoredFile::create([
@@ -118,7 +139,7 @@ class AttachmentStore
             'size_bytes' => (int) $upload->getSize(),
             'width' => $size[0] ?? null,
             'height' => $size[1] ?? null,
-            'purpose' => 'chat_attachment',
+            'purpose' => $purpose,
             'uploaded_by' => $member->id,
         ]);
     }

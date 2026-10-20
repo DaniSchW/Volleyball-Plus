@@ -16,7 +16,8 @@
     "profile": "Profile",
     "members": "Members & admins",
     "language": "Language",
-    "activity": "Activity log"
+    "activity": "Activity log",
+    "documents": "Documents"
   },
   "home": {
     "infoArea": "Notices",
@@ -117,7 +118,8 @@
       "groups": "Groups",
       "guests": "Guests",
       "events": "Events",
-      "statistics": "Statistics"
+      "statistics": "Statistics",
+      "documents": "Documents"
     },
     "empty": "Nobody in the team yet.",
     "role": "Role",
@@ -860,7 +862,8 @@
       "tenant_member": "Member",
       "chat": "Chat",
       "league": "League",
-      "training_group": "Training group"
+      "training_group": "Training group",
+      "document": "Document"
     }
   },
   "positionsShort": {
@@ -896,5 +899,25 @@
     "delete": "Remove standing reply",
     "deleteHint": "Removing ends the standing reply for new events; answers already entered stay.",
     "noPersons": "Your account has no profile you can answer for."
+  },
+  "documents": {
+    "intro": "Documents for the whole club (e.g. the club registration) and for single teams (e.g. set-up instructions for match days). You see the documents of your teams.",
+    "forEverybody": "For everybody",
+    "none": "No documents yet.",
+    "upload": "Upload document",
+    "uploadButton": "Upload",
+    "uploading": "Uploading …",
+    "file": "File",
+    "fileHint": "PDF, Word, Excel, PowerPoint, LibreOffice, pictures, videos, text – up to {{mb}} MB.",
+    "titleLabel": "Title",
+    "description": "Description",
+    "folder": "Folder",
+    "folderHint": "Optional, e.g. “Match day” or “Association” – the same folders are grouped.",
+    "place": "Visible for",
+    "visibleAll": "Visible for all members of the club.",
+    "visibleTeam": "Visible only for this team (players, parents, trainers, organizers) and admins.",
+    "edit": "Edit “{{title}}”",
+    "delete": "Delete",
+    "deleteConfirm": "Delete “{{title}}” for good?"
   }
 }

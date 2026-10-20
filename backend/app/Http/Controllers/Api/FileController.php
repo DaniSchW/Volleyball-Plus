@@ -15,8 +15,8 @@ class FileController extends Controller
 {
     public function __invoke(StoredFile $file): Response
     {
-        // Chat files only via their chat (with its access check).
-        abort_if($file->purpose === 'chat_attachment', 404);
+        // Chat files and documents only via their chat / document (with its access check).
+        abort_if(in_array($file->purpose, ['chat_attachment', 'document'], true), 404);
         $disk = Storage::disk('local');
         abort_unless($disk->exists($file->storage_key), 404);
 

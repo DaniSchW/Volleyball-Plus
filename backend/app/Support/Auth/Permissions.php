@@ -5,6 +5,7 @@ namespace App\Support\Auth;
 use App\Enums\EventScope;
 use App\Enums\PersonRelation;
 use App\Enums\TeamRole;
+use App\Models\Document;
 use App\Models\Event;
 use App\Models\Person;
 use App\Models\PersonAccount;
@@ -256,6 +257,20 @@ class Permissions
         }
 
         return $this->isAdmin($member) || $this->isTrainerOfPerson($member, $person);
+    }
+
+    // ---- documents ----
+
+    /** Department documents: every member; team documents: who sees the team. */
+    public function canSeeDocument(TenantMember $member, Document $document): bool
+    {
+        return $document->team_id === null || ($document->team !== null && $this->canSeeTeam($member, $document->team));
+    }
+
+    /** Department documents: admins; team documents: also the team's trainers and organizers. */
+    public function canManageDocuments(TenantMember $member, ?Team $team): bool
+    {
+        return $team === null ? $this->isAdmin($member) : $this->canManageEventsOf($member, $team);
     }
 
     // ---- events ----

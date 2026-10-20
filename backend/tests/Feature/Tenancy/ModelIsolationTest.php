@@ -15,6 +15,7 @@ use App\Models\ChatMessage;
 use App\Models\ChatReadState;
 use App\Models\ChatTopic;
 use App\Models\CrossNomination;
+use App\Models\Document;
 use App\Models\Event;
 use App\Models\EventInvitee;
 use App\Models\EventResponse;
@@ -66,7 +67,7 @@ class ModelIsolationTest extends TestCase
         EventResponseLog::class, Opponent::class, Notice::class, CalendarFeed::class,
         NotificationPreference::class, League::class, CrossNomination::class, TrainingGroup::class, TrainingGroupMember::class,
         RefereeLicense::class,
-        RsvpRule::class, Task::class, TaskAssignment::class, Poll::class, PollTeam::class, PollOption::class, PollVote::class,
+        RsvpRule::class, Document::class, Task::class, TaskAssignment::class, Poll::class, PollTeam::class, PollOption::class, PollVote::class,
         Chat::class, ChatAttachment::class, ChatMember::class, ChatTopic::class, ChatMessage::class, ChatReadState::class,
         ActivityLog::class, CashBook::class, CashEntry::class, Hall::class, HallSlot::class, HallBooking::class,
     ];
@@ -140,6 +141,8 @@ class ModelIsolationTest extends TestCase
             HallSlot::create(['hall_id' => $hall->id, 'weekday' => 2, 'start_time' => '18:00:00', 'end_time' => '22:00:00']);
             HallBooking::create(['hall_id' => $hall->id, 'team_id' => $team->id, 'weekday' => 2, 'start_time' => '19:30:00', 'end_time' => '21:30:00']);
             NotificationPreference::create(['tenant_member_id' => $member->id, 'category' => 'notice', 'push' => false, 'email' => false]);
+            $docFile = StoredFile::create(['storage_key' => 'd', 'mime_type' => 'application/pdf', 'size_bytes' => 1, 'purpose' => 'document']);
+            Document::create(['team_id' => $team->id, 'title' => 'Aufbau', 'file_id' => $docFile->id, 'name' => 'aufbau.pdf', 'uploaded_by' => $member->id]);
             RsvpRule::create(['person_id' => $person->id, 'team_id' => $team->id, 'event_type' => 'training', 'weekdays' => [3], 'status' => 'yes', 'created_by' => $member->id]);
         });
 

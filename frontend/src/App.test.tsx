@@ -747,6 +747,43 @@ describe('after the event', () => {
   });
 });
 
+describe('documents', () => {
+  it('lists documents for everybody and per team and uploads one', async () => {
+    let sent: FormData | null = null;
+    const doc = (id: string, title: string, team: { id: string; name: string } | null, folder: string | null = null) => ({
+      id, title, description: null, folder, team, name: `${id}.pdf`, mime_type: 'application/pdf', size_bytes: 120000,
+      uploaded_at: '2026-10-20T08:00:00Z', url: `/api/v1/t/ssv-ulm/documents/${id}/file`, can_manage: false,
+    });
+    const list = {
+      can_upload: false, max_mb: 50,
+      teams: [{ id: 't1', name: 'Herren 1', can_upload: true }],
+      documents: [doc('d1', 'Vereinsmeldung 2026', null, 'Verband'), doc('d2', 'Aufbauanleitung Spieltag', { id: 't1', name: 'Herren 1' })],
+    };
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/documents': { body: { data: list } },
+      'POST /t/ssv-ulm/documents': (init) => {
+        sent = init.body as FormData;
+        return { status: 201, body: { data: doc('d3', 'Hallenordnung', { id: 't1', name: 'Herren 1' }) } };
+      },
+    });
+    renderAt('/ssv-ulm/documents');
+
+    expect(await screen.findByRole('link', { name: /Vereinsmeldung 2026/ })).toHaveAttribute('href', '/api/v1/t/ssv-ulm/documents/d1/file');
+    expect(screen.getByText('📂 Verband')).toBeInTheDocument();
+    expect(screen.getByText(/Aufbauanleitung Spieltag/)).toBeInTheDocument();
+    // A trainer of Herren 1 uploads only there (not "for everybody").
+    expect(screen.queryByLabelText('Sichtbar für')).not.toBeInTheDocument();
+    const file = new File(['%PDF-1.4'], 'hallenordnung.pdf', { type: 'application/pdf' });
+    fireEvent.change(screen.getByLabelText('Datei'), { target: { files: [file] } });
+    expect(screen.getByLabelText('Titel')).toHaveValue('hallenordnung');
+    fireEvent.click(screen.getByRole('button', { name: 'Hochladen' }));
+
+    await waitFor(() => expect(sent?.get('team_id')).toBe('t1'));
+    expect(sent!.get('title')).toBe('hallenordnung');
+  });
+});
+
 describe('hall form', () => {
   it('saves address fields and weekly training times', async () => {
     let sent: Record<string, unknown> = {};

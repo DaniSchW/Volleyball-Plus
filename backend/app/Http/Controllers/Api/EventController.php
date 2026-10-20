@@ -9,8 +9,10 @@ use App\Enums\RsvpStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Event;
 use App\Models\EventInvitee;
+use App\Models\EventSeries;
 use App\Models\EventTeam;
 use App\Models\Person;
+use App\Models\TaskTemplate;
 use App\Models\Team;
 use App\Models\TeamMembership;
 use App\Models\TenantMember;
@@ -20,6 +22,7 @@ use App\Support\Auth\Permissions;
 use App\Support\Events\EventPresenter;
 use App\Support\Events\EventService;
 use App\Support\Events\RsvpService;
+use App\Support\Tasks\TaskTemplates;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -80,7 +83,7 @@ class EventController extends Controller
         return response()->json(['data' => $this->presenter->detail($event, $member)]);
     }
 
-    public function store(Request $request, EventService $events): JsonResponse
+    public function store(Request $request, EventService $events, TaskTemplates $templates): JsonResponse
     {
         $member = $this->current->get();
         $data = $request->validate($this->rules(creating: true));
@@ -98,8 +101,23 @@ class EventController extends Controller
         $repeat = $data['repeat'] ?? null;
         abort_if($repeat !== null && ($data['type'] !== EventType::Training->value || $teams->count() !== 1), 422, __('events.series_only_training'));
         $this->checkTrainingGroup($data['training_group_id'] ?? null, $teams);
+        $template = null;
+        if (! empty($data['task_template_id'])) {
+            $template = TaskTemplate::query()->findOrFail($data['task_template_id']);
+            abort_unless($templates->canUse($member, $template), 403);
+        }
 
         $event = $events->create($data, $teams, $scope, $member, $repeat);
+
+        // Tasks from the template – for a series also for the events created later.
+        if ($template !== null) {
+            if ($event->series_id !== null) {
+                EventSeries::query()->whereKey($event->series_id)->update(['task_template_id' => $template->id]);
+                Event::query()->where('series_id', $event->series_id)->get()->each(fn (Event $e) => $templates->apply($template, $e));
+            } else {
+                $templates->apply($template, $event);
+            }
+        }
 
         return response()->json(['data' => $this->presenter->detail($event->refresh(), $member)], 201);
     }
@@ -289,6 +307,7 @@ class EventController extends Controller
             'guests_positions_only' => ['sometimes', 'boolean'],
             'min_participants' => ['sometimes', 'nullable', 'integer', 'between:1,500'],
             'training_group_id' => ['sometimes', 'nullable', 'string'],
+            'task_template_id' => ['sometimes', 'nullable', 'string'],
             'repeat' => ['sometimes', 'nullable', 'array'],
             'repeat.weekdays' => ['required_with:repeat', 'array', 'min:1'],
             'repeat.weekdays.*' => ['integer', 'between:1,7'],

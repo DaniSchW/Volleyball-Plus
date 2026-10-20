@@ -24,7 +24,11 @@
     "infoArea": "Infos",
     "noNotices": "Aktuell keine Hinweise.",
     "upcoming": "Anstehende Termine",
-    "noEvents": "Keine anstehenden Termine."
+    "noEvents": "Keine anstehenden Termine.",
+    "morning": "Guten Morgen, {{name}}!",
+    "day": "Hallo {{name}}!",
+    "evening": "Guten Abend, {{name}}!",
+    "tagline": "Hier siehst du, was als Nächstes ansteht."
   },
   "tenant": {
     "notFound": "Diese Abteilung gibt es nicht.",
@@ -44,7 +48,8 @@
     "saved": "Gespeichert.",
     "create": "Anlegen",
     "add": "Hinzufügen",
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "close": "Schließen"
   },
   "genders": {
     "male": "männlich",
@@ -601,7 +606,46 @@
     "helpWanted": "Helfer gesucht",
     "helpWantedNone": "Aktuell keine Helferdienste mit freien Plätzen.",
     "freePlaces_one": "{{count}} Platz frei",
-    "freePlaces_other": "{{count}} Plätze frei"
+    "freePlaces_other": "{{count}} Plätze frei",
+    "joined_one": "{{count}} dabei",
+    "joined_other": "{{count}} dabei",
+    "anyNumber": "beliebig",
+    "anyNumberShort": "beliebig",
+    "summaryOpen_one": "{{count}} Aufgabe · {{taken}} dabei",
+    "summaryOpen_other": "{{count}} Aufgaben · {{taken}} dabei",
+    "fromTemplate": "Aufgaben aus Vorlage",
+    "chooseTemplate": "Vorlage wählen …",
+    "applyTemplate": "Übernehmen",
+    "noTemplate": "Keine Vorlage",
+    "saveAsTemplate": "Aufgaben als Vorlage speichern",
+    "templateName": "Name der Vorlage (z. B. „Spieltag Damen 1“):",
+    "templateSaved": "Vorlage gespeichert.",
+    "templateHint": "Die Aufgaben der Vorlage werden mit dem Termin angelegt und lassen sich danach anpassen.",
+    "templateForSeries": "Die Aufgaben werden bei jedem Termin der Reihe angelegt – auch bei später erzeugten.",
+    "templates": {
+      "title": "Aufgaben-Vorlagen",
+      "hint": "Feste Aufgabenlisten, z. B. für Heimspieltage (Kasse, Verkauf, Linienrichter, Punkte zählen). Beim Anlegen eines Termins oder hier für mehrere Termine auf einmal übernehmen.",
+      "none": "Noch keine Vorlagen. Tipp: Bei einem Termin mit Aufgaben „Aufgaben als Vorlage speichern“ tippen.",
+      "new": "Neue Vorlage",
+      "edit": "Bearbeiten",
+      "delete": "Vorlage löschen",
+      "deleteConfirm": "Vorlage „{{name}}“ löschen? Termine behalten ihre Aufgaben.",
+      "name": "Name",
+      "namePlaceholder": "z. B. Spieltag Damen 1",
+      "for": "Für",
+      "forAll": "Alle Teams",
+      "items": "Aufgaben",
+      "itemN": "Aufgabe {{n}}",
+      "slotsN": "Anzahl für Aufgabe {{n}}",
+      "removeItem": "Aufgabe {{n}} entfernen",
+      "addItem": "Aufgabe hinzufügen",
+      "slotsHint": "Anzahl Personen optional – leer heißt beliebig viele.",
+      "applyToEvents": "Auf Termine übertragen",
+      "allHomeMatches_one": "Das Heimspiel auswählen",
+      "allHomeMatches_other": "Alle {{count}} Heimspiele auswählen",
+      "applyN_one": "Auf {{count}} Termin übertragen",
+      "applyN_other": "Auf {{count}} Termine übertragen"
+    }
   },
   "polls": {
     "create": "Umfrage erstellen",

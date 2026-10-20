@@ -6,10 +6,10 @@ import { useTranslation } from 'react-i18next';
 
 export function Card({ title, children, actions }: { title?: ReactNode; children: ReactNode; actions?: ReactNode }) {
   return (
-    <section className="rounded-xl border border-slate-200 bg-white p-4">
+    <section className="vo-rise rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgb(15_23_42/0.04),0_6px_20px_-8px_rgb(15_23_42/0.08)]">
       {(title || actions) && (
         <div className="mb-3 flex items-center justify-between gap-3">
-          {title && <h2 className="text-base font-semibold">{title}</h2>}
+          {title && <h2 className="text-base font-semibold tracking-tight text-slate-900">{title}</h2>}
           {actions}
         </div>
       )}
@@ -20,8 +20,8 @@ export function Card({ title, children, actions }: { title?: ReactNode; children
 
 export function PageTitle({ children }: { children: ReactNode }) {
   return (
-    <h1 className="mb-4 flex items-center gap-2 text-xl font-semibold">
-      <span aria-hidden="true" className="h-6 w-1.5 shrink-0 rounded-full bg-ball-400" />
+    <h1 className="mb-4 flex items-center gap-2.5 text-2xl font-bold tracking-tight text-slate-900">
+      <span aria-hidden="true" className="h-7 w-1.5 shrink-0 rounded-full bg-gradient-to-b from-ball-300 to-ball-500" />
       {children}
     </h1>
   );
@@ -31,15 +31,15 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primar
 
 export function Button({ variant = 'primary', className = '', ...props }: ButtonProps) {
   const styles = {
-    primary: 'bg-brand-700 text-white hover:bg-brand-600',
-    secondary: 'border border-slate-300 bg-white text-slate-800 hover:bg-slate-50',
+    primary: 'bg-gradient-to-b from-brand-600 to-brand-700 text-white shadow-sm shadow-brand-700/30 hover:from-brand-500 hover:to-brand-600',
+    secondary: 'border border-slate-300 bg-white text-slate-800 shadow-sm hover:border-slate-400 hover:bg-slate-50',
     danger: 'border border-red-200 bg-white text-red-700 hover:bg-red-50',
   }[variant];
 
   return (
     <button
       type="button"
-      className={`inline-flex min-h-11 items-center justify-center rounded-lg px-4 text-sm font-medium disabled:opacity-50 ${styles} ${className}`}
+      className={`inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl px-4 text-sm font-semibold transition active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 ${styles} ${className}`}
       {...props}
     />
   );
@@ -54,7 +54,7 @@ export function Field({ label, hint, ...props }: InputHTMLAttributes<HTMLInputEl
       </label>
       <input
         id={id}
-        className="block min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base disabled:bg-slate-100"
+        className="block min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-base shadow-[inset_0_1px_1px_rgb(15_23_42/0.03)] transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15 focus:outline-none disabled:bg-slate-100"
         {...props}
       />
       {hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}
@@ -69,7 +69,7 @@ export function Select({ label, children, ...props }: SelectHTMLAttributes<HTMLS
       <label htmlFor={id} className="mb-1 block text-sm font-medium text-slate-700">
         {label}
       </label>
-      <select id={id} className="block min-h-11 w-full rounded-lg border border-slate-300 bg-white px-3 text-base" {...props}>
+      <select id={id} className="block min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-base transition focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15 focus:outline-none" {...props}>
         {children}
       </select>
     </div>
@@ -78,21 +78,26 @@ export function Select({ label, children, ...props }: SelectHTMLAttributes<HTMLS
 
 export function Toggle({ label, checked, onChange, disabled }: { label: string; checked: boolean; onChange: (value: boolean) => void; disabled?: boolean }) {
   return (
-    <label className="flex min-h-11 items-center justify-between gap-3 text-sm">
+    <label className={`flex min-h-11 items-center justify-between gap-3 text-sm ${disabled ? 'opacity-60' : 'cursor-pointer'}`}>
       <span>{label}</span>
-      <input type="checkbox" className="size-5 accent-brand-700" checked={checked} disabled={disabled} onChange={(e) => onChange(e.target.checked)} />
+      {/* A switch: the real checkbox stays for screen readers and keyboards. */}
+      <input type="checkbox" className="peer sr-only" checked={checked} disabled={disabled} onChange={(e) => onChange(e.target.checked)} />
+      <span
+        aria-hidden="true"
+        className="relative h-7 w-12 shrink-0 rounded-full bg-slate-300 transition peer-checked:bg-brand-600 peer-focus-visible:ring-4 peer-focus-visible:ring-brand-500/30 after:absolute after:left-0.5 after:top-0.5 after:size-6 after:rounded-full after:bg-white after:shadow after:transition peer-checked:after:translate-x-5"
+      />
     </label>
   );
 }
 
 export function Notice({ tone = 'info', children }: { tone?: 'info' | 'success' | 'error'; children: ReactNode }) {
   const styles = {
-    info: 'border-slate-200 bg-slate-50 text-slate-700',
-    success: 'border-green-200 bg-green-50 text-green-800',
+    info: 'border-brand-100 bg-brand-50/60 text-slate-700',
+    success: 'border-emerald-200 bg-emerald-50 text-emerald-800',
     error: 'border-red-200 bg-red-50 text-red-800',
   }[tone];
   return (
-    <p role={tone === 'error' ? 'alert' : 'status'} className={`rounded-lg border p-3 text-sm ${styles}`}>
+    <p role={tone === 'error' ? 'alert' : 'status'} className={`rounded-xl border p-3 text-sm ${styles}`}>
       {children}
     </p>
   );
@@ -111,7 +116,7 @@ export function Avatar({ url, name, size = 40 }: { url: string | null; name: str
   ) : (
     <span
       aria-hidden="true"
-      className="inline-flex shrink-0 items-center justify-center rounded-full bg-brand-50 text-sm font-semibold text-brand-700"
+      className="inline-flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-100 to-brand-50 text-sm font-semibold text-brand-700 ring-1 ring-brand-100"
       style={{ width: size, height: size }}
     >
       {initials}

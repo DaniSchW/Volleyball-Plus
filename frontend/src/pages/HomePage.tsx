@@ -8,12 +8,22 @@ import { useTenantMe, useTenantSlug } from '../lib/queries';
 
 /** Start page: notice area on top, then the reply list of upcoming events. */
 export function HomePage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const slug = useTenantSlug();
   const me = useTenantMe();
 
+  const firstName = me.data?.persons.find((p) => p.relation !== 'guardian')?.first_name;
+  const hour = new Date().getHours();
+  const greeting = t(hour < 11 ? 'home.morning' : hour < 18 ? 'home.day' : 'home.evening', { name: firstName ?? '' }).replace(/,?\s*!$/, '!');
+
   return (
     <div className="space-y-6">
+      <div className="vo-rise relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-700 via-brand-600 to-sky-500 p-5 text-white shadow-lg shadow-brand-700/20">
+        <span aria-hidden="true" className="absolute -right-6 -top-6 text-8xl opacity-20">🏐</span>
+        <p className="text-sm text-white/80">{new Intl.DateTimeFormat(i18n.resolvedLanguage ?? 'de', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date())}</p>
+        <p className="mt-1 text-2xl font-bold tracking-tight">{greeting}</p>
+        <p className="mt-1 text-sm text-white/85">{t('home.tagline')}</p>
+      </div>
       <NoticesArea />
       <OpenPolls />
       <section aria-labelledby="upcoming-heading">

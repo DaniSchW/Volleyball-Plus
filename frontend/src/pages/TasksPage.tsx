@@ -6,6 +6,7 @@ import { formatDay, formatTime } from '../lib/dates';
 import { useTenantPath, useTenantSlug } from '../lib/queries';
 import { Card, Loading, Notice, PageTitle } from '../components/ui';
 import { TypeIcon } from '../components/events/EventCard';
+import { TaskTemplates } from '../components/tasks/TaskTemplates';
 
 /** My upcoming tasks (and my children's) and helper services with free places. */
 export function TasksPage() {
@@ -39,6 +40,7 @@ export function TasksPage() {
           ))}
         </ul>
       </Card>
+      <TaskTemplates />
       <Card title={t('tasks.helpWanted')}>
         {open.length === 0 && <p className="text-sm text-slate-500">{t('tasks.helpWantedNone')}</p>}
         <ul className="divide-y divide-slate-100">

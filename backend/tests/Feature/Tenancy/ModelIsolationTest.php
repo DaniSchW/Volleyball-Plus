@@ -43,6 +43,7 @@ use App\Models\RsvpRule;
 use App\Models\StoredFile;
 use App\Models\Task;
 use App\Models\TaskAssignment;
+use App\Models\TaskTemplate;
 use App\Models\Team;
 use App\Models\TeamMembership;
 use App\Models\TenantMember;
@@ -67,7 +68,7 @@ class ModelIsolationTest extends TestCase
         EventResponseLog::class, Opponent::class, Notice::class, CalendarFeed::class,
         NotificationPreference::class, League::class, CrossNomination::class, TrainingGroup::class, TrainingGroupMember::class,
         RefereeLicense::class,
-        RsvpRule::class, Document::class, Task::class, TaskAssignment::class, Poll::class, PollTeam::class, PollOption::class, PollVote::class,
+        RsvpRule::class, Document::class, TaskTemplate::class, Task::class, TaskAssignment::class, Poll::class, PollTeam::class, PollOption::class, PollVote::class,
         Chat::class, ChatAttachment::class, ChatMember::class, ChatTopic::class, ChatMessage::class, ChatReadState::class,
         ActivityLog::class, CashBook::class, CashEntry::class, Hall::class, HallSlot::class, HallBooking::class,
     ];
@@ -143,6 +144,7 @@ class ModelIsolationTest extends TestCase
             NotificationPreference::create(['tenant_member_id' => $member->id, 'category' => 'notice', 'push' => false, 'email' => false]);
             $docFile = StoredFile::create(['storage_key' => 'd', 'mime_type' => 'application/pdf', 'size_bytes' => 1, 'purpose' => 'document']);
             Document::create(['team_id' => $team->id, 'title' => 'Aufbau', 'file_id' => $docFile->id, 'name' => 'aufbau.pdf', 'uploaded_by' => $member->id]);
+            TaskTemplate::create(['team_id' => $team->id, 'name' => 'Spieltag', 'items' => [['title' => 'Kasse', 'description' => null, 'slots' => 2]], 'created_by' => $member->id]);
             RsvpRule::create(['person_id' => $person->id, 'team_id' => $team->id, 'event_type' => 'training', 'weekdays' => [3], 'status' => 'yes', 'created_by' => $member->id]);
         });
 

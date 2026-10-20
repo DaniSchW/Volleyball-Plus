@@ -21,7 +21,30 @@ body,
 }
 
 body {
-  background-color: #f3f6fb;
+  /* Light court-blue wash at the top, fading into the page colour. */
+  background:
+    radial-gradient(1200px 380px at 50% -120px, rgb(37 99 235 / 0.1), transparent 70%),
+    #f3f6fb;
+  background-attachment: fixed;
   color: var(--color-slate-900);
   -webkit-tap-highlight-color: transparent;
 }
+
+/* Focus ring for keyboard users everywhere. */
+:where(a, button, input, select, textarea, summary):focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+}
+
+/* Gentle entrance for cards and lists. */
+@keyframes vo-rise {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.vo-rise {
+  animation: vo-rise 0.18s ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .vo-rise { animation: none; }
+}
+

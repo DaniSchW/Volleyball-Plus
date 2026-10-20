@@ -51,7 +51,8 @@ class TaskController extends Controller
                 'mine' => $task->assignments->whereIn('person_id', $persons)->map(fn ($a) => $a->person?->first_name)->values()->all(),
             ]);
             $mine = $tasks->filter(fn ($t) => $t['mine'] !== []);
-            $open = $tasks->sum(fn ($t) => max(0, $t['slots'] - $t['taken']));
+            // Without a limit a task always has room.
+            $open = $tasks->sum(fn ($t) => $t['slots'] === null ? 1 : max(0, $t['slots'] - $t['taken']));
 
             return [
                 'event' => [
@@ -83,7 +84,7 @@ class TaskController extends Controller
         $data = $request->validate($this->rules(required: false));
 
         $taken = $task->assignments()->count();
-        if (isset($data['slots']) && $data['slots'] < $taken) {
+        if (($data['slots'] ?? null) !== null && $data['slots'] < $taken) {
             throw ValidationException::withMessages(['slots' => __('tasks.slots_below_taken', ['count' => $taken])]);
         }
         $task->fill($data)->save();
@@ -129,7 +130,7 @@ class TaskController extends Controller
         return [
             'title' => [$required ? 'required' : 'sometimes', 'string', 'max:120'],
             'description' => ['sometimes', 'nullable', 'string', 'max:500'],
-            'slots' => ['sometimes', 'integer', 'between:1,99'],
+            'slots' => ['sometimes', 'nullable', 'integer', 'between:1,99'],
         ];
     }
 }

@@ -54,7 +54,7 @@ class EventPresenter
         $invited = EventInvitee::query()->whereIn('event_id', $ids)
             ->selectRaw('event_id, count(*) as n')->groupBy('event_id')->toBase()->pluck('n', 'event_id');
 
-        $taskSlots = Task::query()->whereIn('event_id', $ids)->selectRaw('event_id, sum(slots) as slots, count(*) as n')->groupBy('event_id')->toBase()->get()->keyBy('event_id');
+        $taskSlots = Task::query()->whereIn('event_id', $ids)->selectRaw('event_id, sum(slots) as slots, count(*) as n, sum(case when slots is null then 1 else 0 end) as open_ended')->groupBy('event_id')->toBase()->get()->keyBy('event_id');
         $taskTaken = TaskAssignment::query()->join('tasks', 'tasks.id', '=', 'task_assignments.task_id')
             ->whereIn('tasks.event_id', $ids)->selectRaw('tasks.event_id as event_id, count(*) as n')->groupBy('tasks.event_id')->toBase()->pluck('n', 'event_id');
 
@@ -73,6 +73,8 @@ class EventPresenter
         ), 'task_summary' => isset($taskSlots[$event->id]) ? [
             'count' => (int) $taskSlots[$event->id]->n,
             'slots' => (int) $taskSlots[$event->id]->slots,
+            // Tasks without a limit (any number of people).
+            'open_ended' => (int) $taskSlots[$event->id]->open_ended,
             'taken' => (int) ($taskTaken[$event->id] ?? 0),
         ] : null])->values()->all();
     }

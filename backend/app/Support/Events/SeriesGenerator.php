@@ -7,6 +7,8 @@ use App\Enums\EventType;
 use App\Models\Event;
 use App\Models\EventSeries;
 use App\Models\EventTeam;
+use App\Models\TaskTemplate;
+use App\Support\Tasks\TaskTemplates;
 use App\Support\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Carbon;
@@ -128,6 +130,9 @@ class SeriesGenerator
         ]);
         EventTeam::create(['event_id' => $event->id, 'team_id' => $series->team_id]);
         $this->invitees->syncEvent($event);
+        if ($series->task_template_id !== null && ($template = TaskTemplate::query()->find($series->task_template_id)) !== null) {
+            app(TaskTemplates::class)->apply($template, $event);
+        }
     }
 
     /**

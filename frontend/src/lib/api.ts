@@ -359,7 +359,8 @@ export interface EventSummary {
   can_manage: boolean;
   reason_required: { no: boolean; maybe: boolean };
   training_group: { id: string; name: string } | null;
-  task_summary: { count: number; slots: number; taken: number } | null;
+  /** slots: places of limited tasks; open_ended: tasks without a limit */
+  task_summary: { count: number; slots: number; taken: number; open_ended?: number } | null;
   my: MyReply[];
 }
 
@@ -555,7 +556,8 @@ export interface EventTask {
   id: string;
   title: string;
   description: string | null;
-  slots: number;
+  /** null = any number of people */
+  slots: number | null;
   assignees: { person_id: string; name: string; mine: boolean }[];
   can_take_for: { person_id: string; name: string }[];
 }
@@ -759,3 +761,23 @@ export interface DocumentList {
   documents: DocumentItem[];
   max_mb: number;
 }
+
+// ---- task templates ----
+
+export interface TaskTemplateItem { title: string; description: string | null; slots: number | null }
+
+export interface TaskTemplate {
+  id: string;
+  name: string;
+  /** null = for the whole department */
+  team: { id: string; name: string } | null;
+  items: TaskTemplateItem[];
+  can_change: boolean;
+}
+
+export interface TaskTemplateList {
+  templates: TaskTemplate[];
+  teams: { id: string; name: string }[];
+  can_create_for_all: boolean;
+}
+

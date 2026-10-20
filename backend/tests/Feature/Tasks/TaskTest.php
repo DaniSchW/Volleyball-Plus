@@ -101,7 +101,7 @@ class TaskTest extends TestCase
         $this->loginAs($this->organizer)->patchJson($this->url("tasks/{$task['id']}"), ['slots' => 1])->assertUnprocessable();
 
         $list = $this->loginAs($this->paul)->getJson($this->url('events'))->json('data.0.task_summary');
-        $this->assertSame(['count' => 1, 'slots' => 3, 'taken' => 2], $list);
+        $this->assertSame(['count' => 1, 'slots' => 3, 'open_ended' => 0, 'taken' => 2], $list);
     }
 
     public function test_children_take_tasks_only_with_their_parents_permission(): void
@@ -160,5 +160,56 @@ class TaskTest extends TestCase
         // Helpers see only their own count, organizers none (no competition).
         $this->assertSame(['Mia Mit'], array_column(array_column($this->loginAs($this->mia)->getJson($url)->json('data.rows'), 'person'), 'name'));
         $this->assertSame([], $this->loginAs($this->organizer)->getJson($url)->json('data.rows'));
+    }
+
+    public function test_number_of_people_is_optional(): void
+    {
+        $event = $this->event('helper');
+        $task = collect($this->loginAs($this->organizer)->postJson($this->url("events/{$event['id']}/tasks"), ['title' => 'Kuchen backen'])
+            ->assertCreated()->json('data.tasks'))->firstWhere('title', 'Kuchen backen');
+        $this->assertNull($task['slots']);
+        $this->take($this->paul, $task['id'], $this->paul)->assertOk();
+        $this->take($this->mia, $task['id'], $this->mia)->assertOk();
+        $this->assertEquals(['count' => 1, 'slots' => 0, 'taken' => 2, 'open_ended' => 1], $this->loginAs($this->paul)->getJson($this->url("events/{$event['id']}"))->json('data.task_summary'));
+        // Helper services with unlimited tasks always have room.
+        $this->assertSame($event['id'], $this->loginAs($this->organizer)->getJson($this->url('tasks'))->json('data.0.event.id'));
+    }
+
+    public function test_task_templates(): void
+    {
+        $match = $this->event();
+        $this->addTask($match['id'], 'Kasse am Eingang', 2);
+        $this->addTask($match['id'], 'Linienrichter', 2);
+
+        // Saved from the event; players cannot.
+        $this->loginAs($this->paul)->postJson($this->url('task-templates'), ['name' => 'x', 'team_id' => $this->team->id, 'event_id' => $match['id']])->assertForbidden();
+        $template = $this->loginAs($this->organizer)->postJson($this->url('task-templates'), ['name' => 'Spieltag Herren 1', 'team_id' => $this->team->id, 'event_id' => $match['id']])
+            ->assertCreated()->json('data');
+        $this->assertSame([['title' => 'Kasse am Eingang', 'description' => null, 'slots' => 2], ['title' => 'Linienrichter', 'description' => null, 'slots' => 2]], $template['items']);
+        // For the whole department only admins.
+        $this->loginAs($this->organizer)->postJson($this->url('task-templates'), ['name' => 'Alle', 'items' => [['title' => 'Aufbau']]])->assertForbidden();
+
+        // Edited: more tasks, one without a number.
+        $this->loginAs($this->organizer)->patchJson($this->url("task-templates/{$template['id']}"), ['items' => [
+            ['title' => 'Kasse am Eingang', 'slots' => 2], ['title' => 'Verkauf', 'slots' => 3], ['title' => 'Punkte zählen', 'slots' => 1], ['title' => 'Aufräumen'],
+        ]])->assertOk();
+
+        // Taken over when creating the next match …
+        $next = $this->loginAs($this->organizer)->postJson($this->url('events'), [
+            'type' => 'match', 'team_ids' => [$this->team->id], 'starts_at' => '2026-11-07T14:00', 'ends_at' => '2026-11-07T18:00', 'task_template_id' => $template['id'],
+        ])->assertCreated()->json('data');
+        $this->assertSame(['Kasse am Eingang', 'Verkauf', 'Punkte zählen', 'Aufräumen'], array_column($next['tasks'], 'title'));
+        $this->assertSame([2, 3, 1, null], array_column($next['tasks'], 'slots'));
+
+        // … and into several existing ones at once; existing titles are skipped.
+        $later = $this->event('match', '2026-11-21');
+        $this->loginAs($this->organizer)->postJson($this->url("task-templates/{$template['id']}/apply"), ['event_ids' => [$match['id'], $later['id']]])
+            ->assertOk()->assertJsonPath('data', ['events' => 2, 'tasks' => 7]);
+        $this->assertSame(['Kasse am Eingang', 'Linienrichter', 'Verkauf', 'Punkte zählen', 'Aufräumen'],
+            array_column($this->loginAs($this->organizer)->getJson($this->url("events/{$match['id']}"))->json('data.tasks'), 'title'));
+
+        $this->assertSame(['Spieltag Herren 1'], array_column($this->loginAs($this->organizer)->getJson($this->url('task-templates'))->json('data.templates'), 'name'));
+        $this->loginAs($this->paul)->getJson($this->url('task-templates'))->assertOk()->assertJsonPath('data.templates', []);
+        $this->loginAs($this->organizer)->deleteJson($this->url("task-templates/{$template['id']}"))->assertOk();
     }
 }

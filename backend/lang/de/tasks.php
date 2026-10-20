@@ -1,6 +1,8 @@
 <?php
 
 return [
+    'template_empty' => 'Die Vorlage enthält keine Aufgaben.',
+    'template_applied' => ':tasks Aufgaben in :events Termine übernommen.',
     'not_allowed' => 'Du darfst für diese Person keine Aufgaben übernehmen.',
     'not_invited' => 'Diese Person ist zu dem Termin nicht eingeladen.',
     'closed' => 'Der Termin hat schon begonnen oder ist abgesagt.',

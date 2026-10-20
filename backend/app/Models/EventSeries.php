@@ -18,7 +18,7 @@ class EventSeries extends Model
 
     protected $fillable = [
         'team_id', 'title', 'description', 'weekdays', 'interval_weeks', 'starts_on', 'ends_on', 'start_time', 'end_time',
-        'location_name', 'address', 'rsvp_deadline_minutes', 'max_participants', 'min_participants', 'guests_allowed', 'guests_positions_only', 'position_limits', 'generated_until', 'created_by', 'training_group_id',
+        'location_name', 'address', 'rsvp_deadline_minutes', 'max_participants', 'min_participants', 'guests_allowed', 'guests_positions_only', 'position_limits', 'generated_until', 'created_by', 'training_group_id', 'task_template_id',
     ];
 
     protected function casts(): array

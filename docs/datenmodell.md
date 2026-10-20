@@ -461,3 +461,5 @@ erDiagram
 - `accounts`: `last_active_at` (zuletzt genutzt), `deletion_warned_at` (Löschung wegen Inaktivität angekündigt).
 - `accounts`: `marketing_opt_in_at` (Einwilligung in Werbe-E-Mails, null = keine).
 - `settings` `platform.legal`: Betreiberangaben für Impressum, Datenschutz und AGB.
+- `tasks.slots` nullable (null = beliebig viele).
+- 🏢 `task_templates` ✅: `team_id` null (null = alle Teams), `name`, `items` JSON (Titel, Beschreibung, Anzahl), `created_by`; `event_series.task_template_id` (Aufgaben für jeden Termin der Reihe).

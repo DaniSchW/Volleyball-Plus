@@ -2,7 +2,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams, useSearchParams } from 'react-router';
-import { api, errorText, patch, post, POSITIONS, type EventDetail, type EventType, type Opponent, type Position, type Team, type TrainingGroup } from '../lib/api';
+import { api, errorText, patch, post, POSITIONS, type EventDetail, type EventType, type Opponent, type Position, type TaskTemplateList, type Team, type TrainingGroup } from '../lib/api';
 import { addMinutes, formatDay, formatTime, toLocalInput } from '../lib/dates';
 import { HallSuggestions } from '../components/events/HallSuggestions';
 import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
@@ -103,6 +103,13 @@ export function EventFormPage() {
   const set = <K extends keyof FormState>(key: K, value: FormState[K]) => setForm((f) => ({ ...f, [key]: value }));
 
   const manageable = (teams.data ?? []).filter((team) => team.can_invite);
+  // New events can take over a task template ("Spieltag Damen 1").
+  const [taskTemplate, setTaskTemplate] = useState('');
+  const templates = useQuery({
+    queryKey: ['task-templates', slug],
+    queryFn: async () => (await api<{ data: TaskTemplateList }>(tp('task-templates'))).data,
+    enabled: !eventId,
+  });
 
   const save = useMutation({
     mutationFn: () => {
@@ -131,6 +138,7 @@ export function EventFormPage() {
         body.is_home = form.is_home === '' ? null : form.is_home === 'home';
       }
       if (!eventId) {
+        body.task_template_id = taskTemplate || null;
         body.scope = form.allTeams ? 'tenant' : 'team';
         body.team_ids = form.allTeams ? [] : form.team_ids;
       }
@@ -339,6 +347,18 @@ export function EventFormPage() {
           </div>
         </div>
       </Card>
+
+      {!eventId && (templates.data?.templates.length ?? 0) > 0 && (
+        <Card title={t('tasks.title')}>
+          <Select label={t('tasks.fromTemplate')} value={taskTemplate} onChange={(e) => setTaskTemplate(e.target.value)}>
+            <option value="">{t('tasks.noTemplate')}</option>
+            {templates.data!.templates.map((tpl) => (
+              <option key={tpl.id} value={tpl.id}>{tpl.name} ({tpl.items.map((i) => i.title).join(', ')})</option>
+            ))}
+          </Select>
+          <p className="mt-1 text-xs text-slate-500">{form.repeat ? t('tasks.templateForSeries') : t('tasks.templateHint')}</p>
+        </Card>
+      )}
 
       {save.isError && <Notice tone="error">{errorText(save.error, t('errors.generic'))}</Notice>}
       <Button type="submit" className="w-full" disabled={save.isPending}>{t('common.save')}</Button>

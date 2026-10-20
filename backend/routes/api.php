@@ -28,6 +28,7 @@ use App\Http\Controllers\Api\PushController;
 use App\Http\Controllers\Api\RsvpRuleController;
 use App\Http\Controllers\Api\StatisticsController;
 use App\Http\Controllers\Api\TaskController;
+use App\Http\Controllers\Api\TaskTemplateController;
 use App\Http\Controllers\Api\TeamController;
 use App\Http\Controllers\Api\TenantController;
 use App\Http\Controllers\Api\TenantMeController;
@@ -179,6 +180,11 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
 
         Route::get('tasks', [TaskController::class, 'index']);
         Route::post('events/{event}/tasks', [TaskController::class, 'store']);
+        Route::get('task-templates', [TaskTemplateController::class, 'index']);
+        Route::post('task-templates', [TaskTemplateController::class, 'store']);
+        Route::patch('task-templates/{template}', [TaskTemplateController::class, 'update']);
+        Route::delete('task-templates/{template}', [TaskTemplateController::class, 'destroy']);
+        Route::post('task-templates/{template}/apply', [TaskTemplateController::class, 'apply']);
         Route::patch('tasks/{task}', [TaskController::class, 'update']);
         Route::delete('tasks/{task}', [TaskController::class, 'destroy']);
         Route::post('tasks/{task}/assignments', [TaskController::class, 'take']);

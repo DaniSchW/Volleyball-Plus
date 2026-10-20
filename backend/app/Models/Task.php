@@ -19,7 +19,8 @@ class Task extends Model
 
     protected $fillable = ['event_id', 'title', 'description', 'slots', 'sort_order'];
 
-    protected $attributes = ['slots' => 1, 'sort_order' => 0];
+    // slots null = as many people as want.
+    protected $attributes = ['sort_order' => 0];
 
     protected function casts(): array
     {

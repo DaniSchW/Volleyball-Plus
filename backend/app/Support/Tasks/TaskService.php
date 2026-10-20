@@ -43,7 +43,7 @@ class TaskService
             if ($existing !== null) {
                 return $existing;
             }
-            if (TaskAssignment::query()->where('task_id', $task->id)->count() >= $locked->slots) {
+            if ($locked->slots !== null && TaskAssignment::query()->where('task_id', $task->id)->count() >= $locked->slots) {
                 throw ValidationException::withMessages(['task' => __('tasks.full')]);
             }
 

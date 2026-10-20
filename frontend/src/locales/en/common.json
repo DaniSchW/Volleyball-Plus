@@ -24,7 +24,11 @@
     "infoArea": "Notices",
     "noNotices": "No notices at the moment.",
     "upcoming": "Upcoming events",
-    "noEvents": "No upcoming events."
+    "noEvents": "No upcoming events.",
+    "morning": "Good morning, {{name}}!",
+    "day": "Hello {{name}}!",
+    "evening": "Good evening, {{name}}!",
+    "tagline": "Here you see what is coming up next."
   },
   "tenant": {
     "notFound": "This department does not exist.",
@@ -44,7 +48,8 @@
     "saved": "Saved.",
     "create": "Create",
     "add": "Add",
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "close": "Close"
   },
   "genders": {
     "male": "male",
@@ -601,7 +606,46 @@
     "helpWanted": "Helpers wanted",
     "helpWantedNone": "No helper services with free places right now.",
     "freePlaces_one": "{{count}} place free",
-    "freePlaces_other": "{{count}} places free"
+    "freePlaces_other": "{{count}} places free",
+    "joined_one": "{{count}} in",
+    "joined_other": "{{count}} in",
+    "anyNumber": "any",
+    "anyNumberShort": "any",
+    "summaryOpen_one": "{{count}} task · {{taken}} in",
+    "summaryOpen_other": "{{count}} tasks · {{taken}} in",
+    "fromTemplate": "Tasks from template",
+    "chooseTemplate": "Choose template …",
+    "applyTemplate": "Take over",
+    "noTemplate": "No template",
+    "saveAsTemplate": "Save tasks as template",
+    "templateName": "Name of the template (e.g. “Match day women 1”):",
+    "templateSaved": "Template saved.",
+    "templateHint": "The template’s tasks are created with the event and can be adjusted afterwards.",
+    "templateForSeries": "The tasks are created for every event of the series – also for those created later.",
+    "templates": {
+      "title": "Task templates",
+      "hint": "Fixed task lists, e.g. for home match days (cash desk, sales, line judges, scoring). Take them over when creating an event or here into several events at once.",
+      "none": "No templates yet. Tip: tap “Save tasks as template” at an event with tasks.",
+      "new": "New template",
+      "edit": "Edit",
+      "delete": "Delete template",
+      "deleteConfirm": "Delete template “{{name}}”? Events keep their tasks.",
+      "name": "Name",
+      "namePlaceholder": "e.g. Match day women 1",
+      "for": "For",
+      "forAll": "All teams",
+      "items": "Tasks",
+      "itemN": "Task {{n}}",
+      "slotsN": "Number for task {{n}}",
+      "removeItem": "Remove task {{n}}",
+      "addItem": "Add task",
+      "slotsHint": "Number of people optional – empty means any number.",
+      "applyToEvents": "Take over into events",
+      "allHomeMatches_one": "Select the home match",
+      "allHomeMatches_other": "Select all {{count}} home matches",
+      "applyN_one": "Take over into {{count}} event",
+      "applyN_other": "Take over into {{count}} events"
+    }
   },
   "polls": {
     "create": "Create poll",

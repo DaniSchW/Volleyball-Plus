@@ -498,6 +498,48 @@ describe('tasks and polls', () => {
   });
 });
 
+describe('task templates', () => {
+  it('creates a template with optional numbers and takes it over into home matches', async () => {
+    let created: Record<string, unknown> = {};
+    let applied: Record<string, unknown> = {};
+    const template = { id: 'tt1', name: 'Spieltag Damen 1', team: { id: 't1', name: 'Damen 1' }, items: [{ title: 'Kasse', description: null, slots: 2 }, { title: 'Aufräumen', description: null, slots: null }], can_change: true };
+    const match = { ...EVENT, id: 'e7', type: 'match', title: 'Spiel gegen TSV', is_home: true, status: 'scheduled' };
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/tasks': { body: { data: [] } },
+      'GET /t/ssv-ulm/task-templates': { body: { data: { templates: [template], teams: [{ id: 't1', name: 'Damen 1' }], can_create_for_all: false } } },
+      'POST /t/ssv-ulm/task-templates': (init) => {
+        created = JSON.parse(String(init.body));
+        return { status: 201, body: { data: template } };
+      },
+      'GET /t/ssv-ulm/events?team=t1': { body: { data: [match], next_cursor: null } },
+      'POST /t/ssv-ulm/task-templates/tt1/apply': (init) => {
+        applied = JSON.parse(String(init.body));
+        return { body: { data: { events: 1, tasks: 2 }, message: '2 Aufgaben in 1 Termine übernommen.' } };
+      },
+    });
+    renderAt('/ssv-ulm/tasks');
+
+    expect(await screen.findByText('📋 Spieltag Damen 1')).toBeInTheDocument();
+    expect(screen.getByText('Kasse ×2')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Neue Vorlage' }));
+    fireEvent.change(screen.getByLabelText('Name'), { target: { value: 'Heimspieltag' } });
+    fireEvent.change(screen.getByLabelText('Aufgabe 1'), { target: { value: 'Linienrichter' } });
+    fireEvent.change(screen.getByLabelText('Anzahl für Aufgabe 1'), { target: { value: '2' } });
+    fireEvent.click(screen.getByRole('button', { name: '+ Aufgabe hinzufügen' }));
+    fireEvent.change(screen.getByLabelText('Aufgabe 2'), { target: { value: 'Kuchen' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Speichern' }));
+    await waitFor(() => expect(created).toEqual({ name: 'Heimspieltag', team_id: 't1', items: [{ title: 'Linienrichter', slots: 2 }, { title: 'Kuchen', slots: null }] }));
+
+    fireEvent.click(screen.getByRole('button', { name: 'Auf Termine übertragen' }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Das Heimspiel auswählen' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Auf 1 Termin übertragen' }));
+    await waitFor(() => expect(applied).toEqual({ event_ids: ['e7'] }));
+    expect(await screen.findByText('2 Aufgaben in 1 Termine übernommen.')).toBeInTheDocument();
+  });
+});
+
 describe('chat', () => {
   it('shows messages and sends a reply', async () => {
     let sent: Record<string, unknown> = {};

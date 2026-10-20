@@ -26,6 +26,8 @@ class Account extends Authenticatable
         return [
             'is_platform_admin' => 'boolean',
             'last_login_at' => 'datetime',
+            'last_active_at' => 'datetime',
+            'deletion_warned_at' => 'datetime',
         ];
     }
 
@@ -42,6 +44,32 @@ class Account extends Authenticatable
     public function sessions(): HasMany
     {
         return $this->hasMany(AccountSession::class);
+    }
+
+    /** Listed in SUPERADMIN_EMAILS: clubs and all accounts. */
+    public function isSuperadmin(): bool
+    {
+        return in_array($this->email, config('platform.superadmins'), true);
+    }
+
+    /** Platform access (approve clubs): platform admins and superadmins. */
+    public function isPlatformAdmin(): bool
+    {
+        return (bool) $this->is_platform_admin || $this->isSuperadmin();
+    }
+
+    /** Deleted accounts keep their row with an invalid address. */
+    public function isDeleted(): bool
+    {
+        return str_ends_with($this->email, '@invalid');
+    }
+
+    /** Used the app (throttled to once an hour); a pending deletion notice is void. */
+    public function markActive(): void
+    {
+        if ($this->last_active_at === null || $this->last_active_at->lessThan(now()->subHour()) || $this->deletion_warned_at !== null) {
+            $this->forceFill(['last_active_at' => now(), 'deletion_warned_at' => null])->save();
+        }
     }
 
     public function getRememberTokenName(): ?string

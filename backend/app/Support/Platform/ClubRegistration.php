@@ -67,7 +67,8 @@ class ClubRegistration
         });
 
         $platformUrl = rtrim((string) config('app.url'), '/').'/platform';
-        foreach (Account::query()->where('is_platform_admin', true)->get() as $admin) {
+        $admins = Account::query()->where('is_platform_admin', true)->orWhereIn('email', config('platform.superadmins'))->get();
+        foreach ($admins as $admin) {
             Mail::to($admin->email)->locale($admin->locale)->send(new NotificationMail(
                 null,
                 __('platform.mail.new.title', ['name' => $tenant->name], $admin->locale),

@@ -37,7 +37,7 @@ class SessionManager
             'ip' => $request->ip(),
         ]);
 
-        $account->forceFill(['last_login_at' => $now])->save();
+        $account->forceFill(['last_login_at' => $now, 'last_active_at' => $now, 'deletion_warned_at' => null])->save();
 
         return [$session, $token];
     }
@@ -71,6 +71,7 @@ class SessionManager
             ])->save();
             $request->attributes->set(self::REFRESH_ATTRIBUTE, $token);
         }
+        $session->account?->markActive();
 
         $request->attributes->set(self::REQUEST_ATTRIBUTE, $session);
 

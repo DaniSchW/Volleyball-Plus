@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AccountAdminController;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\ActivityController;
 use App\Http\Controllers\Api\AuthController;
@@ -55,6 +56,8 @@ Route::middleware('auth')->group(function () {
     Route::post('platform/clubs/{id}/reactivate', [PlatformController::class, 'reactivate']);
     Route::delete('platform/clubs/{id}', [PlatformController::class, 'reject']);
     Route::post('platform/clubs/{id}/delete', [PlatformController::class, 'destroy']);
+    Route::get('platform/accounts', [AccountAdminController::class, 'index']);
+    Route::post('platform/accounts/{id}/delete', [AccountAdminController::class, 'destroy']);
 
     Route::get('push/key', [PushController::class, 'key']);
     Route::post('push/subscriptions', [PushController::class, 'subscribe']);

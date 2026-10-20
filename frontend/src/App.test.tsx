@@ -920,6 +920,38 @@ describe('platform', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Freigeben' }));
     await waitFor(() => expect(approved).toBe(true));
     expect(await screen.findByText('Aktiv (1)')).toBeInTheDocument();
+    expect(screen.queryByRole('tab', { name: 'Konten' })).not.toBeInTheDocument();
+  });
+
+  it('lets the superadmin see and delete accounts', async () => {
+    let deleted: Record<string, unknown> = {};
+    const row = (id: string, email: string, extra = {}) => ({
+      id, email, created_at: '2024-01-01T10:00:00Z', last_active_at: '2026-10-01T10:00:00Z', deletion_warned_at: null, deletion_due_at: null,
+      is_platform_admin: false, is_superadmin: false, clubs: [{ name: 'SSV Ulm Volleyball', slug: 'ssv-ulm', is_admin: false, active: true }], ...extra,
+    });
+    mockApi({
+      'GET /me': { body: { data: { ...ACCOUNT.data, email: 'service@example.org', is_platform_admin: true, is_superadmin: true } } },
+      'GET /platform/clubs': { body: { data: [] } },
+      'GET /platform/accounts?filter=all&page=1': { body: { data: [
+        row('a1', 'alt@example.org', { deletion_due_at: '2026-11-03T10:00:00Z' }),
+        row('a2', 'service@example.org', { is_superadmin: true, clubs: [] }),
+      ], meta: { total: 2, page: 1, last_page: 1 } } },
+      'POST /platform/accounts/a1/delete': (init) => {
+        deleted = JSON.parse(String(init.body));
+        return { body: { message: 'Das Konto wurde gelöscht.' } };
+      },
+    });
+    vi.spyOn(window, 'prompt').mockReturnValue('alt@example.org');
+    renderAt('/platform');
+
+    fireEvent.click(await screen.findByRole('tab', { name: 'Konten' }));
+    expect(await screen.findByText('2 Konten')).toBeInTheDocument();
+    expect(screen.getByText(/Löschung angekündigt – fällig am/)).toBeInTheDocument();
+    // The own (superadmin) account has no delete button.
+    expect(screen.getAllByRole('button', { name: 'Löschen' })).toHaveLength(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Löschen' }));
+    await waitFor(() => expect(deleted).toEqual({ confirm: 'alt@example.org' }));
+    expect(await screen.findByText('Das Konto wurde gelöscht.')).toBeInTheDocument();
   });
 });
 

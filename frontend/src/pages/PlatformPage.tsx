@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
@@ -5,6 +6,7 @@ import { api, del, errorText, post, type PlatformClub } from '../lib/api';
 import { formatDateTime } from '../lib/dates';
 import { useAccount } from '../lib/queries';
 import { Button, Card, Loading, Notice } from '../components/ui';
+import { PlatformAccounts } from '../components/platform/PlatformAccounts';
 
 /**
  * Platform admins: approve clubs that registered, suspend or reactivate
@@ -14,6 +16,7 @@ export function PlatformPage() {
   const { t } = useTranslation();
   const account = useAccount();
   const queryClient = useQueryClient();
+  const [tab, setTab] = useState<'clubs' | 'accounts'>('clubs');
   const clubs = useQuery({
     queryKey: ['platform-clubs'],
     queryFn: async () => (await api<{ data: PlatformClub[] }>('/platform/clubs')).data,
@@ -44,10 +47,27 @@ export function PlatformPage() {
         <h1 className="mt-2 text-xl font-semibold">{t('platform.title')}</h1>
         <p className="text-sm text-slate-600">{t('platform.hint')}</p>
       </div>
-      {action.isError && <Notice tone="error">{errorText(action.error, t('errors.generic'))}</Notice>}
+      {account.data.is_superadmin && (
+        <div role="tablist" className="flex gap-1 rounded-lg bg-slate-100 p-1">
+          {(['clubs', 'accounts'] as const).map((value) => (
+            <button
+              key={value}
+              role="tab"
+              type="button"
+              aria-selected={tab === value}
+              onClick={() => setTab(value)}
+              className={`min-h-10 flex-1 rounded-md text-sm ${tab === value ? 'bg-brand-700 font-medium text-white shadow-sm' : 'text-slate-600'}`}
+            >
+              {t(`platform.tabs.${value}`)}
+            </button>
+          ))}
+        </div>
+      )}
+      {tab === 'accounts' && account.data.is_superadmin && <PlatformAccounts ownEmail={account.data.email} />}
+      {tab === 'clubs' && action.isError && <Notice tone="error">{errorText(action.error, t('errors.generic'))}</Notice>}
       {destroy.isError && <Notice tone="error">{errorText(destroy.error, t('errors.generic'))}</Notice>}
 
-      {groups.map(({ status, list }) => (
+      {tab === 'clubs' && groups.map(({ status, list }) => (
         <Card key={status} title={`${t(`platform.status.${status}`)} (${list.length})`}>
           {list.length === 0 ? (
             <p className="text-sm text-slate-500">{t('platform.none')}</p>

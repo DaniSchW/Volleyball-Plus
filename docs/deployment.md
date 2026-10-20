@@ -74,3 +74,9 @@ Neues Paket im Hauptordner der Domain über die bestehenden Dateien entpacken (b
 
 - **„Zugriff nur über HTTPS“ trotz https-Adresse:** Der Hoster beendet SSL dann in einem Proxy vor PHP. Proxies in privaten Netzen werden automatisch erkannt. Nutzt der Proxy öffentliche Adressen, in `backend/.env` `TRUSTED_PROXIES=*` ergänzen.
 - `FORCE_HTTPS` in `.env` nie auf `false` setzen.
+
+## Superadmin und inaktive Konten
+
+Superadmins sehen unter `https://app.volleyorga.de/platform` neben den Vereinen alle Konten und können sie löschen. Wer Superadmin ist, steht in `SUPERADMIN_EMAILS` (mehrere durch Komma getrennt); ohne Eintrag in der `.env` gilt die Adresse des Betreibers. Anmelden auf der Startseite mit dieser Adresse genügt – das Konto wird bei der ersten Anmeldung angelegt.
+
+Konten, die über 2 Jahre nicht genutzt wurden, bekommen automatisch eine E-Mail und werden 14 Tage später gelöscht (`ACCOUNT_INACTIVE_DAYS`, `ACCOUNT_DELETION_NOTICE_DAYS`). Das läuft über den Cron; der E-Mail-Versand muss eingerichtet sein.

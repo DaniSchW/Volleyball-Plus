@@ -127,6 +127,6 @@ class PlatformController extends Controller
 
     private function authorizePlatform(Request $request): void
     {
-        abort_unless((bool) $request->user()?->is_platform_admin, 403);
+        abort_unless((bool) $request->user()?->isPlatformAdmin(), 403);
     }
 }

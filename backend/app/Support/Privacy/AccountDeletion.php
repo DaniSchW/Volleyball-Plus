@@ -39,7 +39,10 @@ class AccountDeletion
                 throw ValidationException::withMessages(['confirm' => __('account.last_admin', ['club' => $clubs[$member->tenant_id]?->name])]);
             }
         }
-        if ($account->is_platform_admin && Account::query()->where('is_platform_admin', true)->count() <= 1) {
+        if ($account->isSuperadmin()) {
+            throw ValidationException::withMessages(['confirm' => __('account.superadmin')]);
+        }
+        if ($account->is_platform_admin && config('platform.superadmins') === [] && Account::query()->where('is_platform_admin', true)->count() <= 1) {
             throw ValidationException::withMessages(['confirm' => __('account.last_platform_admin')]);
         }
 

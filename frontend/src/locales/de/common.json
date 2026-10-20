@@ -840,7 +840,34 @@
     "suspendConfirm": "„{{name}}“ sperren? Niemand aus dem Verein kann sich dann anmelden; die Daten bleiben erhalten.",
     "reactivate": "Wieder aktivieren",
     "delete": "Endgültig löschen",
-    "deleteConfirm": "„{{name}}“ mit allen Daten endgültig löschen? Zur Bestätigung das Kürzel „{{slug}}“ eingeben:"
+    "deleteConfirm": "„{{name}}“ mit allen Daten endgültig löschen? Zur Bestätigung das Kürzel „{{slug}}“ eingeben:",
+    "tabs": {
+      "clubs": "Vereine",
+      "accounts": "Konten"
+    },
+    "accounts": {
+      "hint": "Alle Konten der Plattform. Konten, die über 2 Jahre nicht genutzt wurden, bekommen automatisch eine E-Mail und werden 14 Tage später gelöscht (außer dem einzigen Admin eines Vereins).",
+      "search": "E-Mail suchen",
+      "filter": "Filter",
+      "filters": {
+        "all": "Alle",
+        "inactive": "Über 2 Jahre nicht genutzt",
+        "warned": "Löschung angekündigt"
+      },
+      "title_one": "{{count}} Konto",
+      "title_other": "{{count}} Konten",
+      "none": "Keine Konten gefunden.",
+      "superadmin": "Superadmin",
+      "platformAdmin": "Plattform-Admin",
+      "admin": "Admin",
+      "disabled": "gesperrt",
+      "noClub": "In keinem Verein",
+      "lastActive": "Zuletzt genutzt: {{date}}",
+      "deletionDue": "Löschung angekündigt – fällig am {{date}}",
+      "delete": "Löschen",
+      "deleteConfirm": "Konto {{email}} mit allen Profildaten in allen Vereinen löschen? Zur Bestätigung die E-Mail-Adresse eingeben:",
+      "page": "Seite {{page}} von {{of}}"
+    }
   },
   "activity": {
     "title": "Änderungsprotokoll",

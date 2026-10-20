@@ -95,7 +95,21 @@ export interface Account {
   locale: string;
   /** Runs the platform: approves clubs that register. */
   is_platform_admin: boolean;
+  /** SUPERADMIN_EMAILS: also sees and deletes all accounts. */
+  is_superadmin: boolean;
   tenants: { slug: string; name: string }[];
+}
+
+export interface PlatformAccount {
+  id: string;
+  email: string;
+  created_at: string | null;
+  last_active_at: string | null;
+  deletion_warned_at: string | null;
+  deletion_due_at: string | null;
+  is_platform_admin: boolean;
+  is_superadmin: boolean;
+  clubs: { name: string; slug: string; is_admin: boolean; active: boolean }[];
 }
 
 export interface PlatformClub {

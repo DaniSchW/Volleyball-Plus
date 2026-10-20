@@ -1,6 +1,7 @@
 <?php
 
 use App\Console\Commands\CleanupChatUploads;
+use App\Console\Commands\CleanupInactiveAccounts;
 use App\Console\Commands\GenerateSeries;
 use App\Console\Commands\PruneActivity;
 use App\Console\Commands\ReleaseAdults;
@@ -51,3 +52,6 @@ $task('app:cleanup-chat-uploads')->when(fn () => CleanupChatUploads::isDue());
 
 // The admins' activity log keeps 7 days.
 $task('app:prune-activity')->when(fn () => PruneActivity::isDue());
+
+// Accounts unused for two years: deletion notice, deleted 14 days later.
+$task('app:cleanup-inactive-accounts')->when(fn () => CleanupInactiveAccounts::isDue());

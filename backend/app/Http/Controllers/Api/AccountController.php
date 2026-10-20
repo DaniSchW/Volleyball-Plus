@@ -35,7 +35,8 @@ class AccountController extends Controller
         return response()->json(['data' => [
             'email' => $account->email,
             'locale' => $account->locale,
-            'is_platform_admin' => (bool) $account->is_platform_admin,
+            'is_platform_admin' => $account->isPlatformAdmin(),
+            'is_superadmin' => $account->isSuperadmin(),
             'tenants' => $tenants->map(fn ($t) => ['slug' => $t->slug, 'name' => $t->name])->all(),
         ]]);
     }

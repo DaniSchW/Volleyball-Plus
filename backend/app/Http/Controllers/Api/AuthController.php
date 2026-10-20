@@ -73,7 +73,7 @@ class AuthController extends Controller
 
         if ($tenant === null) {
             $account = Account::query()->where('email', $token->email)->first();
-            abort_if($account === null || (! $account->is_platform_admin && ! $this->links->hasActiveClub($account)), 422, __('auth.link_invalid'));
+            abort_if($account === null || (! $account->isPlatformAdmin() && ! $this->links->hasActiveClub($account)), 422, __('auth.link_invalid'));
             [, $plain] = $this->sessions->start($account, $request);
 
             return response()->json(['data' => ['tenant' => null]])->withCookie($this->sessions->cookie($plain));

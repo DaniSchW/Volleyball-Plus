@@ -53,7 +53,11 @@ class MagicLinks
     {
         $email = mb_strtolower(trim($email));
         $account = Account::query()->where('email', $email)->first();
-        if ($account === null || (! $account->is_platform_admin && ! $this->hasActiveClub($account))) {
+        // Superadmins may log in before their account exists.
+        if ($account === null && in_array($email, config('platform.superadmins'), true)) {
+            $account = Account::create(['email' => $email]);
+        }
+        if ($account === null || (! $account->isPlatformAdmin() && ! $this->hasActiveClub($account))) {
             return;
         }
 

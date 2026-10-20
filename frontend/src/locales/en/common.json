@@ -840,7 +840,34 @@
     "suspendConfirm": "Suspend “{{name}}”? Nobody from the club can log in then; the data is kept.",
     "reactivate": "Reactivate",
     "delete": "Delete for good",
-    "deleteConfirm": "Delete “{{name}}” with all data for good? Type the short name “{{slug}}” to confirm:"
+    "deleteConfirm": "Delete “{{name}}” with all data for good? Type the short name “{{slug}}” to confirm:",
+    "tabs": {
+      "clubs": "Clubs",
+      "accounts": "Accounts"
+    },
+    "accounts": {
+      "hint": "All accounts of the platform. Accounts unused for more than 2 years automatically get an e-mail and are deleted 14 days later (except the only admin of a club).",
+      "search": "Search e-mail",
+      "filter": "Filter",
+      "filters": {
+        "all": "All",
+        "inactive": "Unused for over 2 years",
+        "warned": "Deletion announced"
+      },
+      "title_one": "{{count}} account",
+      "title_other": "{{count}} accounts",
+      "none": "No accounts found.",
+      "superadmin": "Superadmin",
+      "platformAdmin": "Platform admin",
+      "admin": "Admin",
+      "disabled": "disabled",
+      "noClub": "In no club",
+      "lastActive": "Last used: {{date}}",
+      "deletionDue": "Deletion announced – due {{date}}",
+      "delete": "Delete",
+      "deleteConfirm": "Delete account {{email}} with all profile data in all clubs? Type the e-mail address to confirm:",
+      "page": "Page {{page}} of {{of}}"
+    }
   },
   "activity": {
     "title": "Activity log",

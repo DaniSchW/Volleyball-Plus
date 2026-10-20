@@ -979,6 +979,51 @@ describe('platform', () => {
   });
 });
 
+describe('platform access', () => {
+  it('tells a club admin that the platform needs the operator account instead of loading forever', async () => {
+    let loggedOut = false;
+    mockApi({
+      'GET /me': { body: ACCOUNT },
+      'POST /auth/logout': () => {
+        loggedOut = true;
+        return { body: { message: 'ok' } };
+      },
+    });
+    renderAt('/platform');
+
+    expect(await screen.findByText(/Du bist als max@example.org angemeldet/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Abmelden und mit anderem Konto anmelden' }));
+    await waitFor(() => expect(loggedOut).toBe(true));
+  });
+
+  it('sends visitors who are not logged in to the login', async () => {
+    mockApi({ 'GET /me': { status: 401, body: { message: 'Unauthenticated.' } } });
+    renderAt('/platform');
+    expect(await screen.findByRole('link', { name: 'Zur Anmeldung' })).toHaveAttribute('href', '/');
+  });
+});
+
+describe('logout from the menu', () => {
+  it('logs out from every page via the menu', async () => {
+    let loggedOut = false;
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/notices': { body: { data: [] } }, 'GET /t/ssv-ulm/polls': { body: { data: [] } },
+      'GET /t/ssv-ulm/events': { body: { data: [], next_cursor: null } },
+      'POST /auth/logout': () => {
+        loggedOut = true;
+        return { body: { message: 'ok' } };
+      },
+    });
+    const router = renderAt('/ssv-ulm');
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Menü öffnen' }));
+    fireEvent.click(screen.getByRole('button', { name: /Abmelden/ }));
+    await waitFor(() => expect(loggedOut).toBe(true));
+    await waitFor(() => expect(router.state.location.pathname).toBe('/ssv-ulm/login'));
+  });
+});
+
 describe('activity log', () => {
   it('shows admins what changed and by whom', async () => {
     mockApi({

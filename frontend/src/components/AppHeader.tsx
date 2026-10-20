@@ -1,3 +1,4 @@
+import { useLogout } from '../lib/useLogout';
 import { LegalLinks } from './LegalLinks';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -40,6 +41,7 @@ interface Props {
  * deliberately no bottom tab bar, so the content keeps the screen space.
  */
 export function AppHeader({ tenantSlug, tenantName, logoUrl, isAdmin, hidden = [] }: Props) {
+  const logout = useLogout(`/${tenantSlug}/login`);
   const { t, i18n } = useTranslation();
   const queryClient = useQueryClient();
   const [open, setOpen] = useState(false);
@@ -126,6 +128,15 @@ export function AppHeader({ tenantSlug, tenantName, logoUrl, isAdmin, hidden = [
                   ))}
                 </select>
               </label>
+              <button
+                type="button"
+                className="mt-3 flex w-full items-center gap-3 rounded-lg py-1.5 text-sm font-medium text-red-700"
+                disabled={logout.isPending}
+                onClick={() => logout.mutate()}
+              >
+                <span aria-hidden="true" className="flex size-8 items-center justify-center rounded-full bg-red-50 text-base">⏻</span>
+                {t('menu.logout')}
+              </button>
               <LegalLinks className="mt-3 !justify-start" onClick={() => setOpen(false)} />
             </div>
           </nav>

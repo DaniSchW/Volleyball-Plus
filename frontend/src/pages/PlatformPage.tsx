@@ -6,6 +6,7 @@ import { api, del, errorText, post, type PlatformClub } from '../lib/api';
 import { formatDateTime } from '../lib/dates';
 import { useAccount } from '../lib/queries';
 import { Button, Card, Loading, Notice } from '../components/ui';
+import { useLogout } from '../lib/useLogout';
 import { PlatformAccounts } from '../components/platform/PlatformAccounts';
 import { LegalForm } from '../components/platform/LegalForm';
 
@@ -17,6 +18,7 @@ export function PlatformPage() {
   const { t } = useTranslation();
   const account = useAccount();
   const queryClient = useQueryClient();
+  const logout = useLogout();
   const [tab, setTab] = useState<'clubs' | 'accounts' | 'legal'>('clubs');
   const clubs = useQuery({
     queryKey: ['platform-clubs'],
@@ -35,8 +37,10 @@ export function PlatformPage() {
     onSuccess: done,
   });
 
-  if (account.isPending || clubs.isPending) return <Loading />;
-  if (!account.data?.is_platform_admin) return <Notice tone="error">{t('tenant.noAccess')}</Notice>;
+  if (account.isPending) return <Loading />;
+  // Not logged in or no platform access: say so instead of waiting for data that is never loaded.
+  if (!account.data?.is_platform_admin) return <NoPlatformAccess email={account.data?.email ?? null} />;
+  if (clubs.isPending) return <Loading />;
   if (clubs.isError) return <Notice tone="error">{errorText(clubs.error, t('errors.generic'))}</Notice>;
 
   const groups = (['pending', 'active', 'suspended'] as const).map((status) => ({ status, list: clubs.data.filter((c) => c.status === status) }));
@@ -44,7 +48,12 @@ export function PlatformPage() {
   return (
     <div className="mx-auto max-w-3xl space-y-4 p-4">
       <div>
-        <Link to="/" className="text-sm text-brand-700">‹ {t('app.name')}</Link>
+        <div className="flex items-center justify-between gap-3">
+          <Link to="/" className="text-sm text-brand-700">‹ {t('app.name')}</Link>
+          <button type="button" className="text-sm text-slate-600 underline" disabled={logout.isPending} onClick={() => logout.mutate()}>
+            {t('start.logout', { email: account.data.email })}
+          </button>
+        </div>
         <h1 className="mt-2 text-xl font-semibold">{t('platform.title')}</h1>
         <p className="text-sm text-slate-600">{t('platform.hint')}</p>
       </div>
@@ -135,6 +144,30 @@ export function PlatformPage() {
           )}
         </Card>
       ))}
+    </div>
+  );
+}
+
+/** Logged out → to the start page to log in; logged in with another address → log out and change. */
+function NoPlatformAccess({ email }: { email: string | null }) {
+  const { t } = useTranslation();
+  const logout = useLogout();
+
+  return (
+    <div className="mx-auto max-w-md space-y-4 p-6">
+      <h1 className="text-xl font-semibold">{t('platform.title')}</h1>
+      {email ? (
+        <>
+          <Notice tone="error">{t('platform.noAccess', { email })}</Notice>
+          <Button className="w-full" disabled={logout.isPending} onClick={() => logout.mutate()}>{t('platform.switchAccount')}</Button>
+        </>
+      ) : (
+        <>
+          <Notice>{t('platform.loginFirst')}</Notice>
+          <Link to="/" className="flex min-h-11 items-center justify-center rounded-lg bg-brand-700 px-4 text-sm font-medium text-white">{t('platform.toLogin')}</Link>
+        </>
+      )}
+      <Link to="/" className="block text-center text-sm text-brand-700">‹ {t('app.name')}</Link>
     </div>
   );
 }

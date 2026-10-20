@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from 'react';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, Navigate } from 'react-router';
 import { errorText, post } from '../lib/api';
 import { useAccount } from '../lib/queries';
 import { Button, Field, Loading, Notice } from '../components/ui';
 import { LegalLinks } from '../components/LegalLinks';
+import { useLogout } from '../lib/useLogout';
 
 /**
  * Start page of the platform: logged in → the account's clubs (one club:
@@ -14,8 +15,7 @@ import { LegalLinks } from '../components/LegalLinks';
 export function NoTenantPage() {
   const { t } = useTranslation();
   const account = useAccount();
-  const queryClient = useQueryClient();
-  const logout = useMutation({ mutationFn: () => post('/auth/logout'), onSuccess: () => void queryClient.invalidateQueries() });
+  const logout = useLogout();
 
   if (account.isPending) return <Loading />;
 

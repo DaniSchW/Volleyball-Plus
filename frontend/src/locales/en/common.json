@@ -17,7 +17,8 @@
     "members": "Members & admins",
     "language": "Language",
     "activity": "Activity log",
-    "documents": "Documents"
+    "documents": "Documents",
+    "logout": "Log out"
   },
   "home": {
     "infoArea": "Notices",
@@ -891,7 +892,11 @@
         "vat_id": "VAT ID (if any)"
       },
       "disclaimer": "The texts are a careful template, but no legal advice. Best have them checked by an expert before going live."
-    }
+    },
+    "noAccess": "You are logged in as {{email}}. This account has no access to the platform administration – you need the operator account for that.",
+    "switchAccount": "Log out and log in with another account",
+    "loginFirst": "Please log in on the start page with the operator account first.",
+    "toLogin": "To the login"
   },
   "activity": {
     "title": "Activity log",

@@ -17,7 +17,8 @@
     "members": "Mitglieder & Admins",
     "language": "Sprache",
     "activity": "Änderungsprotokoll",
-    "documents": "Dokumente"
+    "documents": "Dokumente",
+    "logout": "Abmelden"
   },
   "home": {
     "infoArea": "Infos",
@@ -891,7 +892,11 @@
         "vat_id": "USt-IdNr. (falls vorhanden)"
       },
       "disclaimer": "Die Texte sind eine sorgfältige Vorlage, aber keine Rechtsberatung. Lass sie vor dem Start am besten von einer Fachperson prüfen."
-    }
+    },
+    "noAccess": "Du bist als {{email}} angemeldet. Dieses Konto hat keinen Zugang zur Plattform-Verwaltung – dafür brauchst du das Betreiber-Konto.",
+    "switchAccount": "Abmelden und mit anderem Konto anmelden",
+    "loginFirst": "Bitte melde dich zuerst auf der Startseite mit dem Betreiber-Konto an.",
+    "toLogin": "Zur Anmeldung"
   },
   "activity": {
     "title": "Änderungsprotokoll",

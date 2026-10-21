@@ -1253,3 +1253,31 @@ describe('training minimum', () => {
     expect(screen.getByRole('article', { name: 'Donnerstagstraining' })).toHaveTextContent('Training findet statt');
   });
 });
+
+describe('tasks when creating an event', () => {
+  it('sends tasks entered by hand for a match day', async () => {
+    let sent: Record<string, unknown> = {};
+    const team = { id: 't1', name: 'Herren 1', gender: 'men', is_youth: false, league_name: null, color: null, can_manage: true, can_invite: true, can_see: true };
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME(true) },
+      'GET /t/ssv-ulm/teams': { body: { data: [team] } },
+      'GET /t/ssv-ulm/opponents': { body: { data: [] } },
+      'GET /t/ssv-ulm/task-templates': { body: { data: { templates: [], teams: [], can_create_for_all: true } } },
+      'POST /t/ssv-ulm/events': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { status: 201, body: { data: { ...EVENT, id: 'e9' } } };
+      },
+    });
+    renderAt('/ssv-ulm/events/new?team=t1');
+
+    fireEvent.change(await screen.findByLabelText('Art'), { target: { value: 'match' } });
+    fireEvent.click(screen.getByRole('button', { name: /Aufgabe hinzufügen/ }));
+    fireEvent.click(screen.getByRole('button', { name: /Aufgabe hinzufügen/ }));
+    fireEvent.change(screen.getByLabelText('Aufgabe 1'), { target: { value: 'Schiedsgericht 1. Spiel' } });
+    fireEvent.change(screen.getByLabelText('Anzahl für Aufgabe 1'), { target: { value: '2' } });
+    fireEvent.change(screen.getByLabelText('Aufgabe 2'), { target: { value: 'Kuchen' } });
+    fireEvent.click(screen.getByRole('button', { name: 'Speichern' }));
+
+    await waitFor(() => expect(sent.tasks).toEqual([{ title: 'Schiedsgericht 1. Spiel', slots: 2 }, { title: 'Kuchen', slots: null }]));
+  });
+});

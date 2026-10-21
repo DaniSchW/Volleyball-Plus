@@ -44,13 +44,25 @@ class TaskTemplates
      */
     public function apply(TaskTemplate $template, Event $event): int
     {
+        return $this->addItems($template->items, $event);
+    }
+
+    /**
+     * Adds tasks to an event (from a template or entered by hand); titles the
+     * event already has are skipped.
+     *
+     * @param  iterable<array{title: string, description?: string|null, slots?: int|null}>  $items
+     */
+    public function addItems(iterable $items, Event $event): int
+    {
         $existing = Task::query()->where('event_id', $event->id)->pluck('title')->map(fn ($t) => mb_strtolower($t))->flip();
         $order = (int) Task::query()->where('event_id', $event->id)->max('sort_order');
         $added = 0;
-        foreach ($template->items as $item) {
+        foreach ($items as $item) {
             if ($existing->has(mb_strtolower($item['title']))) {
                 continue;
             }
+            $existing->put(mb_strtolower($item['title']), true);
             Task::create([
                 'event_id' => $event->id,
                 'title' => $item['title'],

@@ -385,7 +385,7 @@
     "trainingOptions": "Training",
     "trainingGroup": "For",
     "wholeTeam": "whole team",
-    "helperHint": "E.g. club party or home match day. Afterwards add the tasks with places in the event for helpers to sign up.",
+    "helperHint": "E.g. club party or home match day. Add the tasks (e.g. till, sales) below under “Tasks” – or later in the event. Helpers sign up there.",
     "positionLimits": "Positions",
     "positionLimitsHint": "At most this many acceptances per position (empty = no limit). Who finds no place on the main position counts for a free secondary one.",
     "positionLimitsInfo": "When a position is full, accepting for it is closed; declining frees the place again.",
@@ -670,7 +670,9 @@
       "allHomeMatches_other": "Select all {{count}} home matches",
       "applyN_one": "Take over into {{count}} event",
       "applyN_other": "Take over into {{count}} events"
-    }
+    },
+    "byHand": "Add tasks",
+    "byHandHint": "E.g. “Referee duty 1st match”, “Till”, “Cake”. Number of people optional – empty means any number. Players and parents sign up in the event afterwards; you can add more tasks there at any time."
   },
   "polls": {
     "create": "Create poll",

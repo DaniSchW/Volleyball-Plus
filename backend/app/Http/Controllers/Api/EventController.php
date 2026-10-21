@@ -118,6 +118,10 @@ class EventController extends Controller
                 $templates->apply($template, $event);
             }
         }
+        if (! empty($data['tasks'])) {
+            $targets = $event->series_id !== null ? Event::query()->where('series_id', $event->series_id)->get() : collect([$event]);
+            $targets->each(fn (Event $e) => $templates->addItems($data['tasks'], $e));
+        }
 
         return response()->json(['data' => $this->presenter->detail($event->refresh(), $member)], 201);
     }
@@ -327,6 +331,10 @@ class EventController extends Controller
             'min_participants' => ['sometimes', 'nullable', 'integer', 'between:1,500'],
             'training_group_id' => ['sometimes', 'nullable', 'string'],
             'task_template_id' => ['sometimes', 'nullable', 'string'],
+            // Tasks entered by hand when creating (e.g. "Kasse", "Linienrichter" for a match day).
+            'tasks' => ['sometimes', 'array', 'max:50'],
+            'tasks.*.title' => ['required', 'string', 'max:120'],
+            'tasks.*.slots' => ['nullable', 'integer', 'between:1,99'],
             'repeat' => ['sometimes', 'nullable', 'array'],
             'repeat.weekdays' => ['required_with:repeat', 'array', 'min:1'],
             'repeat.weekdays.*' => ['integer', 'between:1,7'],

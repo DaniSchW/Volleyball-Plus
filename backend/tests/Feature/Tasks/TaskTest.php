@@ -75,6 +75,24 @@ class TaskTest extends TestCase
         return $this->loginAs($as)->postJson($this->url("tasks/{$taskId}/assignments"), ['person_id' => $personId]);
     }
 
+    public function test_tasks_entered_by_hand_when_creating_a_match_or_helper_day(): void
+    {
+        foreach (['match', 'helper'] as $type) {
+            $event = $this->loginAs($this->organizer)->postJson($this->url('events'), [
+                'type' => $type, 'team_ids' => [$this->team->id], 'title' => 'Turniertag', 'starts_at' => '2026-10-24T09:00', 'ends_at' => '2026-10-24T18:00',
+                'tasks' => [['title' => 'Schiedsgericht 1. Spiel', 'slots' => 2], ['title' => 'Kuchen backen', 'slots' => null], ['title' => 'kuchen backen']],
+            ])->assertCreated()->json('data');
+
+            $this->assertSame([['Schiedsgericht 1. Spiel', 2], ['Kuchen backen', null]], collect($event['tasks'])->map(fn ($t) => [$t['title'], $t['slots']])->all());
+            // Players put their names down right away.
+            $this->take($this->paul, $event['tasks'][0]['id'], $this->paul)->assertSuccessful();
+        }
+
+        $this->loginAs($this->organizer)->postJson($this->url('events'), [
+            'type' => 'match', 'team_ids' => [$this->team->id], 'starts_at' => '2026-10-24T09:00', 'ends_at' => '2026-10-24T18:00', 'tasks' => [['slots' => 2]],
+        ])->assertUnprocessable();
+    }
+
     public function test_organizers_add_tasks_and_players_take_places(): void
     {
         $event = $this->event();

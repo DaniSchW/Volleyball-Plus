@@ -385,7 +385,7 @@
     "trainingOptions": "Training",
     "trainingGroup": "Für",
     "wholeTeam": "ganzes Team",
-    "helperHint": "Z. B. Vereinsfest oder Heimspieltag. Unten im Termin legst du danach die Aufgaben mit Plätzen an, für die sich Helfer eintragen.",
+    "helperHint": "Z. B. Vereinsfest oder Heimspieltag. Die Aufgaben (z. B. Kasse, Verkauf) legst du unten unter „Aufgaben“ an – oder später im Termin. Helfer tragen sich dort ein.",
     "positionLimits": "Positions-Soll",
     "positionLimitsHint": "Höchstens so viele Zusagen je Position (leer = ohne Grenze). Wer auf der Hauptposition keinen Platz mehr bekommt, zählt für eine freie Nebenposition.",
     "positionLimitsInfo": "Ist eine Position voll, ist die Zusage dafür geschlossen; wer absagt, gibt den Platz wieder frei.",
@@ -670,7 +670,9 @@
       "allHomeMatches_other": "Alle {{count}} Heimspiele auswählen",
       "applyN_one": "Auf {{count}} Termin übertragen",
       "applyN_other": "Auf {{count}} Termine übertragen"
-    }
+    },
+    "byHand": "Aufgaben anlegen",
+    "byHandHint": "Z. B. „Schiedsgericht 1. Spiel“, „Kasse“, „Kuchen“. Anzahl Personen optional – leer heißt beliebig viele. Spieler und Eltern tragen sich danach im Termin ein; weitere Aufgaben kannst du dort jederzeit ergänzen."
   },
   "polls": {
     "create": "Umfrage erstellen",

@@ -64,7 +64,6 @@ export function TaskTemplates() {
   );
 }
 
-type Row = { title: string; slots: string };
 
 function TemplateForm({ template, options, onDone }: { template?: TaskTemplate; options: TaskTemplateList; onDone: () => void }) {
   const { t } = useTranslation();
@@ -73,7 +72,7 @@ function TemplateForm({ template, options, onDone }: { template?: TaskTemplate; 
   const queryClient = useQueryClient();
   const [name, setName] = useState(template?.name ?? '');
   const [teamId, setTeamId] = useState(template ? template.team?.id ?? '' : options.teams[0]?.id ?? '');
-  const [rows, setRows] = useState<Row[]>(template ? template.items.map((i) => ({ title: i.title, slots: i.slots ? String(i.slots) : '' })) : [{ title: '', slots: '' }]);
+  const [rows, setRows] = useState<TaskRow[]>(template ? template.items.map((i) => ({ title: i.title, slots: i.slots ? String(i.slots) : '' })) : [{ title: '', slots: '' }]);
   const refresh = () => void queryClient.invalidateQueries({ queryKey: ['task-templates', slug] });
 
   const save = useMutation({
@@ -101,33 +100,9 @@ function TemplateForm({ template, options, onDone }: { template?: TaskTemplate; 
         {options.can_create_for_all && <option value="">{t('tasks.templates.forAll')}</option>}
         {options.teams.map((team) => <option key={team.id} value={team.id}>{team.name}</option>)}
       </Select>
-      <fieldset className="space-y-2">
+      <fieldset className="min-w-0 space-y-2">
         <legend className="mb-1 text-sm font-medium text-slate-700">{t('tasks.templates.items')}</legend>
-        {rows.map((row, i) => (
-          <div key={i} className="flex items-center gap-2">
-            <input
-              aria-label={t('tasks.templates.itemN', { n: i + 1 })}
-              placeholder={t('tasks.placeholder')}
-              maxLength={120}
-              className="min-h-11 min-w-0 flex-1 rounded-lg border border-slate-300 px-3 text-base"
-              value={row.title}
-              onChange={(e) => setRows(rows.map((r, j) => (j === i ? { ...r, title: e.target.value } : r)))}
-            />
-            <input
-              aria-label={t('tasks.templates.slotsN', { n: i + 1 })}
-              type="number"
-              min={1}
-              max={99}
-              inputMode="numeric"
-              placeholder={t('tasks.anyNumberShort')}
-              className="min-h-11 w-20 rounded-lg border border-slate-300 px-2 text-base"
-              value={row.slots}
-              onChange={(e) => setRows(rows.map((r, j) => (j === i ? { ...r, slots: e.target.value } : r)))}
-            />
-            <button type="button" className="min-h-11 px-2 text-red-700" aria-label={t('tasks.templates.removeItem', { n: i + 1 })} onClick={() => setRows(rows.filter((_, j) => j !== i))}>✕</button>
-          </div>
-        ))}
-        <button type="button" className="text-sm text-brand-700 underline" onClick={() => setRows([...rows, { title: '', slots: '' }])}>+ {t('tasks.templates.addItem')}</button>
+        <TaskRows rows={rows} onChange={setRows} />
         <p className="text-xs text-slate-500">{t('tasks.templates.slotsHint')}</p>
       </fieldset>
       {(save.isError || remove.isError) && <Notice tone="error">{errorText(save.error ?? remove.error, t('errors.generic'))}</Notice>}
@@ -193,5 +168,44 @@ function ApplyTemplate({ template, onDone }: { template: TaskTemplate; onDone: (
         <Button variant="secondary" onClick={onDone}>{t('common.close')}</Button>
       </div>
     </div>
+  );
+}
+
+export interface TaskRow {
+  title: string;
+  slots: string;
+}
+
+/** Editable list of tasks (title + optional number of people) – for templates and new events. */
+export function TaskRows({ rows, onChange }: { rows: TaskRow[]; onChange: (rows: TaskRow[]) => void }) {
+  const { t } = useTranslation();
+  return (
+    <>
+      {rows.map((row, i) => (
+        <div key={i} className="flex items-center gap-2">
+          <input
+            aria-label={t('tasks.templates.itemN', { n: i + 1 })}
+            placeholder={t('tasks.placeholder')}
+            maxLength={120}
+            className="min-h-11 min-w-0 flex-1 rounded-lg border border-slate-300 px-3 text-base"
+            value={row.title}
+            onChange={(e) => onChange(rows.map((r, j) => (j === i ? { ...r, title: e.target.value } : r)))}
+          />
+          <input
+            aria-label={t('tasks.templates.slotsN', { n: i + 1 })}
+            type="number"
+            min={1}
+            max={99}
+            inputMode="numeric"
+            placeholder={t('tasks.anyNumberShort')}
+            className="min-h-11 w-20 rounded-lg border border-slate-300 px-2 text-base"
+            value={row.slots}
+            onChange={(e) => onChange(rows.map((r, j) => (j === i ? { ...r, slots: e.target.value } : r)))}
+          />
+          <button type="button" className="min-h-11 px-2 text-red-700" aria-label={t('tasks.templates.removeItem', { n: i + 1 })} onClick={() => onChange(rows.filter((_, j) => j !== i))}>✕</button>
+        </div>
+      ))}
+      <button type="button" className="text-sm text-brand-700 underline" onClick={() => onChange([...rows, { title: '', slots: '' }])}>+ {t('tasks.templates.addItem')}</button>
+    </>
   );
 }

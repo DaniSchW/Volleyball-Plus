@@ -96,7 +96,7 @@ function GroupCard({ team, group, players }: { team: Team; group: TrainingGroup;
                 <label className="flex min-h-11 items-center gap-3 text-sm">
                   <input
                     type="checkbox"
-                    className="size-5 accent-brand-700"
+                    className="size-5 accent-brand-solid"
                     checked={selected.includes(row.person.id)}
                     onChange={(e) => setSelected((s) => (e.target.checked ? [...s, row.person.id] : s.filter((id) => id !== row.person.id)))}
                   />

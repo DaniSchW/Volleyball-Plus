@@ -5,6 +5,8 @@ import { App } from './App';
 import './i18n';
 // Catch the browser's install offer before React starts.
 import './lib/install';
+// Light or dark design before the first render.
+import './lib/theme';
 import './index.css';
 
 const queryClient = new QueryClient({

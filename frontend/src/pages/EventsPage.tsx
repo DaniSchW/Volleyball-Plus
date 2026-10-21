@@ -17,7 +17,7 @@ export function EventsPage() {
       <div className="flex items-center justify-between gap-3">
         <PageTitle>{t('menu.events')}</PageTitle>
         {canCreateEvents(me.data) && (
-          <Link to={`/${slug}/events/new`} className="-mt-4 rounded-lg bg-brand-700 px-3 py-2 text-sm font-medium text-white">{t('events.create')}</Link>
+          <Link to={`/${slug}/events/new`} className="-mt-4 rounded-lg bg-brand-solid px-3 py-2 text-sm font-medium text-white">{t('events.create')}</Link>
         )}
       </div>
       <div role="tablist" className="flex gap-1 rounded-lg bg-slate-100 p-1">
@@ -28,7 +28,7 @@ export function EventsPage() {
             type="button"
             aria-selected={past === value}
             onClick={() => setPast(value)}
-            className={`min-h-10 flex-1 rounded-md text-sm ${past === value ? 'bg-brand-700 font-medium text-white shadow-sm' : 'text-slate-600'}`}
+            className={`min-h-10 flex-1 rounded-md text-sm ${past === value ? 'bg-brand-solid font-medium text-white shadow-sm' : 'text-slate-600'}`}
           >
             {value ? t('events.past') : t('events.upcoming')}
           </button>

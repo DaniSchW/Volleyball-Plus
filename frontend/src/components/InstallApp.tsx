@@ -35,7 +35,7 @@ export function InstallApp({ always = false }: { always?: boolean }) {
   };
 
   return (
-    <section className="vo-rise flex items-start gap-3 rounded-2xl border border-brand-100 bg-white p-4 shadow-sm" aria-labelledby="install-heading">
+    <section className="vo-rise flex items-start gap-3 rounded-2xl border border-brand-100 bg-surface p-4 shadow-sm" aria-labelledby="install-heading">
       <img src="/icons/icon-192.png" alt="" className="size-12 shrink-0 rounded-xl shadow-sm" />
       <div className="min-w-0 flex-1">
         <h2 id="install-heading" className="font-semibold">{t('install.title')}</h2>
@@ -49,7 +49,7 @@ export function InstallApp({ always = false }: { always?: boolean }) {
         )}
         <div className="mt-3 flex flex-wrap gap-2">
           {mode === 'prompt' && (
-            <button type="button" className="inline-flex min-h-10 items-center rounded-xl bg-gradient-to-b from-brand-600 to-brand-700 px-4 text-sm font-semibold text-white shadow-sm" onClick={() => void install()}>
+            <button type="button" className="inline-flex min-h-10 items-center rounded-xl bg-gradient-to-b from-brand-600 to-brand-solid px-4 text-sm font-semibold text-white shadow-sm" onClick={() => void install()}>
               📲 {t('install.button')}
             </button>
           )}

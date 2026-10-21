@@ -182,7 +182,7 @@ function RuleForm({ options, onSaved }: { options: RsvpRuleOptions; onSaved: (re
                     key={d}
                     type="button"
                     aria-pressed={on}
-                    className={`min-h-10 min-w-11 rounded-full border px-3 text-sm ${on ? 'border-brand-700 bg-brand-700 text-white' : 'border-slate-300 bg-white text-slate-700'}`}
+                    className={`min-h-10 min-w-11 rounded-full border px-3 text-sm ${on ? 'border-brand-solid bg-brand-solid text-white' : 'border-slate-300 bg-surface text-slate-700'}`}
                     onClick={() => setWeekdays(on ? weekdays.filter((x) => x !== d) : [...weekdays, d].sort())}
                   >
                     {weekdayName(d, 'short')}
@@ -201,7 +201,7 @@ function RuleForm({ options, onSaved }: { options: RsvpRuleOptions; onSaved: (re
                 key={s}
                 type="button"
                 aria-pressed={status === s}
-                className={`min-h-11 rounded-lg border text-sm font-medium ${status === s ? (s === 'yes' ? 'border-emerald-600 bg-emerald-600 text-white' : s === 'no' ? 'border-red-600 bg-red-600 text-white' : 'border-amber-500 bg-amber-500 text-white') : 'border-slate-300 bg-white'}`}
+                className={`min-h-11 rounded-lg border text-sm font-medium ${status === s ? (s === 'yes' ? 'border-emerald-600 bg-emerald-600 text-white' : s === 'no' ? 'border-red-600 bg-red-600 text-white' : 'border-amber-500 bg-amber-500 text-white') : 'border-slate-300 bg-surface'}`}
                 onClick={() => setStatus(s)}
               >
                 {t(`events.status.${s}`)}

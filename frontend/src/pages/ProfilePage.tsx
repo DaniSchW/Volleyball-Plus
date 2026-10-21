@@ -1,4 +1,5 @@
 import { InstallApp } from '../components/InstallApp';
+import { ThemeSwitch } from '../components/ThemeSwitch';
 import { useState, type FormEvent } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trans, useTranslation } from 'react-i18next';
@@ -62,6 +63,10 @@ export function ProfilePage() {
       </Card>
 
       <InstallApp always />
+      <Card title={t('theme.title')}>
+        <ThemeSwitch />
+        <p className="mt-2 text-xs text-slate-500">{t('theme.hint')}</p>
+      </Card>
       <NotificationsCard />
 
       <CalendarCard />

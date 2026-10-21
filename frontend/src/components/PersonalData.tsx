@@ -38,7 +38,7 @@ export function PersonalData({ person }: { person: PersonDetail }) {
           <a
             href={`/api/v1${tp(`persons/${person.id}/export`)}`}
             download
-            className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium"
+            className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-surface px-4 text-sm font-medium"
           >
             ⬇️ {t('privacy.export')}
           </a>

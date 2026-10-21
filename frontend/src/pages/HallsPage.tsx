@@ -453,7 +453,7 @@ function TimeForm({ hall, kind, booking, onDone, onWarning }: {
               <label key={c} className="flex min-h-11 items-center gap-2 rounded-lg border border-slate-300 px-3 text-sm">
                 <input
                   type="checkbox"
-                  className="size-5 accent-brand-700"
+                  className="size-5 accent-brand-solid"
                   checked={form.courts.includes(c)}
                   onChange={(e) => setForm({ ...form, courts: e.target.checked ? [...form.courts, c].sort((a, b) => a - b) : form.courts.filter((x) => x !== c) })}
                 />

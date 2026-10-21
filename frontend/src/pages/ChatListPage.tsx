@@ -32,7 +32,7 @@ export function ChatListPage() {
       </div>
       {creating && <CreateChat onDone={() => setCreating(false)} />}
       {chats.data.length === 0 && <Notice>{t('chat.none')}</Notice>}
-      <ul className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <ul className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-surface">
         {chats.data.map((chat) => (
           <li key={chat.id}>
             <Link to={`/${slug}/chat/${chat.id}`} className="flex min-h-16 items-center gap-3 px-4 py-2 hover:bg-slate-50">
@@ -51,7 +51,7 @@ export function ChatListPage() {
                       : t('chat.empty')}
                   </span>
                   {chat.unread > 0 && (
-                    <span className="shrink-0 rounded-full bg-brand-700 px-2 text-xs font-semibold leading-5 text-white" aria-label={t('chat.unread', { count: chat.unread })}>
+                    <span className="shrink-0 rounded-full bg-brand-solid px-2 text-xs font-semibold leading-5 text-white" aria-label={t('chat.unread', { count: chat.unread })}>
                       {chat.unread}
                     </span>
                   )}

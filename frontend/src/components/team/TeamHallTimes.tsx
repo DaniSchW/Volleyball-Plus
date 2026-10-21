@@ -17,7 +17,7 @@ export function TeamHallTimes({ teamId }: { teamId: string }) {
   if (!times.data?.length) return null;
 
   return (
-    <section className="rounded-xl border border-slate-200 bg-white px-4 py-3">
+    <section className="rounded-xl border border-slate-200 bg-surface px-4 py-3">
       <h2 className="mb-1 text-sm font-semibold">{t('halls.teamTimes')}</h2>
       <ul className="space-y-1 text-sm">
         {times.data.map((time) => (

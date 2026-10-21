@@ -50,7 +50,7 @@ export function TeamGuests({ team }: { team: Team }) {
                     <label className="flex items-center gap-1 text-xs">
                       <input
                         type="checkbox"
-                        className="size-5 accent-brand-700"
+                        className="size-5 accent-brand-solid"
                         checked={guest.active}
                         aria-label={t('guests.active', { name })}
                         onChange={(e) => toggle.mutate({ id: guest.id, active: e.target.checked })}

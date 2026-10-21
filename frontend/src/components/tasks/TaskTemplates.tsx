@@ -175,7 +175,7 @@ function ApplyTemplate({ template, onDone }: { template: TaskTemplate; onDone: (
             <label className="flex min-h-11 items-center gap-3 rounded-lg px-2 text-sm hover:bg-slate-50">
               <input
                 type="checkbox"
-                className="size-5 accent-brand-700"
+                className="size-5 accent-brand-solid"
                 checked={selected.includes(e.id)}
                 onChange={(ev) => setSelected(ev.target.checked ? [...selected, e.id] : selected.filter((x) => x !== e.id))}
               />

@@ -1076,5 +1076,12 @@
     "later": "Later",
     "iosStep1": "In Safari tap “Share” at the bottom",
     "iosStep2": "Choose “Add to Home Screen” – done!"
+  },
+  "theme": {
+    "title": "Appearance",
+    "auto": "Auto",
+    "light": "Light",
+    "dark": "Dark",
+    "hint": "“Auto” follows your device setting. Applies to this device only."
   }
 }

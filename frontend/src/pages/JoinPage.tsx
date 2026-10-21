@@ -87,13 +87,13 @@ export function JoinPage() {
       {accept.isSuccess && accept.data.data.status === 'confirm' ? (
         <Notice tone="success">{accept.data.message}</Notice>
       ) : (
-        <form onSubmit={submit} className="space-y-4 rounded-xl border border-slate-200 bg-white p-4">
+        <form onSubmit={submit} className="space-y-4 rounded-xl border border-slate-200 bg-surface p-4">
           {inv.kind === 'team' && inv.allows_child && (
             <fieldset className="space-y-2">
               <legend className="mb-1 text-sm font-medium">{t('join.who')}</legend>
               {(['self', 'child'] as Mode[]).map((value) => (
                 <label key={value} className="flex min-h-11 items-center gap-3 rounded-lg border border-slate-200 px-3">
-                  <input type="radio" name="mode" value={value} checked={mode === value} onChange={() => setMode(value)} className="accent-brand-700" />
+                  <input type="radio" name="mode" value={value} checked={mode === value} onChange={() => setMode(value)} className="accent-brand-solid" />
                   <span className="text-sm">{t(`join.mode.${value}`)}</span>
                 </label>
               ))}

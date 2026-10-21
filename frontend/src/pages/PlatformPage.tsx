@@ -66,7 +66,7 @@ export function PlatformPage() {
               type="button"
               aria-selected={tab === value}
               onClick={() => setTab(value)}
-              className={`min-h-10 flex-1 rounded-md text-sm ${tab === value ? 'bg-brand-700 font-medium text-white shadow-sm' : 'text-slate-600'}`}
+              className={`min-h-10 flex-1 rounded-md text-sm ${tab === value ? 'bg-brand-solid font-medium text-white shadow-sm' : 'text-slate-600'}`}
             >
               {t(`platform.tabs.${value}`)}
             </button>
@@ -164,7 +164,7 @@ function NoPlatformAccess({ email }: { email: string | null }) {
       ) : (
         <>
           <Notice>{t('platform.loginFirst')}</Notice>
-          <Link to="/" className="flex min-h-11 items-center justify-center rounded-lg bg-brand-700 px-4 text-sm font-medium text-white">{t('platform.toLogin')}</Link>
+          <Link to="/" className="flex min-h-11 items-center justify-center rounded-lg bg-brand-solid px-4 text-sm font-medium text-white">{t('platform.toLogin')}</Link>
         </>
       )}
       <Link to="/" className="block text-center text-sm text-brand-700">‹ {t('app.name')}</Link>

@@ -21,7 +21,7 @@ export function TeamsPage() {
   return (
     <div className="space-y-4">
       <PageTitle>{t('menu.teams')}</PageTitle>
-      <ul className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <ul className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-surface">
         {teams.data.map((team) => (
           <li key={team.id}>
             {team.can_see ? (
@@ -39,7 +39,7 @@ export function TeamsPage() {
         {teams.data.length === 0 && <li className="p-4 text-sm text-slate-500">{t('teams.none')}</li>}
       </ul>
       {me.data?.is_admin && (
-        <Link to={`/${slug}/leagues`} className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium">
+        <Link to={`/${slug}/leagues`} className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-surface px-4 text-sm font-medium">
           {t('leagues.manage')}
         </Link>
       )}

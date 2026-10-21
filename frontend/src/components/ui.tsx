@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 
 export function Card({ title, children, actions }: { title?: ReactNode; children: ReactNode; actions?: ReactNode }) {
   return (
-    <section className="vo-rise rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_1px_2px_rgb(15_23_42/0.04),0_6px_20px_-8px_rgb(15_23_42/0.08)]">
+    <section className="vo-rise rounded-2xl border border-slate-200/80 bg-surface p-4 shadow-[0_1px_2px_rgb(15_23_42/0.04),0_6px_20px_-8px_rgb(15_23_42/0.08)]">
       {(title || actions) && (
         <div className="mb-3 flex items-center justify-between gap-3">
           {title && <h2 className="text-base font-semibold tracking-tight text-slate-900">{title}</h2>}
@@ -31,9 +31,9 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'primar
 
 export function Button({ variant = 'primary', className = '', ...props }: ButtonProps) {
   const styles = {
-    primary: 'bg-gradient-to-b from-brand-600 to-brand-700 text-white shadow-sm shadow-brand-700/30 hover:from-brand-500 hover:to-brand-600',
-    secondary: 'border border-slate-300 bg-white text-slate-800 shadow-sm hover:border-slate-400 hover:bg-slate-50',
-    danger: 'border border-red-200 bg-white text-red-700 hover:bg-red-50',
+    primary: 'bg-gradient-to-b from-brand-600 to-brand-solid text-white shadow-sm shadow-brand-solid/30 hover:from-brand-500 hover:to-brand-600',
+    secondary: 'border border-slate-300 bg-surface text-slate-800 shadow-sm hover:border-slate-400 hover:bg-slate-50',
+    danger: 'border border-red-200 bg-surface text-red-700 hover:bg-red-50',
   }[variant];
 
   return (
@@ -54,7 +54,7 @@ export function Field({ label, hint, ...props }: InputHTMLAttributes<HTMLInputEl
       </label>
       <input
         id={id}
-        className="block min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-base shadow-[inset_0_1px_1px_rgb(15_23_42/0.03)] transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15 focus:outline-none disabled:bg-slate-100"
+        className="block min-h-11 w-full rounded-xl border border-slate-300 bg-surface px-3 text-base shadow-[inset_0_1px_1px_rgb(15_23_42/0.03)] transition placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15 focus:outline-none disabled:bg-slate-100"
         {...props}
       />
       {hint && <p className="mt-1 text-xs text-slate-500">{hint}</p>}
@@ -69,7 +69,7 @@ export function Select({ label, children, ...props }: SelectHTMLAttributes<HTMLS
       <label htmlFor={id} className="mb-1 block text-sm font-medium text-slate-700">
         {label}
       </label>
-      <select id={id} className="block min-h-11 w-full rounded-xl border border-slate-300 bg-white px-3 text-base transition focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15 focus:outline-none" {...props}>
+      <select id={id} className="block min-h-11 w-full rounded-xl border border-slate-300 bg-surface px-3 text-base transition focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15 focus:outline-none" {...props}>
         {children}
       </select>
     </div>

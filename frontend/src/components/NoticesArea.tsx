@@ -24,7 +24,7 @@ export function NoticesArea() {
   const canPost = !!me.data?.is_admin || trainerTeamIds(me.data).length > 0;
 
   return (
-    <section aria-labelledby="notices-heading" className="rounded-xl border border-slate-200 bg-white p-4">
+    <section aria-labelledby="notices-heading" className="rounded-xl border border-slate-200 bg-surface p-4">
       <div className="flex items-center justify-between gap-3">
         <h2 id="notices-heading" className="text-sm font-semibold uppercase tracking-wide text-slate-500">{t('home.infoArea')}</h2>
         {canPost && !adding && (

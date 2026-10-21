@@ -59,13 +59,13 @@ export function EventPage() {
         <Card>
           <div className="flex items-center justify-around gap-4 text-center">
             <div className="flex flex-col items-center gap-1">
-              {e.own_logo_url ? <img src={e.own_logo_url} alt="" className="size-16 object-contain" /> : <span className="size-16" />}
+              {e.own_logo_url ? <img src={e.own_logo_url} alt="" className="vo-logo size-16 object-contain" /> : <span className="size-16" />}
               <span className="text-sm">{e.teams[0]?.name}</span>
             </div>
             <span className="text-slate-400">{t('events.versus')}</span>
             <div className="flex flex-col items-center gap-1">
               {e.opponent_logo_url ? (
-                <img src={e.opponent_logo_url} alt="" className="size-16 object-contain" />
+                <img src={e.opponent_logo_url} alt="" className="vo-logo size-16 object-contain" />
               ) : (
                 <span aria-hidden="true" className="flex size-16 items-center justify-center rounded-full bg-slate-100 text-2xl text-slate-400">🛡️</span>
               )}
@@ -343,7 +343,7 @@ function CorrectReplies({ event, onDone }: { event: EventDetail; onDone: () => v
             </label>
             <select
               aria-label={t('events.replyOf', { name: row.person.name })}
-              className="min-h-10 rounded-lg border border-slate-300 bg-white px-2 text-sm"
+              className="min-h-10 rounded-lg border border-slate-300 bg-surface px-2 text-sm"
               value={row.status ?? ''}
               disabled={reply.isPending}
               onChange={(e) => e.target.value && reply.mutate({ personId: row.person.id, status: e.target.value as RsvpStatus })}
@@ -420,7 +420,7 @@ function ReplySwitch({ event, row }: { event: EventDetail; row: ResponseRow }) {
           aria-label={t('events.setReply', { name: row.person.name, status: t(`events.status.${status}`) })}
           disabled={set.isPending || row.status === status}
           onClick={() => set.mutate(status)}
-          className={`flex size-8 items-center justify-center rounded-full text-sm font-bold ring-1 transition ${row.status === status ? on : 'bg-white text-slate-500 ring-slate-300 hover:bg-slate-50'}`}
+          className={`flex size-8 items-center justify-center rounded-full text-sm font-bold ring-1 transition ${row.status === status ? on : 'bg-surface text-slate-500 ring-slate-300 hover:bg-slate-50'}`}
         >
           {icon}
         </button>

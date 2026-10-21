@@ -1076,5 +1076,12 @@
     "later": "Später",
     "iosStep1": "In Safari unten auf „Teilen“ tippen",
     "iosStep2": "„Zum Home-Bildschirm“ wählen – fertig!"
+  },
+  "theme": {
+    "title": "Darstellung",
+    "auto": "Auto",
+    "light": "Hell",
+    "dark": "Dunkel",
+    "hint": "„Auto“ folgt der Einstellung deines Geräts. Gilt nur auf diesem Gerät."
   }
 }

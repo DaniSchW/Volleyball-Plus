@@ -253,7 +253,7 @@ export function EventFormPage() {
                 <legend className="mb-1 text-sm font-medium text-slate-700">{t('events.weekdays')}</legend>
                 <div className="flex flex-wrap gap-2">
                   {WEEKDAYS.map((day) => (
-                    <label key={day} className={`flex min-h-10 min-w-10 items-center justify-center rounded-full border px-3 text-sm ${form.weekdays.includes(day) ? 'border-brand-600 bg-brand-50' : 'border-slate-300 bg-white'}`}>
+                    <label key={day} className={`flex min-h-10 min-w-10 items-center justify-center rounded-full border px-3 text-sm ${form.weekdays.includes(day) ? 'border-brand-600 bg-brand-50' : 'border-slate-300 bg-surface'}`}>
                       <input
                         type="checkbox"
                         className="sr-only"
@@ -471,7 +471,7 @@ function OpponentPicker({ opponents, value, onChange, isHome, onHomeChange }: {
         </div>
         {selected && (
           <div className="flex items-center gap-3">
-            {selected.logo_url && <img src={selected.logo_url} alt="" className="size-12 object-contain" />}
+            {selected.logo_url && <img src={selected.logo_url} alt="" className="vo-logo size-12 object-contain" />}
             <label className="inline-flex min-h-11 cursor-pointer items-center rounded-lg border border-slate-300 px-4 text-sm font-medium">
               {selected.logo_url ? t('events.changeLogo') : t('events.uploadLogo')}
               <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={(e) => e.target.files?.[0] && uploadLogo.mutate(e.target.files[0])} />

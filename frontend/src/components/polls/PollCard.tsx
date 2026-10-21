@@ -118,7 +118,7 @@ function Ballot({ poll, voter, showName }: { poll: Poll; voter: Poll['my'][numbe
             <input
               type={poll.multiple_choice ? 'checkbox' : 'radio'}
               name={`poll-${poll.id}-${voter.person_id}`}
-              className="size-5 accent-brand-700"
+              className="size-5 accent-brand-solid"
               checked={choice.includes(option.id)}
               onChange={(e) => pick(option.id, e.target.checked)}
             />

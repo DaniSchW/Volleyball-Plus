@@ -39,7 +39,7 @@ export function NoTenantPage() {
               <ul className="space-y-2">
                 {tenants.map((tenant) => (
                   <li key={tenant.slug}>
-                    <Link to={`/${tenant.slug}`} className="block rounded-xl border border-slate-200 bg-white p-4 font-medium hover:bg-slate-50">
+                    <Link to={`/${tenant.slug}`} className="block rounded-xl border border-slate-200 bg-surface p-4 font-medium hover:bg-slate-50">
                       {tenant.name}
                     </Link>
                   </li>
@@ -62,7 +62,7 @@ export function NoTenantPage() {
         <StartLogin />
       )}
 
-      <div className="rounded-xl border border-slate-200 bg-white p-4 text-center">
+      <div className="rounded-xl border border-slate-200 bg-surface p-4 text-center">
         <p className="text-sm text-slate-600">{t('start.registerHint')}</p>
         <Link to="/register" className="mt-3 inline-flex min-h-11 items-center rounded-lg border border-slate-300 px-4 text-sm font-medium">
           {t('start.register')}
@@ -87,7 +87,7 @@ function StartLogin() {
   if (request.isSuccess) return <Notice tone="success">{t('login.sent')}</Notice>;
 
   return (
-    <form onSubmit={submit} className="space-y-4 rounded-xl border border-slate-200 bg-white p-4">
+    <form onSubmit={submit} className="space-y-4 rounded-xl border border-slate-200 bg-surface p-4">
       <p className="text-sm text-slate-600">{t('start.loginIntro')}</p>
       <Field label={t('login.email')} type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
       {request.isError && <Notice tone="error">{errorText(request.error, t('errors.generic'))}</Notice>}

@@ -46,7 +46,7 @@ export function PlatformAccounts({ ownEmail }: { ownEmail: string }) {
             type="button"
             aria-pressed={filter === value}
             onClick={() => { setFilter(value); setPage(1); }}
-            className={`min-h-10 rounded-full border px-4 text-sm ${filter === value ? 'border-brand-700 bg-brand-700 text-white' : 'border-slate-300 bg-white text-slate-700'}`}
+            className={`min-h-10 rounded-full border px-4 text-sm ${filter === value ? 'border-brand-solid bg-brand-solid text-white' : 'border-slate-300 bg-surface text-slate-700'}`}
           >
             {t(`platform.accounts.filters.${value}`)}
           </button>

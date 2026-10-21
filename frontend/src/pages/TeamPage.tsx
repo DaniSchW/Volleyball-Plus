@@ -58,7 +58,7 @@ export function TeamPage() {
               type="button"
               aria-selected={tab === value}
               onClick={() => setTab(value)}
-              className={`min-h-10 shrink-0 grow whitespace-nowrap rounded-md px-3 text-sm ${tab === value ? 'bg-brand-700 font-medium text-white shadow-sm' : 'text-slate-600'}`}
+              className={`min-h-10 shrink-0 grow whitespace-nowrap rounded-md px-3 text-sm ${tab === value ? 'bg-brand-solid font-medium text-white shadow-sm' : 'text-slate-600'}`}
             >
               {t(`team.tabs.${value}`)}
             </button>
@@ -91,7 +91,7 @@ export function TeamPage() {
       {tab === 'events' && (
         <>
           {team.data.can_invite && (
-            <Link to={`/${slug}/teams/${team.data.id}/import`} className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium">
+            <Link to={`/${slug}/teams/${team.data.id}/import`} className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-surface px-4 text-sm font-medium">
               📥 {t('import.open')}
             </Link>
           )}

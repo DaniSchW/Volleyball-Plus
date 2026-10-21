@@ -32,7 +32,7 @@ export function LoginPage() {
       {request.isSuccess ? (
         <Notice tone="success">{t('login.sent')}</Notice>
       ) : (
-        <form onSubmit={submit} className="space-y-4 rounded-xl border border-slate-200 bg-white p-4">
+        <form onSubmit={submit} className="space-y-4 rounded-xl border border-slate-200 bg-surface p-4">
           <p className="text-sm text-slate-600">{t('login.intro')}</p>
           <Field label={t('login.email')} type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
           {request.isError && <Notice tone="error">{errorText(request.error, t('errors.generic'))}</Notice>}

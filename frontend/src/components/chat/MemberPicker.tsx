@@ -35,7 +35,7 @@ export function MemberPicker({ chosen, onChange }: { chosen: string[]; onChange:
             <label className="flex min-h-11 items-center gap-3 px-3 text-sm">
               <input
                 type="checkbox"
-                className="size-5 accent-brand-700"
+                className="size-5 accent-brand-solid"
                 checked={chosen.includes(m.id)}
                 onChange={(e) => onChange(e.target.checked ? [...chosen, m.id] : chosen.filter((x) => x !== m.id))}
               />

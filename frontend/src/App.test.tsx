@@ -4,6 +4,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { routes } from './App';
 import { changeLanguage } from './i18n';
+import { ThemeSwitch } from './components/ThemeSwitch';
 
 type Handler = { status?: number; body: unknown } | ((init: RequestInit) => { status?: number; body: unknown });
 
@@ -1169,5 +1170,20 @@ describe('activity log', () => {
     expect(await screen.findByText('Techniktraining (20.10.2026 19:30)')).toBeInTheDocument();
     expect(screen.getByText('geändert')).toBeInTheDocument();
     expect(screen.getByText('von Tom Trainer')).toBeInTheDocument();
+  });
+});
+
+describe('appearance', () => {
+  it('switches to dark mode and remembers it on this device', () => {
+    render(<ThemeSwitch />);
+    expect(screen.getByRole('radio', { name: /Auto/ })).toHaveAttribute('aria-checked', 'true');
+
+    fireEvent.click(screen.getByRole('radio', { name: /Dunkel/ }));
+    expect(document.documentElement).toHaveClass('dark');
+    expect(localStorage.getItem('vo.theme')).toBe('dark');
+
+    fireEvent.click(screen.getByRole('radio', { name: /Auto/ }));
+    expect(document.documentElement).not.toHaveClass('dark');
+    expect(localStorage.getItem('vo.theme')).toBeNull();
   });
 });

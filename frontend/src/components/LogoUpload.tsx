@@ -18,7 +18,7 @@ export function LogoUpload({ title, path, currentUrl, onUploaded }: { title: str
   return (
     <Card title={title}>
       <div className="flex items-center gap-3">
-        {currentUrl && <img src={currentUrl} alt="" className="size-14 object-contain" />}
+        {currentUrl && <img src={currentUrl} alt="" className="vo-logo size-14 object-contain" />}
         <label className="inline-flex min-h-11 cursor-pointer items-center rounded-lg border border-slate-300 px-4 text-sm font-medium hover:bg-slate-50">
           {currentUrl ? t('events.changeLogo') : t('events.uploadLogo')}
           <input type="file" accept="image/png,image/jpeg,image/webp" className="sr-only" onChange={(e) => e.target.files?.[0] && upload.mutate(e.target.files[0])} />

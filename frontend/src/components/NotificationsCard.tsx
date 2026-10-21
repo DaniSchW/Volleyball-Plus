@@ -85,7 +85,7 @@ export function NotificationsCard() {
                       <td key={channel} className="py-2 text-center">
                         <input
                           type="checkbox"
-                          className="size-5 accent-brand-700"
+                          className="size-5 accent-brand-solid"
                           aria-label={`${label}: ${t(`notifications.${channel}`)}`}
                           checked={row[channel]}
                           onChange={(e) => change(row.category, channel, e.target.checked)}

@@ -1,5 +1,6 @@
 import { useLogout } from '../lib/useLogout';
 import { LegalLinks } from './LegalLinks';
+import { ThemeSwitch } from './ThemeSwitch';
 import { useEffect, useId, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { NavLink } from 'react-router';
@@ -67,7 +68,7 @@ export function AppHeader({ tenantSlug, tenantName, logoUrl, isAdmin, hidden = [
   }, [open]);
 
   return (
-    <header className="sticky top-0 z-20 bg-gradient-to-r from-brand-800 via-brand-700 to-brand-500 pt-[env(safe-area-inset-top)] text-white shadow-md">
+    <header className="sticky top-0 z-20 bg-gradient-to-r from-brand-deep via-brand-solid to-brand-500 pt-[env(safe-area-inset-top)] text-white shadow-md">
       <div ref={containerRef} className="relative mx-auto flex h-14 max-w-3xl items-center justify-between px-4">
         <NavLink to={`/${tenantSlug}`} className="flex min-w-0 items-center gap-2 text-base font-semibold text-white">
           {logoUrl ? <img src={logoUrl} alt="" className="size-8 shrink-0 rounded-md bg-white object-contain p-0.5" /> : <img src="/icons/favicon.svg" alt="" className="size-8 shrink-0" />}
@@ -90,7 +91,7 @@ export function AppHeader({ tenantSlug, tenantName, logoUrl, isAdmin, hidden = [
         {open && (
           <nav
             id={menuId}
-            className="absolute right-2 top-full mt-1 w-64 overflow-hidden rounded-xl border border-slate-200 bg-white text-slate-900 shadow-lg"
+            className="absolute right-2 top-full mt-1 w-64 overflow-hidden rounded-xl border border-slate-200 bg-surface text-slate-900 shadow-lg"
           >
             <ul className="py-1">
               {[...MENU, ...(isAdmin ? (['members', 'activity'] as MenuSection[]) : [])].filter((section) => !hidden.includes(section)).map((section) => (
@@ -112,7 +113,7 @@ export function AppHeader({ tenantSlug, tenantName, logoUrl, isAdmin, hidden = [
               <label className="flex items-center justify-between gap-3 text-sm text-slate-600">
                 {t('menu.language')}
                 <select
-                  className="rounded-md border border-slate-300 bg-white px-2 py-1 text-sm"
+                  className="rounded-md border border-slate-300 bg-surface px-2 py-1 text-sm"
                   value={i18n.resolvedLanguage}
                   onChange={(event) => {
                     const locale = event.target.value as Language;
@@ -128,6 +129,7 @@ export function AppHeader({ tenantSlug, tenantName, logoUrl, isAdmin, hidden = [
                   ))}
                 </select>
               </label>
+              <div className="mt-3"><ThemeSwitch /></div>
               <button
                 type="button"
                 className="mt-3 flex w-full items-center gap-3 rounded-lg py-1.5 text-sm font-medium text-red-700"

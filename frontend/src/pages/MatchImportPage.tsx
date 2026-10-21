@@ -74,7 +74,7 @@ export function MatchImportPage() {
       <p className="text-sm text-slate-600">{t('import.hint')}</p>
 
       <Card>
-        <label className="inline-flex min-h-11 cursor-pointer items-center rounded-lg bg-brand-700 px-4 text-sm font-medium text-white">
+        <label className="inline-flex min-h-11 cursor-pointer items-center rounded-lg bg-brand-solid px-4 text-sm font-medium text-white">
           {file ? t('import.otherFile') : t('import.chooseFile')}
           <input type="file" accept=".ics,.ical,.csv,text/calendar,text/csv" className="sr-only" onChange={(e) => choose(e.target.files?.[0])} />
         </label>
@@ -149,7 +149,7 @@ function ImportLine({ row, checked, onChange }: { row: ImportRow; checked: boole
   return (
     <li>
       <label className={`flex gap-3 py-2 ${disabled ? 'opacity-60' : ''}`}>
-        <input type="checkbox" className="mt-1 size-5 shrink-0 accent-brand-700" checked={checked} disabled={disabled} onChange={(e) => onChange(e.target.checked)} />
+        <input type="checkbox" className="mt-1 size-5 shrink-0 accent-brand-solid" checked={checked} disabled={disabled} onChange={(e) => onChange(e.target.checked)} />
         <span className="min-w-0 flex-1 text-sm">
           <span className="block text-xs text-slate-500">
             {formatDay(row.starts_at)} · {formatTime(row.starts_at)}

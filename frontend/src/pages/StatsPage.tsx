@@ -23,7 +23,7 @@ export function StatsPage() {
       <PageTitle>{t('menu.stats')}</PageTitle>
       <p className="text-sm text-slate-600">{t('stats.pageHint')}</p>
       {list.length === 0 && <Notice>{t('teams.none')}</Notice>}
-      <ul className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <ul className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-surface">
         {list.map((team) => (
           <li key={team.id}>
             <Link to={`/${slug}/teams/${team.id}?tab=statistics`} className="flex min-h-14 items-center justify-between px-4 hover:bg-slate-50">

@@ -40,7 +40,7 @@ export function RegisterPage() {
       {register.isSuccess ? (
         <Notice tone="success">{register.data.message}</Notice>
       ) : (
-        <form onSubmit={submit} className="space-y-4 rounded-xl border border-slate-200 bg-white p-4">
+        <form onSubmit={submit} className="space-y-4 rounded-xl border border-slate-200 bg-surface p-4">
           <h2 className="font-semibold">{t('register.club')}</h2>
           <Field
             label={t('register.clubName')}
@@ -87,7 +87,7 @@ export function RegisterPage() {
           {/* Honeypot against bots – hidden from people. */}
           <input type="text" name="website" tabIndex={-1} autoComplete="off" className="hidden" aria-hidden="true" value={form.website} onChange={(e) => set('website', e.target.value)} />
           <label className="flex items-start gap-3 text-sm">
-            <input type="checkbox" required className="mt-0.5 size-5 shrink-0 accent-brand-700" checked={form.accept} onChange={(e) => set('accept', e.target.checked)} />
+            <input type="checkbox" required className="mt-0.5 size-5 shrink-0 accent-brand-solid" checked={form.accept} onChange={(e) => set('accept', e.target.checked)} />
             <span>
               <Trans i18nKey="register.acceptTerms" components={{ terms: <Link to="/agb" className="text-brand-700 underline" target="_blank" rel="noreferrer" />, privacy: <Link to="/datenschutz" className="text-brand-700 underline" target="_blank" rel="noreferrer" /> }} />
             </span>

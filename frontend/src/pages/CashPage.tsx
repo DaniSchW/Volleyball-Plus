@@ -60,7 +60,7 @@ function BookList({ books }: { books: CashBookInfo[] }) {
   const slug = useTenantSlug();
 
   return (
-    <ul className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-white">
+    <ul className="divide-y divide-slate-100 overflow-hidden rounded-xl border border-slate-200 bg-surface">
       {books.map((book) => (
         <li key={book.id}>
           <Link to={`/${slug}/cash/${book.id}`} className="flex min-h-14 items-center gap-3 px-4 hover:bg-slate-50">

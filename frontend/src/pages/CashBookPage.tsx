@@ -107,7 +107,7 @@ export function CashBookPage() {
 
         <a
           href={`/api/v1${tp(`cash-books/${bookId}/export`)}${search ? `?${search}` : ''}`}
-          className="mt-4 inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-white px-4 text-sm font-medium"
+          className="mt-4 inline-flex min-h-11 items-center rounded-lg border border-slate-300 bg-surface px-4 text-sm font-medium"
           download
         >
           📄 {t('cash.export')}
@@ -198,7 +198,7 @@ function NewEntry({ book, onBooked }: { book: CashBookDetail; onBooked: () => vo
                 role="radio"
                 aria-checked={form.direction === d}
                 onClick={() => setForm({ ...form, direction: d })}
-                className={`min-h-10 rounded-md text-sm ${form.direction === d ? `bg-white font-medium shadow-sm ${d === 'income' ? 'text-emerald-700' : 'text-red-700'}` : 'text-slate-600'}`}
+                className={`min-h-10 rounded-md text-sm ${form.direction === d ? `bg-surface font-medium shadow-sm ${d === 'income' ? 'text-emerald-700' : 'text-red-700'}` : 'text-slate-600'}`}
               >
                 {t(`cash.${d}`)}
               </button>
@@ -241,7 +241,7 @@ function OpeningBalance({ book, onSaved }: { book: CashBookDetail; onSaved: () =
   const parsed = parseMoney(value.replace('-', ''));
 
   return (
-    <details className="rounded-xl border border-slate-200 bg-white p-4">
+    <details className="rounded-xl border border-slate-200 bg-surface p-4">
       <summary className="cursor-pointer text-sm font-medium">{t('cash.opening')}: {formatMoney(book.opening_balance_cents)}</summary>
       <form
         className="mt-3 space-y-3"
@@ -254,7 +254,7 @@ function OpeningBalance({ book, onSaved }: { book: CashBookDetail; onSaved: () =
         <div className="grid grid-cols-[1fr_auto] items-end gap-3">
           <Field label={t('cash.amount')} inputMode="decimal" value={value} onChange={(e) => setValue(e.target.value)} />
           <label className="flex min-h-11 items-center gap-2 text-sm">
-            <input type="checkbox" className="size-5 accent-brand-700" checked={negative} onChange={(e) => setNegative(e.target.checked)} />
+            <input type="checkbox" className="size-5 accent-brand-solid" checked={negative} onChange={(e) => setNegative(e.target.checked)} />
             {t('cash.negative')}
           </label>
         </div>

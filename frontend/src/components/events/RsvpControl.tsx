@@ -64,7 +64,7 @@ export function RsvpControl({ event, reply, showName }: { event: EventSummary; r
                 aria-pressed={active}
                 onClick={() => choose(status)}
                 className={`flex min-h-11 flex-1 items-center justify-center gap-1 rounded-lg border text-sm font-medium disabled:opacity-40 ${
-                  active ? STYLE[status].active : 'border-slate-300 bg-white text-slate-700'
+                  active ? STYLE[status].active : 'border-slate-300 bg-surface text-slate-700'
                 }`}
               >
                 <span aria-hidden="true">{STYLE[status].icon}</span>
@@ -79,7 +79,7 @@ export function RsvpControl({ event, reply, showName }: { event: EventSummary; r
         <label className="flex items-center gap-2 text-xs text-slate-600">
           {t('events.acceptAs')}
           <select
-            className="min-h-9 rounded-md border border-slate-300 bg-white px-2 text-sm"
+            className="min-h-9 rounded-md border border-slate-300 bg-surface px-2 text-sm"
             value={position}
             onChange={(e) => {
               const value = e.target.value as Position | '';
@@ -114,7 +114,7 @@ export function RsvpControl({ event, reply, showName }: { event: EventSummary; r
             onChange={(e) => setReason(e.target.value)}
             autoFocus
           />
-          <button type="submit" className="min-h-11 rounded-lg bg-brand-700 px-4 text-sm font-medium text-white" disabled={send.isPending}>
+          <button type="submit" className="min-h-11 rounded-lg bg-brand-solid px-4 text-sm font-medium text-white" disabled={send.isPending}>
             {t('events.send')}
           </button>
         </form>

@@ -42,18 +42,18 @@ export function HallSuggestions({ teamId, startsAt, onPick }: { teamId: string |
       <p className="text-sm font-medium text-slate-700">{t('events.hallsOn', { day: weekdayName(weekday) })}</p>
       <ul className="space-y-2">
         {own.map(({ hall, b }) => (
-          <li key={b.id} className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-white p-2 text-sm">
+          <li key={b.id} className="flex items-center gap-2 rounded-lg border border-emerald-200 bg-surface p-2 text-sm">
             <span className="min-w-0 flex-1">
               <span className="font-medium">🏟️ {hall.name}</span> · {b.start_time}–{b.end_time}
               <span className="block text-xs text-emerald-700">{t('events.ownHallTime')}{b.courts ? ` · ${courtsLabel(b.courts, hall.courts, t)}` : ''}</span>
             </span>
-            <button type="button" className="shrink-0 rounded-md bg-brand-700 px-3 py-2 text-xs font-medium text-white" onClick={() => onPick(hall, { start: b.start_time, end: b.end_time })}>
+            <button type="button" className="shrink-0 rounded-md bg-brand-solid px-3 py-2 text-xs font-medium text-white" onClick={() => onPick(hall, { start: b.start_time, end: b.end_time })}>
               {t('events.takeHall')}
             </button>
           </li>
         ))}
         {available.map(({ hall, s, taken }) => (
-          <li key={s.id} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white p-2 text-sm">
+          <li key={s.id} className="flex items-center gap-2 rounded-lg border border-slate-200 bg-surface p-2 text-sm">
             <span className="min-w-0 flex-1">
               <span className="font-medium">🏟️ {hall.name}</span> · {s.start_time}–{s.end_time}
               {s.courts && <span className="text-slate-500"> · {courtsLabel(s.courts, hall.courts, t)}</span>}

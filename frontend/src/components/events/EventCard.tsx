@@ -19,7 +19,7 @@ function DateTile({ iso, type, muted }: { iso: string; type: EventSummary['type'
   const date = new Date(iso);
   const part = (o: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(i18n.resolvedLanguage ?? 'de', o).format(date);
   return (
-    <div aria-hidden="true" className={`flex w-14 shrink-0 flex-col items-center overflow-hidden rounded-xl bg-white text-center shadow-sm ring-1 ring-slate-200 ${muted ? 'grayscale' : ''}`}>
+    <div aria-hidden="true" className={`flex w-14 shrink-0 flex-col items-center overflow-hidden rounded-xl bg-surface text-center shadow-sm ring-1 ring-slate-200 ${muted ? 'grayscale' : ''}`}>
       <span className={`w-full bg-gradient-to-b py-0.5 text-[0.65rem] font-semibold uppercase tracking-wide text-white ${TYPE_COLORS[type].tile}`}>{part({ weekday: 'short' })}</span>
       <span className="pt-0.5 text-xl font-bold leading-6 text-slate-900">{part({ day: 'numeric' })}</span>
       <span className="pb-1 text-[0.65rem] font-medium uppercase text-slate-500">{part({ month: 'short' })}</span>
@@ -45,7 +45,7 @@ function RelativeDay({ iso }: { iso: string }) {
   const days = Math.round((day(new Date(iso)) - day(new Date())) / 86_400_000);
   if (days < 0 || days > 6) return null;
   return (
-    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${days === 0 ? 'bg-brand-700 text-white' : 'bg-brand-50 text-brand-700'}`}>
+    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${days === 0 ? 'bg-brand-solid text-white' : 'bg-brand-50 text-brand-700'}`}>
       {days === 0 ? t('events.today') : days === 1 ? t('events.tomorrow') : t('events.inDays', { count: days })}
     </span>
   );
@@ -78,7 +78,7 @@ export function EventCard({ event }: { event: EventSummary }) {
 
   return (
     <article
-      className={`vo-rise overflow-hidden rounded-2xl border border-l-4 shadow-[0_1px_2px_rgb(15_23_42/0.04),0_6px_20px_-8px_rgb(15_23_42/0.1)] transition hover:shadow-md ${TYPE_COLORS[event.type].stripe} ${cancelled ? 'border-slate-200 bg-slate-100 opacity-70' : highlight ? 'border-amber-300 bg-white' : 'border-slate-200 bg-white'}`}
+      className={`vo-rise overflow-hidden rounded-2xl border border-l-4 shadow-[0_1px_2px_rgb(15_23_42/0.04),0_6px_20px_-8px_rgb(15_23_42/0.1)] transition hover:shadow-md ${TYPE_COLORS[event.type].stripe} ${cancelled ? 'border-slate-200 bg-slate-100 opacity-70' : highlight ? 'border-amber-300 bg-surface' : 'border-slate-200 bg-surface'}`}
       aria-label={event.title}
     >
       <Link to={`/${slug}/events/${event.id}`} className="block p-4">
@@ -103,9 +103,9 @@ export function EventCard({ event }: { event: EventSummary }) {
           {/* Logos only once the opponent has one – otherwise just "gegen" would be shown. */}
           {event.type === 'match' && event.opponent_logo_url && (
             <div className="flex shrink-0 flex-col items-center gap-0.5">
-              {event.own_logo_url && <img src={event.own_logo_url} alt="" className="size-9 rounded object-contain" />}
+              {event.own_logo_url && <img src={event.own_logo_url} alt="" className="vo-logo size-9 rounded object-contain" />}
               <span className="text-[0.65rem] uppercase text-slate-400">{t('events.versus')}</span>
-              <img src={event.opponent_logo_url} alt={event.opponent?.name ?? ''} className="size-9 rounded object-contain" />
+              <img src={event.opponent_logo_url} alt={event.opponent?.name ?? ''} className="vo-logo size-9 rounded object-contain" />
             </div>
           )}
         </div>
@@ -131,7 +131,7 @@ export function EventCard({ event }: { event: EventSummary }) {
               <span className="text-amber-700">? {event.counts.maybe}</span>
               <span className="text-red-700">✕ {event.counts.no}</span>
               <span>{t('events.open', { count: event.counts.open })}</span>
-              {event.is_full && <span className="rounded-full bg-slate-800 px-2 font-medium text-white">{t('events.full')}</span>}
+              {event.is_full && <span className="rounded-full bg-slate-800 px-2 font-medium text-slate-50">{t('events.full')}</span>}
             </p>
             {highlight && (
               <p className="mt-2 rounded-lg bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-800 ring-1 ring-amber-200">

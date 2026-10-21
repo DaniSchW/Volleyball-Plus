@@ -48,7 +48,7 @@ export function ChatPage() {
               role="tab"
               aria-selected={topic.id === topicId}
               onClick={() => setParams({ topic: topic.id }, { replace: true })}
-              className={`min-h-9 shrink-0 rounded-full border px-3 text-sm ${topic.id === topicId ? 'border-brand-700 bg-brand-700 text-white' : 'border-slate-300 bg-white'}`}
+              className={`min-h-9 shrink-0 rounded-full border px-3 text-sm ${topic.id === topicId ? 'border-brand-solid bg-brand-solid text-white' : 'border-slate-300 bg-surface'}`}
             >
               # {topic.name}
               {topic.unread > 0 && topic.id !== topicId && <span className="ml-1 font-semibold">({topic.unread})</span>}
@@ -212,7 +212,7 @@ function Bubble({ message: m, showAuthor, active, onToggle, onReply, onEdit, onD
         onClick={onToggle}
         disabled={m.deleted}
         className={`${m.attachments.length > 0 ? 'w-[85%] sm:w-80' : 'max-w-[85%]'} whitespace-pre-wrap break-words rounded-2xl px-3 py-2 text-left text-sm ${
-          m.deleted ? 'border border-dashed border-slate-300 italic text-slate-500' : m.is_mine ? 'bg-brand-700 text-white' : 'border border-slate-200 bg-white'
+          m.deleted ? 'border border-dashed border-slate-300 italic text-slate-500' : m.is_mine ? 'bg-brand-solid text-white' : 'border border-slate-200 bg-surface'
         }`}
       >
         {m.reply_to && (
@@ -304,7 +304,7 @@ function Composer({ chatId, topicId, uploadInfo, reply, editing, onCancel, onSen
   return (
     <form onSubmit={submit} className="border-t border-slate-200 bg-slate-50 pb-[calc(0.5rem+env(safe-area-inset-bottom))] pt-2">
       {(reply || editing) && (
-        <div className="mb-2 flex items-center justify-between gap-2 rounded-lg bg-white px-3 py-1 text-xs text-slate-600">
+        <div className="mb-2 flex items-center justify-between gap-2 rounded-lg bg-surface px-3 py-1 text-xs text-slate-600">
           <span className="min-w-0 truncate">
             {editing ? t('chat.editing') : t('chat.replyingTo', { name: reply!.author.name })}
             {reply && `: ${reply.body ?? ''}`}
@@ -316,7 +316,7 @@ function Composer({ chatId, topicId, uploadInfo, reply, editing, onCancel, onSen
       {uploads.length > 0 && (
         <ul className="mb-2 flex flex-wrap gap-2">
           {uploads.map((u) => (
-            <li key={u.key} className={`flex max-w-full items-center gap-2 rounded-full px-3 py-1 text-xs ${u.error ? 'bg-red-50 text-red-800' : 'bg-white'}`}>
+            <li key={u.key} className={`flex max-w-full items-center gap-2 rounded-full px-3 py-1 text-xs ${u.error ? 'bg-red-50 text-red-800' : 'bg-surface'}`}>
               <span className="min-w-0 truncate">{u.name}</span>
               {u.error ? <span>{u.error}</span> : !u.attachment && <span className="tabular-nums text-slate-500">{Math.round(u.progress * 100)} %</span>}
               <button type="button" className="text-slate-500" aria-label={t('chat.removeFile', { name: u.name })} onClick={() => setUploads((list) => list.filter((x) => x.key !== u.key))}>✕</button>
@@ -393,7 +393,7 @@ function ChatSettings({ chat }: { chat: ChatDetail }) {
             type="button"
             aria-pressed={chat.mode === value}
             onClick={() => chat.mode !== value && mode.mutate(value)}
-            className={`min-h-9 rounded-full border px-3 ${chat.mode === value ? 'border-brand-700 bg-brand-700 text-white' : 'border-slate-300 bg-white'}`}
+            className={`min-h-9 rounded-full border px-3 ${chat.mode === value ? 'border-brand-solid bg-brand-solid text-white' : 'border-slate-300 bg-surface'}`}
           >
             {t(`chat.modes.${value}`)}
           </button>

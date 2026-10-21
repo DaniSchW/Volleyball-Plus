@@ -30,7 +30,7 @@ export function LegalPage({ kind }: { kind: LegalKind }) {
       {legal.isPending && <Loading />}
       {legal.data && !legal.data.complete && <Notice tone="error">{t('legal.incomplete')}</Notice>}
       {legal.data && (
-        <article className="legal space-y-3 rounded-xl border border-slate-200 bg-white p-4 text-sm leading-relaxed text-slate-800 [&_h2]:mt-5 [&_h2]:text-base [&_h2]:font-semibold [&_ol]:list-decimal [&_ol]:space-y-1 [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5">
+        <article className="legal space-y-3 rounded-xl border border-slate-200 bg-surface p-4 text-sm leading-relaxed text-slate-800 [&_h2]:mt-5 [&_h2]:text-base [&_h2]:font-semibold [&_ol]:list-decimal [&_ol]:space-y-1 [&_ol]:pl-5 [&_ul]:list-disc [&_ul]:space-y-1 [&_ul]:pl-5">
           {kind === 'imprint' && <Imprint legal={legal.data} />}
           {kind === 'privacy' && <Privacy legal={legal.data} />}
           {kind === 'terms' && <Terms legal={legal.data} />}

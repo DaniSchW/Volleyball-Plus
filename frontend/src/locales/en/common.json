@@ -428,7 +428,11 @@
     "changeOpponentLogo": "Change logo",
     "uploadingLogo": "Uploading …",
     "enterForPlayers": "With ✓ ? ✕ you enter a player’s reply directly, e.g. after talking to them.",
-    "setReply": "Enter {{status}} for {{name}}"
+    "setReply": "Enter {{status}} for {{name}}",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "inDays_one": "in {{count}} day",
+    "inDays_other": "in {{count}} days"
   },
   "notifications": {
     "title": "Notifications",

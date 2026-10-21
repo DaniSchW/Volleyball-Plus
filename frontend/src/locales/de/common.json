@@ -428,7 +428,11 @@
     "changeOpponentLogo": "Logo ändern",
     "uploadingLogo": "Wird hochgeladen …",
     "enterForPlayers": "Mit ✓ ? ✕ trägst du die Antwort eines Spielers direkt ein, z. B. nach einem Gespräch.",
-    "setReply": "{{name}}: {{status}} eintragen"
+    "setReply": "{{name}}: {{status}} eintragen",
+    "today": "Heute",
+    "tomorrow": "Morgen",
+    "inDays_one": "in {{count}} Tag",
+    "inDays_other": "in {{count}} Tagen"
   },
   "notifications": {
     "title": "Benachrichtigungen",

@@ -7,7 +7,7 @@ import {
   type Invitation, type RosterRow, type Team, type TeamRole, type TeamSettings,
 } from '../lib/api';
 import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
-import { Avatar, Button, Card, Field, Loading, Notice, PageTitle, Select, Toggle } from '../components/ui';
+import { Avatar, Button, Card, Field, Loading, Notice, PageTitle, SaveBar, Select, Toggle } from '../components/ui';
 import { EventFeed } from '../components/events/EventFeed';
 import { LogoUpload } from '../components/LogoUpload';
 import { AddFromDepartment } from '../components/team/AddFromDepartment';
@@ -389,8 +389,7 @@ function Settings({ team, settings }: { team: Team; settings: TeamSettings }) {
       </Card>
 
       {save.isError && <Notice tone="error">{errorText(save.error, t('errors.generic'))}</Notice>}
-      {save.isSuccess && <Notice tone="success">{t('common.saved')}</Notice>}
-      <Button type="submit" disabled={save.isPending}>{t('common.save')}</Button>
+      <SaveBar saved={save.isSuccess}><Button type="submit" disabled={save.isPending}>{t('common.save')}</Button></SaveBar>
     </form>
   );
 }

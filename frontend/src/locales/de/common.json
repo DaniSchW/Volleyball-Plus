@@ -396,7 +396,7 @@
     "deadlineHours": "Rückmeldefrist (Stunden vor Beginn)",
     "deadlineAt": "Antworten bis {{date}}",
     "minParticipants": "Trainingsminimum (Spieler)",
-    "minParticipantsHint": "Optional – leer = Wert aus den Team-Einstellungen. Darunter wird das Training gelb markiert.",
+    "minParticipantsHint": "Optional – leer = Wert aus den Team-Einstellungen. Darunter wird das Training gelb markiert, ist die Zahl rechnerisch nicht mehr erreichbar, rot mit „Training findet nicht statt“.",
     "guestsAllowed": "Gäste dürfen zusagen",
     "guestsAllowedHint": "Quernominierte Spieler aus anderen Teams; es gilt dieselbe Rückmeldefrist wie für alle.",
     "hallsOn": "Verfügbare Hallen am {{day}}",
@@ -445,7 +445,10 @@
     "dropped_other": "{{count}} Termine fallen weg",
     "droppedText": "Durch die Änderung gehören diese Termine nicht mehr zur Serie (z. B. weil sie jetzt früher endet). Sollen sie abgesagt oder gelöscht werden?",
     "droppedCancel": "Absagen (bleiben als „abgesagt“ sichtbar)",
-    "droppedDelete": "Löschen"
+    "droppedDelete": "Löschen",
+    "minimumReached": "Training findet statt – Mindestzahl von {{min}} Zusagen erreicht",
+    "minimumUnreachable": "Training findet nicht statt",
+    "minimumPossible": "höchstens noch {{possible}} von {{min}} nötigen Zusagen möglich"
   },
   "notifications": {
     "title": "Benachrichtigungen",

@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api, del, errorText, patch, post, type Hall, type HallBooking, type HallSlot, type Team } from '../lib/api';
 import { formatDate, weekdayName } from '../lib/dates';
 import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
-import { Button, Card, Field, Loading, Notice, PageTitle, Select } from '../components/ui';
+import { Button, Card, Field, Loading, Notice, PageTitle, SaveBar, Select } from '../components/ui';
 
 type PlanResponse = { data: Hall[]; booking: HallBooking | null };
 
@@ -273,10 +273,10 @@ function HallForm({ hall, onDone }: { hall?: Hall; onDone?: () => void }) {
       </fieldset>
       <Field label={t('halls.notes')} maxLength={1000} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
       {save.isError && <Notice tone="error">{errorText(save.error, t('errors.generic'))}</Notice>}
-      <div className="flex gap-2">
+      <SaveBar>
         <Button type="submit" disabled={save.isPending}>{hall ? t('common.save') : t('halls.add')}</Button>
         {onDone && <Button variant="secondary" onClick={onDone}>{t('common.cancel')}</Button>}
-      </div>
+      </SaveBar>
     </form>
   );
 
@@ -472,10 +472,10 @@ function TimeForm({ hall, kind, booking, onDone, onWarning }: {
       </div>
       {kind === 'booking' && <Field label={t('halls.notes')} maxLength={255} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />}
       {save.isError && <Notice tone="error">{errorText(save.error, t('errors.generic'))}</Notice>}
-      <div className="flex gap-2">
+      <SaveBar>
         <Button type="submit" disabled={save.isPending}>{t('common.save')}</Button>
         <Button variant="secondary" onClick={onDone}>{t('common.cancel')}</Button>
-      </div>
+      </SaveBar>
     </form>
   );
 }

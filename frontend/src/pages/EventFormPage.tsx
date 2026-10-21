@@ -6,7 +6,7 @@ import { api, errorText, patch, post, POSITIONS, type EventDetail, type EventTyp
 import { addMinutes, formatDay, formatTime, toLocalInput } from '../lib/dates';
 import { HallSuggestions } from '../components/events/HallSuggestions';
 import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
-import { Button, Card, ChoiceDialog, Field, Loading, Notice, PageTitle, Select, Toggle } from '../components/ui';
+import { Button, Card, ChoiceDialog, Field, Loading, Notice, PageTitle, SaveBar, Select, Toggle } from '../components/ui';
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
 
@@ -372,7 +372,7 @@ export function EventFormPage() {
       )}
 
       {(save.isError || preview.isError) && <Notice tone="error">{errorText(save.error ?? preview.error, t('errors.generic'))}</Notice>}
-      <Button type="submit" className="w-full" disabled={save.isPending || preview.isPending}>{t('common.save')}</Button>
+      <SaveBar><Button type="submit" className="w-full" disabled={save.isPending || preview.isPending}>{t('common.save')}</Button></SaveBar>
       {dropped > 0 && (
         <ChoiceDialog
           title={t('events.dropped', { count: dropped })}

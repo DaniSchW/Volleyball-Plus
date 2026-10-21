@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api, del, errorText, post, type RsvpRule, type RsvpRuleOptions, type RsvpStatus } from '../lib/api';
 import { formatDate, formatDay, weekdayName } from '../lib/dates';
 import { useTenantPath, useTenantSlug } from '../lib/queries';
-import { Button, Card, Field, Loading, Notice, PageTitle, Select, Toggle } from '../components/ui';
+import { Button, Card, Field, Loading, Notice, PageTitle, SaveBar, Select, Toggle } from '../components/ui';
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
 const STATUSES: RsvpStatus[] = ['yes', 'maybe', 'no'];
@@ -220,7 +220,7 @@ function RuleForm({ options, onSaved }: { options: RsvpRuleOptions; onSaved: (re
         )}
         <Toggle label={t('rules.overwrite')} checked={overwrite} onChange={setOverwrite} />
         {save.isError && <Notice tone="error">{errorText(save.error, t('errors.generic'))}</Notice>}
-        <Button type="submit" className="w-full" disabled={save.isPending}>{t('rules.save')}</Button>
+        <SaveBar><Button type="submit" className="w-full" disabled={save.isPending}>{t('rules.save')}</Button></SaveBar>
       </form>
     </Card>
   );

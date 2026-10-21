@@ -7,7 +7,7 @@ import {
   type Invitation, type MinorPermissions, type PersonDetail, type Position,
 } from '../lib/api';
 import { useTenantPath } from '../lib/queries';
-import { Avatar, Button, Card, Field, Loading, Notice, PageTitle, Select, Toggle } from '../components/ui';
+import { Avatar, Button, Card, Field, Loading, Notice, PageTitle, SaveBar, Select, Toggle } from '../components/ui';
 import { PersonalData } from '../components/PersonalData';
 import { RefereeLicenseCard } from '../components/team/RefereeLicenseCard';
 import { ShareLink } from './TeamPage';
@@ -227,8 +227,7 @@ function ProfileForm({ person }: { person: PersonDetail }) {
       )}
 
       {save.isError && <Notice tone="error">{errorText(save.error, t('errors.generic'))}</Notice>}
-      {save.isSuccess && <Notice tone="success">{t('common.saved')}</Notice>}
-      <Button type="submit" disabled={save.isPending}>{t('common.save')}</Button>
+      <SaveBar saved={save.isSuccess}><Button type="submit" disabled={save.isPending}>{t('common.save')}</Button></SaveBar>
     </form>
   );
 }
@@ -307,8 +306,9 @@ function ChildPermissions({ person, permissions }: { person: PersonDetail; permi
           }))}
         />
       ))}
-      {save.isSuccess && <div className="mt-2"><Notice tone="success">{t('common.saved')}</Notice></div>}
-      <Button className="mt-3" onClick={() => save.mutate()} disabled={save.isPending}>{t('common.save')}</Button>
+      <div className="mt-3">
+        <SaveBar saved={save.isSuccess}><Button onClick={() => save.mutate()} disabled={save.isPending}>{t('common.save')}</Button></SaveBar>
+      </div>
     </Card>
   );
 }

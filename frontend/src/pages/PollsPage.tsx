@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api, errorText, post, type Poll, type Team } from '../lib/api';
 import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
-import { Button, Card, Field, Loading, Notice, PageTitle, Toggle } from '../components/ui';
+import { Button, Card, Field, Loading, Notice, PageTitle, SaveBar, Toggle } from '../components/ui';
 import { PollCard } from '../components/polls/PollCard';
 
 /** Polls of my teams; trainers/organizers create team polls, admins also for all teams. */
@@ -110,10 +110,10 @@ function CreatePoll({ teams, isAdmin, onDone }: { teams: Team[]; isAdmin: boolea
           <Field label={t('polls.closesAt')} type="datetime-local" value={form.closes_at} onChange={(e) => set('closes_at', e.target.value)} hint={t('invitations.optional')} />
           <NotifyChoice push={form.notify_push} email={form.notify_email} onPush={(v) => set('notify_push', v)} onEmail={(v) => set('notify_email', v)} />
           {create.isError && <Notice tone="error">{errorText(create.error, t('errors.generic'))}</Notice>}
-          <div className="flex gap-2">
+          <SaveBar>
             <Button type="submit" disabled={create.isPending}>{t('polls.publish')}</Button>
             <Button variant="secondary" onClick={onDone}>{t('common.cancel')}</Button>
-          </div>
+          </SaveBar>
         </div>
       </Card>
     </form>

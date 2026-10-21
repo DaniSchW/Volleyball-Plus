@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api, del, errorText, patch, post, type DocumentItem, type DocumentList } from '../../lib/api';
 import { formatDate, toLocalInput } from '../../lib/dates';
 import { useTenantPath, useTenantSlug } from '../../lib/queries';
-import { Button, Card, Field, Loading, Notice, Select } from '../ui';
+import { Button, Card, Field, Loading, Notice, SaveBar, Select } from '../ui';
 
 const ICON = (mime: string | null) =>
   mime === 'application/pdf' ? '📕' : mime?.startsWith('image/') ? '🖼️' : mime?.startsWith('video/') ? '🎬'
@@ -111,11 +111,11 @@ function DocumentRow({ document, targets, folders }: { document: DocumentItem; t
             </Select>
           )}
           {save.isError && <Notice tone="error">{errorText(save.error, t('errors.generic'))}</Notice>}
-          <div className="flex flex-wrap gap-2">
+          <SaveBar>
             <Button type="submit" disabled={save.isPending}>{t('common.save')}</Button>
             <Button variant="secondary" onClick={() => setEditing(false)}>{t('common.cancel')}</Button>
             <Button variant="danger" onClick={() => window.confirm(t('documents.deleteConfirm', { title: document.title })) && remove.mutate()}>{t('documents.delete')}</Button>
-          </div>
+          </SaveBar>
         </form>
       </li>
     );
@@ -198,7 +198,7 @@ function UploadForm({ targets, folders, maxMb, defaultTarget }: { targets: { id:
         <Field label={t('documents.description')} maxLength={1000} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
         <p className="text-xs text-slate-500">{form.team_id ? t('documents.visibleTeam') : t('documents.visibleAll')}</p>
         {upload.isError && <Notice tone="error">{errorText(upload.error, t('errors.generic'))}</Notice>}
-        <Button type="submit" disabled={!file || upload.isPending}>{upload.isPending ? t('documents.uploading') : t('documents.uploadButton')}</Button>
+        <SaveBar><Button type="submit" disabled={!file || upload.isPending}>{upload.isPending ? t('documents.uploading') : t('documents.uploadButton')}</Button></SaveBar>
       </form>
     </Card>
   );

@@ -7,7 +7,7 @@ import { formatDateTime, formatLongDay, formatTime } from '../lib/dates';
 import { useTenantPath, useTenantSlug } from '../lib/queries';
 import { RsvpControl } from '../components/events/RsvpControl';
 import { TasksCard } from '../components/events/TasksCard';
-import { TypeIcon } from '../components/events/EventCard';
+import { MinimumNotice, TypeIcon } from '../components/events/EventCard';
 import { Avatar, Button, Card, ChoiceDialog, Loading, Notice } from '../components/ui';
 
 export function EventPage() {
@@ -63,6 +63,7 @@ export function EventPage() {
           {e.title}
         </h1>
         {cancelled && <p className="font-medium text-red-700">{t('events.cancelled')}</p>}
+        <div className="mt-2 empty:hidden"><MinimumNotice event={e} /></div>
       </div>
 
       {e.type === 'match' && (

@@ -129,6 +129,20 @@ export function Loading() {
   return <p className="p-6 text-center text-slate-500">{t('tenant.loading')}</p>;
 }
 
+/**
+ * Save button(s) that stay in view while scrolling through a long form –
+ * the bar sticks to the bottom of the screen until the end of its form.
+ */
+export function SaveBar({ children, saved = false }: { children: ReactNode; saved?: boolean }) {
+  const { t } = useTranslation();
+  return (
+    <div className="sticky bottom-0 z-10 -mx-4 flex flex-wrap items-center gap-2 border-t border-slate-200/70 bg-surface/85 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom))] backdrop-blur">
+      {children}
+      {saved && <span role="status" className="text-sm font-medium text-emerald-700">✓ {t('common.saved')}</span>}
+    </div>
+  );
+}
+
 export interface Choice {
   label: string;
   onChoose: () => void;

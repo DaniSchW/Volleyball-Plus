@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api, del, errorText, patch, post, type League } from '../lib/api';
 import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
-import { Button, Card, Field, Loading, Notice, PageTitle, Select } from '../components/ui';
+import { Button, Card, Field, Loading, Notice, PageTitle, SaveBar, Select } from '../components/ui';
 
 /**
  * League tree (admins): levels from the top league down. The level decides
@@ -94,10 +94,10 @@ function EditLeague({ league, onSave, onCancel }: { league: League; onSave: (bod
         <Field label={t('leagues.name')} required maxLength={80} value={name} onChange={(e) => setName(e.target.value)} />
         <Field label={t('leagues.level')} type="number" min={1} max={30} required inputMode="numeric" value={level} onChange={(e) => setLevel(e.target.value)} />
       </div>
-      <div className="flex gap-2">
+      <SaveBar>
         <Button type="submit">{t('common.save')}</Button>
         <Button variant="secondary" onClick={onCancel}>{t('common.cancel')}</Button>
-      </div>
+      </SaveBar>
     </form>
   );
 }

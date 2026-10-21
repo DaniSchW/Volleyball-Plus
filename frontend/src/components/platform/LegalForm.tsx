@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { errorText, put, type LegalDetails } from '../../lib/api';
 import { useLegal } from '../../pages/LegalPage';
-import { Button, Card, Field, Loading, Notice } from '../ui';
+import { Button, Card, Field, Loading, Notice, SaveBar } from '../ui';
 
 const FIELDS = ['name', 'company', 'street', 'postal_code', 'city', 'country', 'email', 'phone', 'vat_id'] as const;
 const REQUIRED = new Set(['name', 'street', 'postal_code', 'city', 'email']);
@@ -45,8 +45,7 @@ export function LegalForm() {
           />
         ))}
         {save.isError && <Notice tone="error">{errorText(save.error, t('errors.generic'))}</Notice>}
-        {save.isSuccess && <Notice tone="success">{t('common.saved')}</Notice>}
-        <Button type="submit" disabled={save.isPending}>{t('common.save')}</Button>
+        <SaveBar saved={save.isSuccess}><Button type="submit" disabled={save.isPending}>{t('common.save')}</Button></SaveBar>
         <p className="text-xs text-slate-500">
           <Link className="text-brand-700 underline" to="/impressum">{t('legal.imprint')}</Link> · <Link className="text-brand-700 underline" to="/datenschutz">{t('legal.privacy')}</Link> · <Link className="text-brand-700 underline" to="/agb">{t('legal.terms')}</Link>
         </p>

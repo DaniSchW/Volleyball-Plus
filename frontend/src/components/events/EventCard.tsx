@@ -67,18 +67,47 @@ function ReplyBar({ event }: { event: EventSummary }) {
   );
 }
 
+/** Does the training take place? Reached (green), still open (amber) or not reachable any more (red). */
+export function minimumState(event: EventSummary): 'reached' | 'open' | 'unreachable' | null {
+  if (event.status === 'cancelled' || event.response_mode !== 'rsvp') return null;
+  return event.minimum_state ?? (event.below_minimum ? 'open' : null);
+}
+
+export function MinimumNotice({ event }: { event: EventSummary }) {
+  const { t } = useTranslation();
+  const state = minimumState(event);
+  if (!state) return null;
+  const style = {
+    reached: 'bg-emerald-50 text-emerald-800 ring-emerald-200',
+    open: 'bg-amber-50 text-amber-800 ring-amber-200',
+    unreachable: 'bg-red-50 text-red-800 ring-red-200',
+  }[state];
+  return (
+    <p className={`rounded-lg px-2.5 py-1.5 text-xs font-medium ring-1 ${style}`}>
+      <span aria-hidden="true">{{ reached: '✅', open: '⚠️', unreachable: '❌' }[state]} </span>
+      {state === 'reached' && t('events.minimumReached', { min: event.min_participants })}
+      {state === 'open' && t('events.belowMinimum', { min: event.min_participants })}
+      {state === 'unreachable' && (
+        <>
+          <strong>{t('events.minimumUnreachable')}</strong> – {t('events.minimumPossible', { possible: event.minimum_possible ?? 0, min: event.min_participants })}
+        </>
+      )}
+    </p>
+  );
+}
+
 export function EventCard({ event }: { event: EventSummary }) {
   const { t } = useTranslation();
   const slug = useTenantSlug();
   const cancelled = event.status === 'cancelled';
-  const highlight = event.below_minimum && !cancelled;
+  const minimum = minimumState(event);
   const rsvp = event.response_mode === 'rsvp' && !cancelled;
   const who = [event.teams.map((team) => team.name).join(', '), event.training_group?.name, event.my.some((r) => r.is_guest) && t('events.asGuest')]
     .filter(Boolean).join(' · ');
 
   return (
     <article
-      className={`vo-rise overflow-hidden rounded-2xl border border-l-4 shadow-[0_1px_2px_rgb(15_23_42/0.04),0_6px_20px_-8px_rgb(15_23_42/0.1)] transition hover:shadow-md ${TYPE_COLORS[event.type].stripe} ${cancelled ? 'border-slate-200 bg-slate-100 opacity-70' : highlight ? 'border-amber-300 bg-surface' : 'border-slate-200 bg-surface'}`}
+      className={`vo-rise overflow-hidden rounded-2xl border border-l-4 shadow-[0_1px_2px_rgb(15_23_42/0.04),0_6px_20px_-8px_rgb(15_23_42/0.1)] transition hover:shadow-md ${TYPE_COLORS[event.type].stripe} ${cancelled ? 'border-slate-200 bg-slate-100 opacity-70' : minimum === 'unreachable' ? 'border-red-300 bg-surface' : minimum === 'open' ? 'border-amber-300 bg-surface' : minimum === 'reached' ? 'border-emerald-300 bg-surface' : 'border-slate-200 bg-surface'}`}
       aria-label={event.title}
     >
       <Link to={`/${slug}/events/${event.id}`} className="block p-4">
@@ -133,11 +162,7 @@ export function EventCard({ event }: { event: EventSummary }) {
               <span>{t('events.open', { count: event.counts.open })}</span>
               {event.is_full && <span className="rounded-full bg-slate-800 px-2 font-medium text-slate-50">{t('events.full')}</span>}
             </p>
-            {highlight && (
-              <p className="mt-2 rounded-lg bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-800 ring-1 ring-amber-200">
-                <span aria-hidden="true">⚠️ </span>{t('events.belowMinimum', { min: event.min_participants })}
-              </p>
-            )}
+            {minimum && <div className="mt-2"><MinimumNotice event={event} /></div>}
           </>
         )}
       </Link>

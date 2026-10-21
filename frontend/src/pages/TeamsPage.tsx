@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { api, errorText, post, type Team } from '../lib/api';
 import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
-import { Button, Card, Field, Loading, Notice, PageTitle, Select, Toggle } from '../components/ui';
+import { Button, Card, Field, Loading, Notice, PageTitle, SaveBar, Select, Toggle } from '../components/ui';
 
 export function TeamsPage() {
   const { t } = useTranslation();
@@ -99,7 +99,7 @@ function CreateTeam() {
         </Select>
         <Toggle label={t('teams.youthLabel')} checked={isYouth} onChange={setIsYouth} />
         {create.isError && <Notice tone="error">{errorText(create.error, t('errors.generic'))}</Notice>}
-        <Button type="submit" disabled={create.isPending}>{t('common.create')}</Button>
+        <SaveBar><Button type="submit" disabled={create.isPending}>{t('common.create')}</Button></SaveBar>
       </form>
     </Card>
   );

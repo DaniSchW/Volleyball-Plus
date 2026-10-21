@@ -6,7 +6,7 @@ import { api, errorText, patch, post, type CashBookDetail, type CashEntry } from
 import { formatDate, todayDate } from '../lib/dates';
 import { formatMoney, parseMoney } from '../lib/money';
 import { useTenantPath, useTenantSlug } from '../lib/queries';
-import { Button, Card, Field, Loading, Notice, PageTitle, Select } from '../components/ui';
+import { Button, Card, Field, Loading, Notice, PageTitle, SaveBar, Select } from '../components/ui';
 import { amountTone } from './CashPage';
 
 type Period = 'all' | 'year' | 'lastYear' | 'custom';
@@ -221,7 +221,7 @@ function NewEntry({ book, onBooked }: { book: CashBookDetail; onBooked: () => vo
           </div>
           {invalid && <Notice tone="error">{t('cash.amountInvalid')}</Notice>}
           {save.isError && <Notice tone="error">{errorText(save.error, t('errors.generic'))}</Notice>}
-          <Button type="submit" disabled={save.isPending}>{t('cash.book')}</Button>
+          <SaveBar><Button type="submit" disabled={save.isPending}>{t('cash.book')}</Button></SaveBar>
         </div>
       </Card>
     </form>
@@ -259,8 +259,7 @@ function OpeningBalance({ book, onSaved }: { book: CashBookDetail; onSaved: () =
           </label>
         </div>
         {parsed === null && <Notice tone="error">{t('cash.amountInvalid')}</Notice>}
-        {save.isSuccess && <Notice tone="success">{t('common.saved')}</Notice>}
-        <Button type="submit" variant="secondary" disabled={parsed === null || save.isPending}>{t('common.save')}</Button>
+        <SaveBar saved={save.isSuccess}><Button type="submit" variant="secondary" disabled={parsed === null || save.isPending}>{t('common.save')}</Button></SaveBar>
       </form>
     </details>
   );

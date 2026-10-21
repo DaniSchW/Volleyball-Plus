@@ -1237,3 +1237,19 @@ describe('managing an event', () => {
     expect(await screen.findByRole('button', { name: /Absage zurücknehmen/ })).toBeInTheDocument();
   });
 });
+
+describe('training minimum', () => {
+  it('says a training does not take place when the minimum cannot be reached any more', async () => {
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/notices': { body: { data: [] } },
+      'GET /t/ssv-ulm/events?': { body: { data: [{ ...EVENT, minimum_state: 'unreachable', minimum_possible: 4 }, { ...EVENT, id: 'e2', title: 'Donnerstagstraining', below_minimum: false, minimum_state: 'reached' }], next_cursor: null } },
+    });
+    renderAt('/ssv-ulm');
+
+    const card = await screen.findByRole('article', { name: 'Hallentraining' });
+    expect(card).toHaveTextContent('Training findet nicht statt – höchstens noch 4 von 6 nötigen Zusagen möglich');
+    expect(card.className).toContain('red');
+    expect(screen.getByRole('article', { name: 'Donnerstagstraining' })).toHaveTextContent('Training findet statt');
+  });
+});

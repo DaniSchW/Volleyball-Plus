@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { api, del, errorText, patch, post, type RosterRow, type Team, type TrainingGroup } from '../../lib/api';
 import { useTenantPath } from '../../lib/queries';
-import { Button, Card, Field, Loading, Notice } from '../ui';
+import { Button, Card, Field, Loading, Notice, SaveBar } from '../ui';
 
 /**
  * Training groups within the team (e.g. setter training) with their own
@@ -106,10 +106,10 @@ function GroupCard({ team, group, players }: { team: Team; group: TrainingGroup;
               </li>
             ))}
           </ul>
-          <div className="flex gap-2">
+          <SaveBar>
             <Button onClick={() => save.mutate()} disabled={save.isPending}>{t('common.save')}</Button>
             <Button variant="secondary" onClick={() => { setSelected(group.person_ids); setEditing(false); }}>{t('common.cancel')}</Button>
-          </div>
+          </SaveBar>
           {save.isError && <Notice tone="error">{errorText(save.error, t('errors.generic'))}</Notice>}
         </div>
       )}

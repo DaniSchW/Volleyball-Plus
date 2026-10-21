@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router';
 import { api, errorText, patch, type League, type Team } from '../../lib/api';
 import { useTenantPath, useTenantSlug } from '../../lib/queries';
-import { Button, Card, Field, Notice, Select, Toggle } from '../ui';
+import { Button, Card, Field, Notice, SaveBar, Select, Toggle } from '../ui';
 
 /** Admins: name, kind, youth, league and order within the league (hierarchy). */
 export function TeamBaseData({ team }: { team: Team }) {
@@ -60,8 +60,7 @@ export function TeamBaseData({ team }: { team: Team }) {
             {t('teamBase.hint')} <Link to={`/${slug}/leagues`} className="text-brand-700 underline">{t('leagues.manage')}</Link>
           </p>
           {save.isError && <Notice tone="error">{errorText(save.error, t('errors.generic'))}</Notice>}
-          {save.isSuccess && <Notice tone="success">{t('common.saved')}</Notice>}
-          <Button type="submit" disabled={save.isPending}>{t('common.save')}</Button>
+          <SaveBar saved={save.isSuccess}><Button type="submit" disabled={save.isPending}>{t('common.save')}</Button></SaveBar>
         </div>
       </Card>
     </form>

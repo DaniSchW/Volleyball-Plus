@@ -7,7 +7,7 @@ import { Attachments } from '../components/chat/Attachments';
 import { MemberPicker } from '../components/chat/MemberPicker';
 import { formatDay, formatTime } from '../lib/dates';
 import { useTenantPath, useTenantSlug } from '../lib/queries';
-import { Button, Loading, Notice } from '../components/ui';
+import { Button, Loading, Notice, SaveBar } from '../components/ui';
 
 /** How often an open chat asks for new messages (no websockets on shared hosting). */
 const POLL_MS = 4000;
@@ -419,10 +419,10 @@ function ChatSettings({ chat }: { chat: ChatDetail }) {
         <div className="space-y-2">
           <MemberPicker chosen={members} onChange={setMembers} />
           {saveMembers.isError && <Notice tone="error">{errorText(saveMembers.error, t('errors.generic'))}</Notice>}
-          <div className="flex gap-2">
+          <SaveBar>
             <Button disabled={members.length === 0 || saveMembers.isPending} onClick={() => saveMembers.mutate(members)}>{t('common.save')}</Button>
             <Button variant="secondary" onClick={() => setMembers(null)}>{t('common.cancel')}</Button>
-          </div>
+          </SaveBar>
         </div>
       ))}
     </div>

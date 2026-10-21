@@ -6,7 +6,7 @@ import { api, errorText, post, type ChatDetail, type ChatSummary } from '../lib/
 import { MemberPicker } from '../components/chat/MemberPicker';
 import { formatDay, formatTime } from '../lib/dates';
 import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
-import { Button, Card, Field, Loading, Notice, PageTitle, Select } from '../components/ui';
+import { Button, Card, Field, Loading, Notice, PageTitle, SaveBar, Select } from '../components/ui';
 
 /** All chats of the member: team chats and the custom chats they belong to. */
 export function ChatListPage() {
@@ -106,10 +106,10 @@ function CreateChat({ onDone }: { onDone: () => void }) {
           </Select>
           <MemberPicker chosen={chosen} onChange={setChosen} />
           {create.isError && <Notice tone="error">{errorText(create.error, t('errors.generic'))}</Notice>}
-          <div className="flex gap-2">
+          <SaveBar>
             <Button type="submit" disabled={create.isPending || chosen.length === 0}>{t('common.create')}</Button>
             <Button variant="secondary" onClick={onDone}>{t('common.cancel')}</Button>
-          </div>
+          </SaveBar>
         </div>
       </Card>
     </form>

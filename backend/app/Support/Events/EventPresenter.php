@@ -175,6 +175,8 @@ class EventPresenter
         $minimum = $event->type === EventType::Training ? ($event->min_participants ?? $event->teams->pluck('min_participants')->filter()->max()) : null;
         $canManage = $this->permissions->canManageEvent($viewer, $event);
         $deadlinePassed = $event->deadlinePassed();
+        // Most who could still come: accepted, "maybe" and – until the deadline – those without an answer.
+        $possible = $yes + ($counts['maybe'] ?? 0) + ($deadlinePassed ? 0 : max(0, $invited - $answered));
 
         $tenant = $this->tenants->get();
         $team = $event->teams->first();
@@ -214,6 +216,10 @@ class EventPresenter
             'is_full' => $event->max_participants !== null && $yes >= $event->max_participants,
             'min_participants' => $minimum,
             'below_minimum' => $minimum !== null && $event->expectsResponses() && $yes < $minimum,
+            // reached · open (still reachable) · unreachable (training does not take place).
+            'minimum_state' => $minimum === null || ! $event->expectsResponses() ? null
+                : ($yes >= $minimum ? 'reached' : ($possible >= $minimum ? 'open' : 'unreachable')),
+            'minimum_possible' => $minimum !== null ? $possible : null,
             'can_manage' => $canManage,
             'reason_required' => [
                 'no' => $this->rsvp->reasonRequired($event, RsvpStatus::No),

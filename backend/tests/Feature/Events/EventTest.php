@@ -226,6 +226,28 @@ class EventTest extends TestCase
         $this->respond($this->teammate, $event['id'], $this->personOf($this->teammate), 'yes')->assertJsonPath('data.below_minimum', false);
     }
 
+    public function test_training_does_not_take_place_when_the_minimum_cannot_be_reached(): void
+    {
+        $event = $this->create($this->trainer, ['min_participants' => 2]);
+        $this->assertSame('open', $event['minimum_state']);
+        $invited = $event['counts']['open'];
+
+        // Everybody but one declines: at most one can come.
+        $persons = collect([$this->trainer, $this->teammate, $this->organizer])->map(fn ($m) => $this->personOf($m));
+        $response = null;
+        foreach ($persons->take($invited - 1) as $person) {
+            $response = $this->loginAs($this->trainer)->postJson("/api/v1/t/ssv-ulm/events/{$event['id']}/responses", ['person_id' => $person->id, 'status' => 'no']);
+        }
+        $response->assertJsonPath('data.minimum_state', 'unreachable')->assertJsonPath('data.minimum_possible', 1);
+
+        // One changes their mind – reachable again, and reached with a second yes.
+        $this->loginAs($this->trainer)->postJson("/api/v1/t/ssv-ulm/events/{$event['id']}/responses", ['person_id' => $persons[0]->id, 'status' => 'maybe'])
+            ->assertJsonPath('data.minimum_state', 'open');
+        $this->respond($this->player, $event['id'], $this->personOf($this->player), 'yes');
+        $this->loginAs($this->trainer)->postJson("/api/v1/t/ssv-ulm/events/{$event['id']}/responses", ['person_id' => $persons[0]->id, 'status' => 'yes'])
+            ->assertJsonPath('data.minimum_state', 'reached');
+    }
+
     public function test_training_with_its_own_minimum(): void
     {
         $this->loginAs($this->trainer)->patchJson("/api/v1/t/ssv-ulm/teams/{$this->team->id}", ['min_participants' => 2])->assertOk();

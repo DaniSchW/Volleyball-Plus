@@ -356,6 +356,10 @@ export interface EventSummary {
   is_full: boolean;
   min_participants: number | null;
   below_minimum: boolean;
+  /** Training minimum: reached, still reachable, or not reachable any more (training does not take place). */
+  minimum_state?: 'reached' | 'open' | 'unreachable' | null;
+  /** Most who can still come (yes + maybe + not answered until the deadline). */
+  minimum_possible?: number | null;
   can_manage: boolean;
   reason_required: { no: boolean; maybe: boolean };
   training_group: { id: string; name: string } | null;

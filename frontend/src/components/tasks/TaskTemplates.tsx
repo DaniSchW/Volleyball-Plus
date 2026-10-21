@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { api, del, errorText, patch, post, type EventPage, type TaskTemplate, type TaskTemplateItem, type TaskTemplateList } from '../../lib/api';
 import { formatDay, formatTime } from '../../lib/dates';
 import { useTenantPath, useTenantSlug } from '../../lib/queries';
-import { Button, Card, Field, Loading, Notice, Select } from '../ui';
+import { Button, Card, Field, Loading, Notice, SaveBar, Select } from '../ui';
 import { TypeIcon } from '../events/EventCard';
 
 /**
@@ -131,11 +131,11 @@ function TemplateForm({ template, options, onDone }: { template?: TaskTemplate; 
         <p className="text-xs text-slate-500">{t('tasks.templates.slotsHint')}</p>
       </fieldset>
       {(save.isError || remove.isError) && <Notice tone="error">{errorText(save.error ?? remove.error, t('errors.generic'))}</Notice>}
-      <div className="flex flex-wrap gap-2">
+      <SaveBar>
         <Button type="submit" disabled={save.isPending}>{t('common.save')}</Button>
         <Button variant="secondary" onClick={onDone}>{t('common.cancel')}</Button>
         {template && <Button variant="danger" onClick={() => window.confirm(t('tasks.templates.deleteConfirm', { name: template.name })) && remove.mutate()}>{t('tasks.templates.delete')}</Button>}
-      </div>
+      </SaveBar>
     </form>
   );
 }

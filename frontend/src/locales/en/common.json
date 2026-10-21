@@ -396,7 +396,7 @@
     "deadlineHours": "Reply deadline (hours before start)",
     "deadlineAt": "Replies until {{date}}",
     "minParticipants": "Training minimum (players)",
-    "minParticipantsHint": "Optional – empty = value from the team settings. Below it the training is marked yellow.",
+    "minParticipantsHint": "Optional – empty = value from the team settings. Below it the training is marked yellow; once the number can no longer be reached, red with “Training does not take place”.",
     "guestsAllowed": "Guests may accept",
     "guestsAllowedHint": "Cross-nominated players from other teams; the same reply deadline applies as for everybody.",
     "hallsOn": "Available halls on {{day}}",
@@ -445,7 +445,10 @@
     "dropped_other": "{{count}} dates drop out",
     "droppedText": "After this change these dates no longer belong to the series (e.g. because it now ends earlier). Should they be cancelled or deleted?",
     "droppedCancel": "Cancel (stay visible as “cancelled”)",
-    "droppedDelete": "Delete"
+    "droppedDelete": "Delete",
+    "minimumReached": "Training takes place – minimum of {{min}} reached",
+    "minimumUnreachable": "Training does not take place",
+    "minimumPossible": "at most {{possible}} of the {{min}} needed replies still possible"
   },
   "notifications": {
     "title": "Notifications",

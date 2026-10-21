@@ -5,7 +5,7 @@ import { api, del, errorText, post, type Notice as NoticeType, type Team } from 
 import { formatDateTime, toLocalInput } from '../lib/dates';
 import { trainerTeamIds } from '../lib/permissions';
 import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
-import { Button, Field, Notice, Select, Toggle } from './ui';
+import { Button, Field, Notice, SaveBar, Select, Toggle } from './ui';
 
 /** Notice area on top of the start page; trainers post for their team, admins for everyone. */
 export function NoticesArea() {
@@ -136,10 +136,10 @@ function NoticeForm({ onDone }: { onDone: () => void }) {
         <p className="mt-1 text-xs text-slate-500">{notify ? t('notices.notifyHint') : t('notices.notifyOff')}</p>
       </div>
       {create.isError && <Notice tone="error">{errorText(create.error, t('errors.generic'))}</Notice>}
-      <div className="flex gap-2">
+      <SaveBar>
         <Button type="submit" disabled={create.isPending || !form.visible_until}>{t('notices.publish')}</Button>
         <Button variant="secondary" onClick={onDone}>{t('common.cancel')}</Button>
-      </div>
+      </SaveBar>
     </form>
   );
 }

@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { del, errorText, put, type PersonDetail } from '../../lib/api';
 import { useTenantPath } from '../../lib/queries';
-import { Button, Card, Field, Notice } from '../ui';
+import { Button, Card, Field, Notice, SaveBar } from '../ui';
 import { RefereeBadge } from './RefereeBadge';
 
 /** Referee license with expiry date; trainers see it in the roster. */
@@ -60,10 +60,10 @@ export function RefereeLicenseCard({ person }: { person: PersonDetail }) {
           </div>
           <Field label={t('referee.number')} maxLength={40} value={form.license_number} onChange={(e) => setForm({ ...form, license_number: e.target.value })} hint={t('invitations.optional')} />
           {save.isError && <Notice tone="error">{errorText(save.error, t('errors.generic'))}</Notice>}
-          <div className="flex gap-2">
+          <SaveBar>
             <Button type="submit" disabled={save.isPending}>{t('common.save')}</Button>
             <Button variant="secondary" onClick={() => setEditing(false)}>{t('common.cancel')}</Button>
-          </div>
+          </SaveBar>
         </form>
       )}
     </Card>

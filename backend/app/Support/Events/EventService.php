@@ -95,18 +95,50 @@ class EventService
 
     /**
      * Changes the whole series from now on (title, times, place, weekdays …).
+     * Dates that drop out (shorter series, other weekdays) are cancelled or
+     * deleted, as chosen.
+     *
+     * @param  array<string, mixed>  $data
+     * @param  array{weekdays: list<int>, interval_weeks?: int, ends_on?: ?string}  $repeat
+     * @param  'cancel'|'delete'  $dropped
+     */
+    public function updateSeries(EventSeries $series, array $data, array $repeat, ?TenantMember $actor = null, string $dropped = 'cancel'): EventSeries
+    {
+        $this->fillSeries($series, $data, $repeat)->save();
+
+        DB::transaction(fn () => $this->series->update($series, $dropped));
+
+        $next = $this->nextOf($series);
+        if ($next !== null) {
+            $this->notifications->seriesChanged($next, $actor);
+        }
+
+        return $series;
+    }
+
+    /**
+     * How many upcoming dates the change would drop – nothing is saved.
      *
      * @param  array<string, mixed>  $data
      * @param  array{weekdays: list<int>, interval_weeks?: int, ends_on?: ?string}  $repeat
      */
-    public function updateSeries(EventSeries $series, array $data, array $repeat, ?TenantMember $actor = null): EventSeries
+    public function seriesDropCount(EventSeries $series, array $data, array $repeat): int
+    {
+        return $this->series->droppedCount($this->fillSeries(clone $series, $data, $repeat));
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     * @param  array{weekdays: list<int>, interval_weeks?: int, ends_on?: ?string}  $repeat
+     */
+    private function fillSeries(EventSeries $series, array $data, array $repeat): EventSeries
     {
         $attributes = $this->attributes($data);
         $tz = $this->tenants->get()->timezone;
         $start = CarbonImmutable::parse($attributes['starts_at'])->setTimezone($tz);
         $end = CarbonImmutable::parse($attributes['ends_at'])->setTimezone($tz);
 
-        $series->fill([
+        return $series->fill([
             'title' => $attributes['title'],
             'description' => $attributes['description'] ?? null,
             'weekdays' => array_values(array_unique(array_map('intval', $repeat['weekdays']))),
@@ -124,27 +156,42 @@ class EventService
             'guests_allowed' => $attributes['guests_allowed'] ?? true,
             'guests_positions_only' => $attributes['guests_positions_only'] ?? false,
             'training_group_id' => $attributes['training_group_id'] ?? null,
-        ])->save();
-
-        DB::transaction(fn () => $this->series->update($series));
-
-        $next = $this->nextOf($series);
-        if ($next !== null) {
-            $this->notifications->seriesChanged($next, $actor);
-        }
-
-        return $series;
+        ]);
     }
 
-    /** Ends a training series; upcoming dates are cancelled. */
-    public function endSeries(EventSeries $series, ?TenantMember $actor = null): void
+    /**
+     * Ends a training series; upcoming dates are cancelled or deleted.
+     *
+     * @param  'cancel'|'delete'  $mode
+     */
+    public function endSeries(EventSeries $series, ?TenantMember $actor = null, string $mode = 'cancel'): void
     {
         $next = $this->nextOf($series);
-        $this->series->end($series);
-
         if ($next !== null) {
-            $this->notifications->seriesEnded($next, $actor);
+            // Announced before the dates (and with delete the event itself) are gone.
+            $this->notifications->seriesEnded($next, $actor, linkEvent: $mode !== 'delete');
         }
+        DB::transaction(fn () => $this->series->end($series, $mode));
+    }
+
+    /**
+     * Removes an event for good, with its replies and tasks. An upcoming
+     * event is announced as cancelled first; a series date is remembered so
+     * the series does not create it again.
+     */
+    public function delete(Event $event, ?TenantMember $actor = null): void
+    {
+        if (! $event->isCancelled()) {
+            $this->notifications->deleted($event, $actor);
+        }
+
+        DB::transaction(function () use ($event) {
+            if ($event->series_id !== null && ($series = $event->series) !== null) {
+                $day = CarbonImmutable::parse($event->starts_at)->setTimezone($this->tenants->get()->timezone)->toDateString();
+                $series->forceFill(['excluded_dates' => array_values(array_unique([...($series->excluded_dates ?? []), $day]))])->save();
+            }
+            $event->delete();
+        });
     }
 
     public function cancel(Event $event, ?TenantMember $actor = null): void

@@ -142,6 +142,7 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
         Route::post('events', [EventController::class, 'store']);
         Route::get('events/{event}', [EventController::class, 'show']);
         Route::patch('events/{event}', [EventController::class, 'update']);
+        Route::delete('events/{event}', [EventController::class, 'destroy']);
         Route::post('events/{event}/cancel', [EventController::class, 'cancel']);
         Route::post('events/{event}/end-series', [EventController::class, 'endSeries']);
         Route::post('events/{event}/responses', [EventController::class, 'respond']);

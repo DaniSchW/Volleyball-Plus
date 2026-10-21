@@ -115,6 +115,18 @@ class NotificationTest extends TestCase
         $this->assertSame('Findet doch statt: Hallentraining', $this->pushesTo($this->player)[3]['title']);
     }
 
+    public function test_deleting_an_upcoming_event_is_announced_as_cancelled(): void
+    {
+        $event = $this->createEvent();
+
+        $this->loginAs($this->trainer)->deleteJson('/api/v1/t/ssv-ulm/events/'.$event['id'])->assertOk();
+
+        $push = $this->pushesTo($this->player)[1];
+        $this->assertSame('Abgesagt: Hallentraining', $push['title']);
+        // The event is gone – the message leads to the start page.
+        $this->assertStringEndsWith('/ssv-ulm', $push['url']);
+    }
+
     public function test_members_choose_channels_per_category(): void
     {
         $url = '/api/v1/t/ssv-ulm/notification-preferences';

@@ -131,9 +131,16 @@ class EventController extends Controller
         abort_unless($this->permissions->canManageEvent($member, $event), 403);
 
         if ($request->boolean('series') && $event->series_id !== null) {
-            $data = $request->validate($this->rules(creating: true) + ['repeat' => ['required', 'array']]);
+            $data = $request->validate($this->rules(creating: true) + [
+                'repeat' => ['required', 'array'],
+                // What happens to dates that drop out (shorter series, fewer weekdays).
+                'dropped' => ['sometimes', Rule::in(['cancel', 'delete'])],
+            ]);
             $this->checkTrainingGroup($data['training_group_id'] ?? null, $event->teams);
-            $events->updateSeries($event->series, $data, $data['repeat'], $member);
+            if ($request->boolean('preview')) {
+                return response()->json(['data' => ['dropped' => $events->seriesDropCount($event->series, $data, $data['repeat'])]]);
+            }
+            $events->updateSeries($event->series, $data, $data['repeat'], $member, $data['dropped'] ?? 'cancel');
         } else {
             $data = $request->validate($this->rules(creating: false));
             $this->checkTrainingGroup($data['training_group_id'] ?? null, $event->teams);
@@ -153,13 +160,25 @@ class EventController extends Controller
         return response()->json(['data' => $this->presenter->detail($event->refresh(), $this->current->get())]);
     }
 
-    /** Ends a training series: upcoming dates are cancelled. */
-    public function endSeries(Event $event, EventService $events): JsonResponse
+    /** Ends a training series: upcoming dates are cancelled or (mode=delete) deleted. */
+    public function endSeries(Request $request, Event $event, EventService $events): JsonResponse
     {
         $member = $this->current->get();
         abort_unless($this->permissions->canManageEvent($member, $event) && $event->series_id !== null, 403);
+        $data = $request->validate(['mode' => ['sometimes', Rule::in(['cancel', 'delete'])]]);
 
-        $events->endSeries($event->series, $member);
+        $events->endSeries($event->series, $member, $data['mode'] ?? 'cancel');
+
+        return response()->json(['message' => 'ok']);
+    }
+
+    /** Deletes a single event – any type, also a date of a series. */
+    public function destroy(Event $event, EventService $events): JsonResponse
+    {
+        $member = $this->current->get();
+        abort_unless($this->permissions->canManageEvent($member, $event), 403);
+
+        $events->delete($event, $member);
 
         return response()->json(['message' => 'ok']);
     }

@@ -6,7 +6,7 @@ import { api, errorText, patch, post, POSITIONS, type EventDetail, type EventTyp
 import { addMinutes, formatDay, formatTime, toLocalInput } from '../lib/dates';
 import { HallSuggestions } from '../components/events/HallSuggestions';
 import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
-import { Button, Card, Field, Loading, Notice, PageTitle, Select, Toggle } from '../components/ui';
+import { Button, Card, ChoiceDialog, Field, Loading, Notice, PageTitle, Select, Toggle } from '../components/ui';
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7];
 
@@ -111,8 +111,7 @@ export function EventFormPage() {
     enabled: !eventId,
   });
 
-  const save = useMutation({
-    mutationFn: () => {
+  const body = () => {
       const body: Record<string, unknown> = {
         type: form.type,
         title: form.title || null,
@@ -144,10 +143,21 @@ export function EventFormPage() {
       }
       if (form.repeat) body.repeat = { weekdays: form.weekdays, interval_weeks: form.interval_weeks, ends_on: form.ends_on || null };
 
-      return eventId
-        ? patch<{ data: EventDetail }>(`${tp(`events/${eventId}`)}${editSeries ? '?series=1' : ''}`, body)
-        : post<{ data: EventDetail }>(tp('events'), body);
-    },
+      return body;
+  };
+
+  // Changing a series: first ask the server how many dates would drop out (shorter series, fewer weekdays).
+  const [dropped, setDropped] = useState(0);
+  const preview = useMutation({
+    mutationFn: () => patch<{ data: { dropped: number } }>(`${tp(`events/${eventId}`)}?series=1&preview=1`, body()),
+    onSuccess: ({ data }) => (data.dropped > 0 ? setDropped(data.dropped) : save.mutate(undefined)),
+  });
+
+  const save = useMutation({
+    mutationFn: (droppedMode: 'cancel' | 'delete' | undefined) =>
+      eventId
+        ? patch<{ data: EventDetail }>(`${tp(`events/${eventId}`)}${editSeries ? '?series=1' : ''}`, { ...body(), ...(droppedMode ? { dropped: droppedMode } : {}) })
+        : post<{ data: EventDetail }>(tp('events'), body()),
     onSuccess: async ({ data }) => {
       await queryClient.invalidateQueries({ queryKey: ['events'] });
       queryClient.setQueryData(['event', data.id], data);
@@ -159,7 +169,8 @@ export function EventFormPage() {
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
-    save.mutate();
+    if (eventId && editSeries) preview.mutate();
+    else save.mutate(undefined);
   };
 
   const singleTeam = !form.allTeams && form.team_ids.length === 1 ? form.team_ids[0] : null;
@@ -360,8 +371,21 @@ export function EventFormPage() {
         </Card>
       )}
 
-      {save.isError && <Notice tone="error">{errorText(save.error, t('errors.generic'))}</Notice>}
-      <Button type="submit" className="w-full" disabled={save.isPending}>{t('common.save')}</Button>
+      {(save.isError || preview.isError) && <Notice tone="error">{errorText(save.error ?? preview.error, t('errors.generic'))}</Notice>}
+      <Button type="submit" className="w-full" disabled={save.isPending || preview.isPending}>{t('common.save')}</Button>
+      {dropped > 0 && (
+        <ChoiceDialog
+          title={t('events.dropped', { count: dropped })}
+          onClose={() => setDropped(0)}
+          busy={save.isPending}
+          choices={[
+            { label: t('events.droppedCancel'), variant: 'danger', onChoose: () => save.mutate('cancel', { onSettled: () => setDropped(0) }) },
+            { label: t('events.droppedDelete'), variant: 'danger', onChoose: () => save.mutate('delete', { onSettled: () => setDropped(0) }) },
+          ]}
+        >
+          <p>{t('events.droppedText')}</p>
+        </ChoiceDialog>
+      )}
     </form>
   );
 }

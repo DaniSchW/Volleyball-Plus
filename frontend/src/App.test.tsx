@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { routes } from './App';
@@ -1185,5 +1185,55 @@ describe('appearance', () => {
     fireEvent.click(screen.getByRole('radio', { name: /Auto/ }));
     expect(document.documentElement).not.toHaveClass('dark');
     expect(localStorage.getItem('vo.theme')).toBeNull();
+  });
+});
+
+describe('managing an event', () => {
+  const detail = {
+    ...EVENT, description: null, names_visible: true, series_id: 's1', series: { weekdays: [2], interval_weeks: 1, ends_on: null }, team_ids: ['t1'],
+    cross_nomination_opens_at: null, guests_open_at: null, positions: null, tasks: [], task_summary: null, position_limits: null, position_taken: null,
+    guest_position_needs: null, can_manage: true, can_record_attendance: false, attendance_recorded_at: null, deadline_passed: false, my: [], responses: [],
+  };
+
+  it('deletes a single date of a series after asking', async () => {
+    const fetchMock = mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/events/e1': { body: { data: detail } },
+      'GET /t/ssv-ulm/task-templates': { body: { data: { templates: [], teams: [], can_create_for_all: false } } },
+      'DELETE /t/ssv-ulm/events/e1': { body: { message: 'ok' } },
+      'GET /t/ssv-ulm/notices': { body: { data: [] } },
+      'GET /t/ssv-ulm/polls': { body: { data: [] } },
+      'GET /t/ssv-ulm/events?': { body: { data: [], next_cursor: null } },
+    });
+    const router = renderAt('/ssv-ulm/events/e1');
+
+    fireEvent.click(await screen.findByRole('button', { name: /Termin löschen/ }));
+    const dialog = screen.getByRole('dialog', { name: 'Termin endgültig löschen?' });
+    expect(dialog).toHaveTextContent('Nur dieser Termin wird gelöscht – die Serie läuft weiter.');
+    expect(fetchMock.mock.calls.some(([, init]) => (init as RequestInit | undefined)?.method === 'DELETE')).toBe(false);
+
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Termin löschen' }));
+    await waitFor(() => expect(router.state.location.pathname).toBe('/ssv-ulm'));
+    expect(fetchMock.mock.calls.some(([url, init]) => String(url).endsWith('/events/e1') && (init as RequestInit | undefined)?.method === 'DELETE')).toBe(true);
+  });
+
+  it('asks only after confirmation before cancelling', async () => {
+    const fetchMock = mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
+      'GET /t/ssv-ulm/events/e1': { body: { data: detail } },
+      'GET /t/ssv-ulm/task-templates': { body: { data: { templates: [], teams: [], can_create_for_all: false } } },
+      'POST /t/ssv-ulm/events/e1/cancel': { body: { data: { ...detail, status: 'cancelled' } } },
+    });
+    renderAt('/ssv-ulm/events/e1');
+
+    fireEvent.click(await screen.findByRole('button', { name: /Termin absagen/ }));
+    const dialog = screen.getByRole('dialog', { name: 'Termin absagen?' });
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Abbrechen' }));
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(fetchMock.mock.calls.some(([url]) => String(url).endsWith('/cancel'))).toBe(false);
+
+    fireEvent.click(screen.getByRole('button', { name: /Termin absagen/ }));
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Termin absagen' }));
+    expect(await screen.findByRole('button', { name: /Absage zurücknehmen/ })).toBeInTheDocument();
   });
 });

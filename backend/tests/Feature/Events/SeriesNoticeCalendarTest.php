@@ -129,6 +129,69 @@ class SeriesNoticeCalendarTest extends TestCase
         $this->loginAs($this->player)->postJson("/api/v1/t/ssv-ulm/events/{$first['id']}/end-series")->assertForbidden();
     }
 
+    public function test_shortening_a_series_asks_and_cancels_or_deletes_the_dropped_dates(): void
+    {
+        $first = $this->createSeries();
+        $short = [
+            'type' => 'training', 'title' => 'Hallentraining', 'starts_at' => '2026-10-20T19:30', 'ends_at' => '2026-10-20T21:30',
+            'rsvp_deadline' => '2026-10-20T17:30', 'location_name' => 'Kuhberghalle', 'repeat' => ['weekdays' => [2, 4], 'ends_on' => '2026-10-31'],
+        ];
+
+        // Preview: 3, 5, 10, 12 Nov would drop out – nothing changes yet.
+        $this->patchJson("/api/v1/t/ssv-ulm/events/{$first['id']}?series=1&preview=1", $short)->assertOk()->assertJsonPath('data.dropped', 4);
+        $this->assertCount(8, $this->seriesEvents());
+
+        $this->patchJson("/api/v1/t/ssv-ulm/events/{$first['id']}?series=1", $short + ['dropped' => 'delete'])->assertOk();
+        $this->assertSame(['2026-10-20', '2026-10-22', '2026-10-27', '2026-10-29'], collect($this->seriesEvents())->map(fn (Event $e) => $e->starts_at->toDateString())->all());
+
+        // Extending again brings the dates back; shortening with "cancel" keeps them as cancelled.
+        $this->patchJson("/api/v1/t/ssv-ulm/events/{$first['id']}?series=1", ['repeat' => ['weekdays' => [2, 4], 'ends_on' => '2026-11-15']] + $short)->assertOk();
+        $this->assertCount(8, $this->seriesEvents());
+        $this->patchJson("/api/v1/t/ssv-ulm/events/{$first['id']}?series=1", $short + ['dropped' => 'cancel'])->assertOk();
+        $this->assertSame(['scheduled', 'scheduled', 'scheduled', 'scheduled', 'cancelled', 'cancelled', 'cancelled', 'cancelled'], collect($this->seriesEvents())->map(fn (Event $e) => $e->status->value)->all());
+        // Already cancelled dates are not counted again.
+        $this->patchJson("/api/v1/t/ssv-ulm/events/{$first['id']}?series=1&preview=1", $short)->assertJsonPath('data.dropped', 0);
+    }
+
+    public function test_ending_a_series_can_delete_upcoming_dates(): void
+    {
+        $first = $this->createSeries();
+        Carbon::setTestNow('2026-10-28 10:00:00');
+
+        $this->postJson("/api/v1/t/ssv-ulm/events/{$first['id']}/end-series", ['mode' => 'delete'])->assertOk();
+
+        // Past dates stay for the statistics, upcoming ones are gone.
+        $this->assertSame(['2026-10-20', '2026-10-22', '2026-10-27'], collect($this->seriesEvents())->map(fn (Event $e) => $e->starts_at->toDateString())->all());
+    }
+
+    public function test_any_event_can_be_deleted_also_a_series_date(): void
+    {
+        $first = $this->createSeries();
+        $events = $this->seriesEvents();
+
+        $this->loginAs($this->player)->deleteJson("/api/v1/t/ssv-ulm/events/{$events[1]->id}")->assertForbidden();
+        $this->loginAs($this->trainer)->deleteJson("/api/v1/t/ssv-ulm/events/{$events[1]->id}")->assertOk();
+        $this->assertCount(7, $this->seriesEvents());
+        $this->getJson("/api/v1/t/ssv-ulm/events/{$events[1]->id}")->assertNotFound();
+
+        // The series does not create the deleted date again – also not after a change of the series.
+        $this->artisan('app:generate-series')->assertSuccessful();
+        $this->patchJson("/api/v1/t/ssv-ulm/events/{$first['id']}?series=1", [
+            'type' => 'training', 'title' => 'Training', 'starts_at' => '2026-10-20T19:30', 'ends_at' => '2026-10-20T21:30',
+            'location_name' => 'Kuhberghalle', 'repeat' => ['weekdays' => [2, 4], 'ends_on' => '2026-11-15'],
+        ])->assertOk();
+        $this->assertCount(7, $this->seriesEvents());
+        $this->assertNotContains('2026-10-22', collect($this->seriesEvents())->map(fn (Event $e) => $e->starts_at->toDateString())->all());
+
+        // Single events of any type, with replies.
+        $match = $this->postJson('/api/v1/t/ssv-ulm/events', [
+            'type' => 'match', 'team_ids' => [$this->team->id], 'title' => 'Spieltag', 'starts_at' => '2026-10-24T14:00', 'ends_at' => '2026-10-24T18:00',
+        ])->assertCreated()->json('data.id');
+        $this->loginAs($this->player)->postJson("/api/v1/t/ssv-ulm/events/{$match}/responses", ['person_id' => $this->personOf($this->player)->id, 'status' => 'yes'])->assertOk();
+        $this->loginAs($this->trainer)->deleteJson("/api/v1/t/ssv-ulm/events/{$match}")->assertOk();
+        $this->assertSame(0, $this->inTenant($this->tenant, fn () => Event::query()->whereKey($match)->count()));
+    }
+
     public function test_series_only_for_trainings(): void
     {
         $this->loginAs($this->trainer)->postJson('/api/v1/t/ssv-ulm/events', [

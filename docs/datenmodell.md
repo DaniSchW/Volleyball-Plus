@@ -217,7 +217,7 @@ Trainings mit `training_group_id` laden nur die Gruppe ein (`source = group`) pl
 ## 4. Termine & Zu-/Absagen
 
 ### 🏢 `event_series` – Serientermin (Training) ✅
-`team_id`, `title`, `description`, `weekdays` (JSON, ISO 1 = Mo … 7 = So), `interval_weeks` (1 = jede Woche, 2 = 14-tägig), `starts_on`, `ends_on` null, `start_time`, `end_time` (Ortszeit der Abteilung), `location_name`, `address`, `rsvp_deadline_minutes` (vor Beginn), `max_participants`, `generated_until`, `created_by`. `training_group_id` null ✅ *(Später: `hall_booking_id`.)*
+`team_id`, `title`, `description`, `weekdays` (JSON, ISO 1 = Mo … 7 = So), `interval_weeks` (1 = jede Woche, 2 = 14-tägig), `starts_on`, `ends_on` null, `excluded_dates` (JSON null: Tage, deren Termin gelöscht wurde – werden nicht neu erzeugt), `start_time`, `end_time` (Ortszeit der Abteilung), `location_name`, `address`, `rsvp_deadline_minutes` (vor Beginn), `max_participants`, `generated_until`, `created_by`. `training_group_id` null ✅ *(Später: `hall_booking_id`.)*
 Ein täglicher Job (`app:generate-series`) erzeugt daraus Einzeltermine rollierend ~6 Monate voraus; 19:30 bleibt über die Zeitumstellung 19:30. Serie ändern wirkt auf kommende, nicht einzeln bearbeitete Termine (`series_exception`); nicht mehr passende Termine werden abgesagt, nicht gelöscht. Serie beenden sagt alle kommenden Termine ab.
 
 ### 🏢 `opponents` – wiederverwendbare Gegner ✅

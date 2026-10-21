@@ -2,13 +2,13 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate, useParams } from 'react-router';
-import { api, errorText, post, put, POSITIONS, type EventDetail, type Position, type ResponseRow, type RsvpStatus } from '../lib/api';
+import { api, del, errorText, post, put, POSITIONS, type EventDetail, type Position, type ResponseRow, type RsvpStatus } from '../lib/api';
 import { formatDateTime, formatLongDay, formatTime } from '../lib/dates';
 import { useTenantPath, useTenantSlug } from '../lib/queries';
 import { RsvpControl } from '../components/events/RsvpControl';
 import { TasksCard } from '../components/events/TasksCard';
 import { TypeIcon } from '../components/events/EventCard';
-import { Avatar, Button, Card, Loading, Notice } from '../components/ui';
+import { Avatar, Button, Card, ChoiceDialog, Loading, Notice } from '../components/ui';
 
 export function EventPage() {
   const { t } = useTranslation();
@@ -28,12 +28,22 @@ export function EventPage() {
     },
   });
   const endSeries = useMutation({
-    mutationFn: () => post(tp(`events/${eventId}/end-series`)),
+    mutationFn: (mode: 'cancel' | 'delete') => post(tp(`events/${eventId}/end-series`), { mode }),
     onSuccess: async () => {
       await queryClient.invalidateQueries();
       navigate(`/${slug}`);
     },
   });
+  const remove = useMutation({
+    mutationFn: () => del(tp(`events/${eventId}`)),
+    onSuccess: async () => {
+      queryClient.removeQueries({ queryKey: ['event', eventId] });
+      await queryClient.invalidateQueries({ queryKey: ['events'] });
+      navigate(`/${slug}`, { replace: true });
+    },
+  });
+  // Which question is open: cancel, delete or end the series.
+  const [asking, setAsking] = useState<'cancel' | 'delete' | 'endSeries' | null>(null);
 
   if (event.isPending) return <Loading />;
   if (event.isError) return <Notice tone="error">{errorText(event.error, t('errors.generic'))}</Notice>;
@@ -100,6 +110,29 @@ export function EventPage() {
         {e.description && <p className="mt-3 whitespace-pre-line text-sm text-slate-700">{e.description}</p>}
       </Card>
 
+      {e.can_manage && (
+        <Card title={t('events.manage')}>
+          <div className="flex flex-wrap gap-2">
+            <Link to={`/${slug}/events/${e.id}/edit`} className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 text-sm font-semibold">✏️ {t('events.edit')}</Link>
+            {e.series_id && (
+              <Link to={`/${slug}/events/${e.id}/edit?series=1`} className="inline-flex min-h-11 items-center rounded-xl border border-slate-300 px-4 text-sm font-semibold">🔁 {t('events.editSeries')}</Link>
+            )}
+            {cancelled ? (
+              <Button variant="secondary" onClick={() => cancel.mutate(true)}>↩️ {t('events.restore')}</Button>
+            ) : (
+              <Button variant="danger" onClick={() => setAsking('cancel')}>🚫 {t('events.cancel')}</Button>
+            )}
+            <Button variant="danger" onClick={() => setAsking('delete')}>🗑️ {t('events.delete')}</Button>
+            {e.series_id && (
+              <Button variant="danger" onClick={() => setAsking('endSeries')}>⏹️ {t('events.endSeries')}</Button>
+            )}
+          </div>
+          {(remove.isError || endSeries.isError || cancel.isError) && (
+            <div className="mt-3"><Notice tone="error">{errorText(remove.error ?? endSeries.error ?? cancel.error, t('errors.generic'))}</Notice></div>
+          )}
+        </Card>
+      )}
+
       {e.response_mode === 'rsvp' && !cancelled && e.my.length > 0 && (
         <Card title={t('events.yourReply')}>
           <div className="space-y-3">
@@ -120,21 +153,39 @@ export function EventPage() {
 
       {e.response_mode === 'rsvp' && <Responses event={e} />}
 
-      {e.can_manage && (
-        <Card title={t('events.manage')}>
-          <div className="flex flex-wrap gap-2">
-            <Link to={`/${slug}/events/${e.id}/edit`} className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 px-4 text-sm font-medium">{t('events.edit')}</Link>
-            {e.series_id && (
-              <Link to={`/${slug}/events/${e.id}/edit?series=1`} className="inline-flex min-h-11 items-center rounded-lg border border-slate-300 px-4 text-sm font-medium">{t('events.editSeries')}</Link>
-            )}
-            <Button variant={cancelled ? 'secondary' : 'danger'} onClick={() => cancel.mutate(cancelled)}>
-              {cancelled ? t('events.restore') : t('events.cancel')}
-            </Button>
-            {e.series_id && (
-              <Button variant="danger" onClick={() => window.confirm(t('events.endSeriesConfirm')) && endSeries.mutate()}>{t('events.endSeries')}</Button>
-            )}
-          </div>
-        </Card>
+      {asking === 'cancel' && (
+        <ChoiceDialog
+          title={t('events.cancelTitle')}
+          onClose={() => setAsking(null)}
+          busy={cancel.isPending}
+          choices={[{ label: t('events.cancel'), variant: 'danger', onChoose: () => cancel.mutate(false, { onSettled: () => setAsking(null) }) }]}
+        >
+          <p>{t('events.cancelText')}</p>
+        </ChoiceDialog>
+      )}
+      {asking === 'delete' && (
+        <ChoiceDialog
+          title={t('events.deleteTitle')}
+          onClose={() => setAsking(null)}
+          busy={remove.isPending}
+          choices={[{ label: t('events.delete'), variant: 'danger', onChoose: () => remove.mutate(undefined, { onError: () => setAsking(null) }) }]}
+        >
+          <p>{t('events.deleteText')}</p>
+          {e.series_id && <p className="font-medium">{t('events.deleteSeriesHint')}</p>}
+        </ChoiceDialog>
+      )}
+      {asking === 'endSeries' && (
+        <ChoiceDialog
+          title={t('events.endSeries')}
+          onClose={() => setAsking(null)}
+          busy={endSeries.isPending}
+          choices={[
+            { label: t('events.endSeriesCancel'), variant: 'danger', onChoose: () => endSeries.mutate('cancel', { onError: () => setAsking(null) }) },
+            { label: t('events.endSeriesDelete'), variant: 'danger', onChoose: () => endSeries.mutate('delete', { onError: () => setAsking(null) }) },
+          ]}
+        >
+          <p>{t('events.endSeriesText')}</p>
+        </ChoiceDialog>
       )}
     </div>
   );

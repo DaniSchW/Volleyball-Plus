@@ -12,6 +12,7 @@ use App\Support\Tasks\TaskTemplates;
 use App\Support\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 
 /**
  * Turns a weekly series into single events, a rolling window ahead
@@ -60,42 +61,99 @@ class SeriesGenerator
 
     /**
      * Applies changed series data to upcoming, not individually edited events
-     * and fills in new dates. Dates that no longer fit are cancelled (not
-     * deleted, so replies stay in the statistics).
+     * and fills in new dates. Dates that no longer fit (other weekdays, after
+     * a new end) are cancelled – so replies stay in the statistics – or, if
+     * asked for, deleted. Individually edited dates are only dropped when
+     * they lie after the new end.
+     *
+     * @param  'cancel'|'delete'  $dropped
      */
-    public function update(EventSeries $series): void
+    public function update(EventSeries $series, string $dropped = 'cancel'): void
     {
         $tz = $this->tenants->get()->timezone;
-        $weekOfFirst = CarbonImmutable::parse($series->starts_on->toDateString(), $tz)->startOfWeek();
-        $ends = $series->ends_on ? CarbonImmutable::parse($series->ends_on->toDateString(), $tz)->endOfDay() : null;
 
-        $series->events()
-            ->where('starts_at', '>', Carbon::now())
-            ->where('series_exception', false)
-            ->each(function (Event $event) use ($series, $tz, $weekOfFirst, $ends) {
-                $day = CarbonImmutable::parse($event->starts_at)->setTimezone($tz)->startOfDay();
-                $fits = $this->occursOn($series, $day, $weekOfFirst) && ($ends === null || $day->lessThanOrEqualTo($ends));
+        foreach ($this->upcoming($series) as $event) {
+            if (! $this->fits($series, $event, $tz)) {
+                $this->drop($event, $dropped);
 
-                $event->fill($this->eventData($series, $day, $tz));
-                $event->status = $fits ? EventStatus::Scheduled : EventStatus::Cancelled;
-                $groupChanged = $event->isDirty('training_group_id');
-                $event->save();
-                if ($groupChanged) {
-                    $this->invitees->syncEvent($event);
-                }
-            });
+                continue;
+            }
+            if ($event->series_exception) {
+                continue;
+            }
+            $day = CarbonImmutable::parse($event->starts_at)->setTimezone($tz)->startOfDay();
+            $event->fill($this->eventData($series, $day, $tz));
+            $event->status = EventStatus::Scheduled;
+            $groupChanged = $event->isDirty('training_group_id');
+            $event->save();
+            if ($groupChanged) {
+                $this->invitees->syncEvent($event);
+            }
+        }
 
         $this->generate($series);
     }
 
-    /** Ends the series: upcoming events are cancelled, past ones kept. */
-    public function end(EventSeries $series): void
+    /**
+     * How many upcoming, still scheduled dates the (changed, not yet saved)
+     * series would drop – to ask whether to cancel or delete them.
+     */
+    public function droppedCount(EventSeries $series): int
     {
-        $series->events()
-            ->where('starts_at', '>', Carbon::now())
-            ->update(['status' => EventStatus::Cancelled->value]);
+        $tz = $this->tenants->get()->timezone;
+
+        return $this->upcoming($series)
+            ->filter(fn (Event $event) => $event->status === EventStatus::Scheduled && ! $this->fits($series, $event, $tz))
+            ->count();
+    }
+
+    /**
+     * Ends the series today: upcoming events are cancelled (or deleted),
+     * past ones kept.
+     *
+     * @param  'cancel'|'delete'  $mode
+     */
+    public function end(EventSeries $series, string $mode = 'cancel'): void
+    {
+        foreach ($this->upcoming($series) as $event) {
+            $this->drop($event, $mode);
+        }
 
         $series->forceFill(['ends_on' => CarbonImmutable::now($this->tenants->get()->timezone)->toDateString()])->save();
+    }
+
+    /**
+     * Upcoming events of the series (any status).
+     *
+     * @return Collection<int, Event>
+     */
+    private function upcoming(EventSeries $series): Collection
+    {
+        return $series->events()->where('starts_at', '>', Carbon::now())->orderBy('starts_at')->get();
+    }
+
+    /** Still part of the series? Individually edited dates only need to lie before the end. */
+    private function fits(EventSeries $series, Event $event, string $tz): bool
+    {
+        $day = CarbonImmutable::parse($event->starts_at)->setTimezone($tz)->startOfDay();
+        if ($series->ends_on !== null && $day->greaterThan(CarbonImmutable::parse($series->ends_on->toDateString(), $tz))) {
+            return false;
+        }
+        if ($event->series_exception) {
+            return true;
+        }
+
+        return $this->occursOn($series, $day, CarbonImmutable::parse($series->starts_on->toDateString(), $tz)->startOfWeek());
+    }
+
+    /** @param  'cancel'|'delete'  $mode */
+    private function drop(Event $event, string $mode): void
+    {
+        if ($mode === 'delete') {
+            $event->delete();
+        } elseif ($event->status !== EventStatus::Cancelled) {
+            $event->forceFill(['status' => EventStatus::Cancelled])->save();
+        }
     }
 
     private function occursOn(EventSeries $series, CarbonImmutable $day, CarbonImmutable $weekOfFirst): bool
@@ -118,7 +176,7 @@ class SeriesGenerator
     {
         return $series->events()->pluck('starts_at')
             ->mapWithKeys(fn ($start) => [CarbonImmutable::parse($start)->setTimezone($tz)->toDateString() => true])
-            ->all();
+            ->all() + array_fill_keys($series->excluded_dates ?? [], true);
     }
 
     private function createEvent(EventSeries $series, CarbonImmutable $day, string $tz): void

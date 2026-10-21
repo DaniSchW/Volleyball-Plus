@@ -1,5 +1,5 @@
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes } from 'react';
-import { useId } from 'react';
+import { useEffect, useId } from 'react';
 import { useTranslation } from 'react-i18next';
 
 /** Small set of shared building blocks so every page looks the same. */
@@ -127,4 +127,47 @@ export function Avatar({ url, name, size = 40 }: { url: string | null; name: str
 export function Loading() {
   const { t } = useTranslation();
   return <p className="p-6 text-center text-slate-500">{t('tenant.loading')}</p>;
+}
+
+export interface Choice {
+  label: string;
+  onChoose: () => void;
+  variant?: 'primary' | 'secondary' | 'danger';
+}
+
+/**
+ * Asks before something drastic (cancel, delete) – one button per choice
+ * plus "Abbrechen". Escape or a tap next to it closes it as well.
+ */
+export function ChoiceDialog({ title, children, choices, onClose, busy = false }: { title: string; children?: ReactNode; choices: Choice[]; onClose: () => void; busy?: boolean }) {
+  const { t } = useTranslation();
+  const titleId = useId();
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div className="fixed inset-0 z-40 flex items-end justify-center bg-black/50 p-3 sm:items-center" onClick={onClose}>
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        className="vo-rise w-full max-w-sm rounded-2xl bg-surface p-5 shadow-xl pb-[calc(1.25rem+env(safe-area-inset-bottom))]"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h2 id={titleId} className="text-lg font-semibold text-slate-900">{title}</h2>
+        {children && <div className="mt-2 space-y-2 text-sm text-slate-600">{children}</div>}
+        <div className="mt-5 flex flex-col gap-2">
+          {choices.map((choice) => (
+            <Button key={choice.label} variant={choice.variant ?? 'primary'} disabled={busy} onClick={choice.onChoose}>
+              {choice.label}
+            </Button>
+          ))}
+          <Button variant="secondary" onClick={onClose} autoFocus>{t('common.cancel')}</Button>
+        </div>
+      </div>
+    </div>
+  );
 }

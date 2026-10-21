@@ -25,6 +25,7 @@ class EventSeries extends Model
     {
         return [
             'weekdays' => 'array',
+            'excluded_dates' => 'array',
             'position_limits' => 'array',
             'guests_allowed' => 'boolean',
             'guests_positions_only' => 'boolean',
@@ -55,7 +56,7 @@ class EventSeries extends Model
     }
 
     /** @var list<string> */
-    public array $activityIgnore = ['generated_until'];
+    public array $activityIgnore = ['generated_until', 'excluded_dates'];
 
     public function activityLabel(): string
     {

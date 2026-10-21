@@ -58,6 +58,12 @@ class EventNotifications
         $this->send($event, NotificationCategory::EventChanged, 'event_cancelled', $actor);
     }
 
+    /** Deleted events are announced like cancelled ones, but link to the start page. */
+    public function deleted(Event $event, ?TenantMember $actor): void
+    {
+        $this->send($event, NotificationCategory::EventChanged, 'event_cancelled', $actor, '');
+    }
+
     public function restored(Event $event, ?TenantMember $actor): void
     {
         $this->send($event, NotificationCategory::EventChanged, 'event_restored', $actor);
@@ -69,9 +75,9 @@ class EventNotifications
         $this->send($next, NotificationCategory::EventChanged, 'series_changed', $actor);
     }
 
-    public function seriesEnded(Event $next, ?TenantMember $actor): void
+    public function seriesEnded(Event $next, ?TenantMember $actor, bool $linkEvent = true): void
     {
-        $this->send($next, NotificationCategory::EventChanged, 'series_ended', $actor);
+        $this->send($next, NotificationCategory::EventChanged, 'series_ended', $actor, $linkEvent ? null : '');
     }
 
     /** Asks everyone who has not answered yet. */
@@ -107,7 +113,7 @@ class EventNotifications
         return $sent;
     }
 
-    private function send(Event $event, NotificationCategory $category, string $kind, ?TenantMember $actor): void
+    private function send(Event $event, NotificationCategory $category, string $kind, ?TenantMember $actor, ?string $path = null): void
     {
         if ($event->ends_at->lessThan(Carbon::now())) {
             return;
@@ -116,7 +122,7 @@ class EventNotifications
         $this->notifier->toPersons($category, $this->invitees($event), fn (string $locale) => [
             'title' => __("notifications.{$kind}.title", ['title' => $event->title], $locale),
             'body' => $this->body($event, $kind, $locale),
-        ], $this->path($event), $actor);
+        ], $path ?? $this->path($event), $actor);
     }
 
     private function body(Event $event, string $kind, string $locale): string

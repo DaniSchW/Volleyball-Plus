@@ -3,8 +3,8 @@ import { setTheme, useTheme, type ThemeChoice } from '../lib/theme';
 
 const CHOICES: [ThemeChoice, string][] = [['auto', '📱'], ['light', '☀️'], ['dark', '🌙']];
 
-/** Automatic / light / dark – stored on this device. */
-export function ThemeSwitch() {
+/** Automatic / light / dark – stored on this device. Compact: icons only (menu). */
+export function ThemeSwitch({ compact = false }: { compact?: boolean }) {
   const { t } = useTranslation();
   const theme = useTheme();
   return (
@@ -16,10 +16,12 @@ export function ThemeSwitch() {
           role="radio"
           aria-checked={theme === value}
           onClick={() => setTheme(value)}
-          className={`flex min-h-10 items-center justify-center gap-1.5 rounded-lg text-sm font-medium transition ${theme === value ? 'bg-surface text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
+          aria-label={compact ? t(`theme.${value}`) : undefined}
+          title={compact ? t(`theme.${value}`) : undefined}
+          className={`flex ${compact ? 'min-h-8' : 'min-h-10'} items-center justify-center gap-1.5 rounded-lg text-sm font-medium transition ${theme === value ? 'bg-surface text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}`}
         >
           <span aria-hidden="true">{icon}</span>
-          {t(`theme.${value}`)}
+          {!compact && t(`theme.${value}`)}
         </button>
       ))}
     </div>

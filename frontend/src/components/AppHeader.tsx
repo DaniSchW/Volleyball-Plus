@@ -38,7 +38,7 @@ interface Props {
 }
 
 /**
- * Top bar with the department name and a drop-down menu at the top right –
+ * Top bar with the department name and a drop-down menu (tiles) at the top right –
  * deliberately no bottom tab bar, so the content keeps the screen space.
  */
 export function AppHeader({ tenantSlug, tenantName, logoUrl, isAdmin, hidden = [] }: Props) {
@@ -91,29 +91,30 @@ export function AppHeader({ tenantSlug, tenantName, logoUrl, isAdmin, hidden = [
         {open && (
           <nav
             id={menuId}
-            className="absolute right-2 top-full mt-1 w-64 overflow-hidden rounded-xl border border-slate-200 bg-surface text-slate-900 shadow-lg"
+            className="absolute inset-x-2 top-full mt-1 max-h-[calc(100dvh-4.5rem-env(safe-area-inset-top))] overflow-y-auto overscroll-contain rounded-2xl border border-slate-200 bg-surface text-slate-900 shadow-xl sm:left-auto sm:w-96"
           >
-            <ul className="py-1">
+            {/* Tiles in three columns – all sections fit on a phone screen without scrolling. */}
+            <ul className="grid grid-cols-3 gap-1 p-2">
               {[...MENU, ...(isAdmin ? (['members', 'activity'] as MenuSection[]) : [])].filter((section) => !hidden.includes(section)).map((section) => (
                 <li key={section}>
                   <NavLink
                     to={`/${tenantSlug}/${section}`}
                     onClick={() => setOpen(false)}
                     className={({ isActive }) =>
-                      `flex items-center gap-3 px-4 py-2.5 text-sm ${isActive ? 'bg-brand-50 font-medium text-brand-700' : 'text-slate-700 hover:bg-slate-50'}`
+                      `flex h-full min-h-20 flex-col items-center justify-center gap-1.5 rounded-xl px-1 py-2 text-center text-xs leading-tight break-words hyphens-auto ${isActive ? 'bg-brand-50 font-semibold text-brand-700' : 'text-slate-700 hover:bg-slate-50'}`
                     }
                   >
-                    <span aria-hidden="true" className={`flex size-8 items-center justify-center rounded-full text-base ${ICONS[section][1]}`}>{ICONS[section][0]}</span>
+                    <span aria-hidden="true" className={`flex size-9 items-center justify-center rounded-full text-lg ${ICONS[section][1]}`}>{ICONS[section][0]}</span>
                     {t(`menu.${section}`)}
                   </NavLink>
                 </li>
               ))}
             </ul>
-            <div className="border-t border-slate-100 px-4 py-3">
-              <label className="flex items-center justify-between gap-3 text-sm text-slate-600">
-                {t('menu.language')}
+            <div className="space-y-3 border-t border-slate-100 px-4 py-3">
+              <div className="flex items-center gap-2">
                 <select
-                  className="rounded-md border border-slate-300 bg-surface px-2 py-1 text-sm"
+                  aria-label={t('menu.language')}
+                  className="min-h-10 rounded-lg border border-slate-300 bg-surface px-2 text-sm"
                   value={i18n.resolvedLanguage}
                   onChange={(event) => {
                     const locale = event.target.value as Language;
@@ -128,18 +129,20 @@ export function AppHeader({ tenantSlug, tenantName, logoUrl, isAdmin, hidden = [
                     </option>
                   ))}
                 </select>
-              </label>
-              <div className="mt-3"><ThemeSwitch /></div>
-              <button
-                type="button"
-                className="mt-3 flex w-full items-center gap-3 rounded-lg py-1.5 text-sm font-medium text-red-700"
-                disabled={logout.isPending}
-                onClick={() => logout.mutate()}
-              >
-                <span aria-hidden="true" className="flex size-8 items-center justify-center rounded-full bg-red-50 text-base">⏻</span>
-                {t('menu.logout')}
-              </button>
-              <LegalLinks className="mt-3 !justify-start" onClick={() => setOpen(false)} />
+                <div className="flex-1"><ThemeSwitch compact /></div>
+              </div>
+              <div className="flex items-center justify-between gap-3">
+                <LegalLinks className="!justify-start" onClick={() => setOpen(false)} />
+                <button
+                  type="button"
+                  className="flex shrink-0 items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium text-red-700 hover:bg-red-50"
+                  disabled={logout.isPending}
+                  onClick={() => logout.mutate()}
+                >
+                  <span aria-hidden="true">⏻</span>
+                  {t('menu.logout')}
+                </button>
+              </div>
             </div>
           </nav>
         )}

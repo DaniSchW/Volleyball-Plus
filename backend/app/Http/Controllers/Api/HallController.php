@@ -3,16 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Event;
 use App\Models\Hall;
 use App\Models\HallBooking;
+use App\Models\HallClosure;
 use App\Models\HallSlot;
 use App\Models\Team;
 use App\Support\Auth\CurrentMember;
 use App\Support\Auth\Permissions;
+use App\Support\Halls\HallClosures;
 use App\Support\Halls\HallPlan;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 /**
  * Halls, their available times and which team trains when. Every member
@@ -105,6 +110,7 @@ class HallController extends Controller
         $this->authorizeAdmin();
         $hall->bookings()->delete();
         $hall->slots()->delete();
+        $hall->closures()->delete();
         $hall->delete();
 
         return $this->plan();
@@ -159,6 +165,62 @@ class HallController extends Controller
     }
 
     /** The whole plan; after saving a booking also its warnings. */
+    /**
+     * Before closing: which events lie in the hall in that period. Trainings
+     * that still take place are suggested, everything else can be added.
+     */
+    public function previewClosure(Request $request, Hall $hall, HallClosures $closures): JsonResponse
+    {
+        $this->authorizeAdmin();
+        $data = $this->closureDates($request);
+
+        return response()->json(['data' => $closures->affected($hall, $data['starts_on'], $data['ends_on'])->map(fn (Event $e) => [
+            'id' => $e->id,
+            'type' => $e->type->value,
+            'title' => $e->title,
+            'starts_at' => $e->starts_at->toIso8601ZuluString(),
+            'status' => $e->status->value,
+            'teams' => $e->teams->pluck('name')->values()->all(),
+            'suggested' => $e->type->value === 'training' && $e->status->value === 'scheduled' && $e->ends_at->isFuture(),
+        ])->values()->all()]);
+    }
+
+    /** Closes the hall; the chosen events are cancelled or deleted. */
+    public function storeClosure(Request $request, Hall $hall, HallClosures $closures): JsonResponse
+    {
+        $this->authorizeAdmin();
+        $data = $this->closureDates($request) + $request->validate([
+            'reason' => ['nullable', 'string', 'max:200'],
+            'mode' => ['required', Rule::in(['cancel', 'delete'])],
+            'event_ids' => ['present', 'array', 'max:500'],
+            'event_ids.*' => ['string'],
+        ]);
+        $eventIds = $data['event_ids'];
+        unset($data['event_ids']);
+
+        $closures->close($hall, $data, $eventIds, $this->current->get());
+
+        return $this->plan(201);
+    }
+
+    /** Lifts the closure: series create those dates again; cancelled events stay cancelled. */
+    public function destroyClosure(HallClosure $closure): JsonResponse
+    {
+        $this->authorizeAdmin();
+        $closure->delete();
+
+        return $this->plan();
+    }
+
+    /** @return array{starts_on: string, ends_on: string} */
+    private function closureDates(Request $request): array
+    {
+        return $request->validate([
+            'starts_on' => ['required', 'date_format:Y-m-d'],
+            'ends_on' => ['required', 'date_format:Y-m-d', 'after_or_equal:starts_on', 'before_or_equal:'.Carbon::parse((string) $request->input('starts_on'))->addYear()->toDateString()],
+        ]);
+    }
+
     private function plan(int $status = 200, ?string $bookingId = null): JsonResponse
     {
         $halls = $this->plan->present();

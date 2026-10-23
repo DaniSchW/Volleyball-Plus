@@ -4,6 +4,7 @@ import { api, type Hall } from '../../lib/api';
 import { weekdayName } from '../../lib/dates';
 import { useTenantPath, useTenantSlug } from '../../lib/queries';
 import { courtsLabel } from '../../pages/HallsPage';
+import { closureOn } from '../halls/HallClosures';
 
 type Times = { start: string; end: string };
 
@@ -46,6 +47,7 @@ export function HallSuggestions({ teamId, startsAt, onPick }: { teamId: string |
             <span className="min-w-0 flex-1">
               <span className="font-medium">🏟️ {hall.name}</span> · {b.start_time}–{b.end_time}
               <span className="block text-xs text-emerald-700">{t('events.ownHallTime')}{b.courts ? ` · ${courtsLabel(b.courts, hall.courts, t)}` : ''}</span>
+              <Closed hall={hall} date={date} />
             </span>
             <button type="button" className="shrink-0 rounded-md bg-brand-solid px-3 py-2 text-xs font-medium text-white" onClick={() => onPick(hall, { start: b.start_time, end: b.end_time })}>
               {t('events.takeHall')}
@@ -60,6 +62,7 @@ export function HallSuggestions({ teamId, startsAt, onPick }: { teamId: string |
               <span className="block text-xs text-slate-500">
                 {taken.length === 0 ? t('events.hallFree') : t('events.hallTaken', { teams: taken.map((b) => `${b.team.name} ${b.start_time}–${b.end_time}`).join(', ') })}
               </span>
+              <Closed hall={hall} date={date} />
             </span>
             <button type="button" className="shrink-0 rounded-md border border-slate-300 px-3 py-2 text-xs font-medium" onClick={() => onPick(hall)}>
               {t('events.takeHall')}
@@ -69,4 +72,12 @@ export function HallSuggestions({ teamId, startsAt, onPick }: { teamId: string |
       </ul>
     </div>
   );
+}
+
+/** "🚫 gesperrt (Herbstferien)" when a closure covers the day. */
+function Closed({ hall, date }: { hall: Hall; date: string }) {
+  const { t } = useTranslation();
+  const closure = closureOn(hall, date);
+  if (!closure) return null;
+  return <span className="block text-xs font-medium text-red-700">🚫 {t('halls.closure.closed')}{closure.reason ? ` (${closure.reason})` : ''}</span>;
 }

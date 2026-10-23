@@ -8,6 +8,7 @@ use App\Models\Event;
 use App\Models\EventSeries;
 use App\Models\EventTeam;
 use App\Models\TaskTemplate;
+use App\Support\Halls\HallClosures;
 use App\Support\Tasks\TaskTemplates;
 use App\Support\Tenancy\TenantContext;
 use Carbon\CarbonImmutable;
@@ -181,11 +182,19 @@ class SeriesGenerator
 
     private function createEvent(EventSeries $series, CarbonImmutable $day, string $tz): void
     {
+        // Hall closed that day: no date at all, or a cancelled one (left alone by later series changes).
+        $closure = app(HallClosures::class)->closureFor($series->location_name, $series->address, $day);
+        if ($closure?->mode === 'delete') {
+            return;
+        }
         $event = Event::create($this->eventData($series, $day, $tz) + [
             'type' => EventType::Training,
             'series_id' => $series->id,
             'created_by' => $series->created_by,
         ]);
+        if ($closure !== null) {
+            $event->forceFill(['status' => EventStatus::Cancelled, 'series_exception' => true])->save();
+        }
         EventTeam::create(['event_id' => $event->id, 'team_id' => $series->team_id]);
         $this->invitees->syncEvent($event);
         if ($series->task_template_id !== null && ($template = TaskTemplate::query()->find($series->task_template_id)) !== null) {

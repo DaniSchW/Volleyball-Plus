@@ -50,6 +50,14 @@ class Hall extends Model
     }
 
     /**
+     * @return HasMany<HallClosure, $this>
+     */
+    public function closures(): HasMany
+    {
+        return $this->hasMany(HallClosure::class)->orderBy('starts_on');
+    }
+
+    /**
      * @return HasMany<HallBooking, $this>
      */
     public function bookings(): HasMany

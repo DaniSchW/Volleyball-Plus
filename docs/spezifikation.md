@@ -188,7 +188,7 @@ Die App übernimmt die Funktionen beider Systeme als Grundlage (Termine, Aufgabe
 - Warnung vor ablaufender Schiedsrichter-Lizenz – ◐ Hinweis im Kader 60 Tage vor Ablauf, keine Nachricht
 - Spieltagseinteilung (Schreiber, Schiedsrichter, Hallenaufsicht) – ✅ über Aufgaben und Aufgaben-Vorlagen
 - Spielergebnisse und kurze Spielberichte – offen
-- Hallensperrung mit automatischer Absage betroffener Trainings – offen
+- Hallensperrung mit automatischer Absage betroffener Trainings – ✅ umgesetzt (wahlweise absagen oder löschen)
 - Saisonwechsel mit Übernahme von Teams und Spielern – offen
 - Dokumentenablage (z. B. Elterneinverständnis) – ✅ umgesetzt
 - Datenschutz: Export und Löschung der eigenen Daten – ✅ umgesetzt
@@ -213,4 +213,5 @@ Kurzfassung; Einzelheiten in `umsetzungsplan.md`, Abschnitt 9.
 - **Umfragen und Infos benachrichtigen:** Push-Nachricht und wahlweise E-Mail; Erinnerung an offene Umfragen. Infos auf der Startseite brauchen ein Verfallsdatum.
 - **Dokumentenablage:** Für den ganzen Verein (z. B. Vereinsmeldung) und je Mannschaft (z. B. Aufbauanleitung nur für Herren 1), mit Ordnern.
 - **Konto löschen:** Jede Person kann ihr Konto selbst löschen (Bestätigung durch Eintippen der E-Mail-Adresse).
+- **Hallensperrung:** Admins sperren eine Halle für einen Zeitraum; die Termine dort werden – nach Auswahl – abgesagt oder gelöscht, Trainingsreihen lassen die Tage aus; eine Nachricht an alle Betroffenen.
 - **Bedienung:** App installieren (Banner mit Anleitung), Dunkelmodus (folgt dem Gerät, im Profil umschaltbar), Menü als Kacheln, Gegner-Logo direkt im Spieltag hochladen.

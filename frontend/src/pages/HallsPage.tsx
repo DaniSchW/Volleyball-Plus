@@ -5,6 +5,7 @@ import { api, del, errorText, patch, post, type Hall, type HallBooking, type Hal
 import { formatDate, weekdayName } from '../lib/dates';
 import { useTenantMe, useTenantPath, useTenantSlug } from '../lib/queries';
 import { Button, Card, Field, Loading, Notice, PageTitle, SaveBar, Select } from '../components/ui';
+import { ClosureForm, ClosureList } from '../components/halls/HallClosures';
 
 type PlanResponse = { data: Hall[]; booking: HallBooking | null };
 
@@ -61,7 +62,7 @@ function HallCard({ hall, admin }: { hall: Hall; admin: boolean }) {
   const { t } = useTranslation();
   const tp = useTenantPath();
   const update = usePlanUpdate();
-  const [editing, setEditing] = useState<'hall' | 'slot' | 'booking' | null>(null);
+  const [editing, setEditing] = useState<'hall' | 'slot' | 'booking' | 'closure' | null>(null);
   const [booking, setBooking] = useState<HallBooking | null>(null);
   const [warning, setWarning] = useState<HallBooking | null>(null);
 
@@ -107,6 +108,7 @@ function HallCard({ hall, admin }: { hall: Hall; admin: boolean }) {
             </p>
           )}
           {hall.notes && <p className="whitespace-pre-line text-sm text-slate-600">{hall.notes}</p>}
+          <ClosureList hall={hall} admin={admin} onUpdate={update} />
 
           {warning && <BookingWarning booking={warning} onClose={() => setWarning(null)} />}
 
@@ -175,10 +177,12 @@ function HallCard({ hall, admin }: { hall: Hall; admin: boolean }) {
 
           {admin && editing === 'slot' && <TimeForm hall={hall} kind="slot" onDone={close} />}
           {admin && editing === 'booking' && <TimeForm hall={hall} kind="booking" booking={booking} onDone={close} onWarning={setWarning} />}
+          {admin && editing === 'closure' && <ClosureForm hall={hall} onDone={close} onUpdate={update} />}
           {admin && editing === null && (
             <div className="flex flex-wrap gap-2">
               <Button variant="secondary" onClick={() => setEditing('booking')}>{t('halls.addBooking')}</Button>
               <Button variant="secondary" onClick={() => setEditing('slot')}>{t('halls.addSlot')}</Button>
+              <Button variant="danger" onClick={() => setEditing('closure')}>🚫 {t('halls.closure.close')}</Button>
             </div>
           )}
         </div>

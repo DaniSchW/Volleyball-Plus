@@ -14,6 +14,7 @@ return [
     'series_new' => ['title' => 'New training series: :title', 'body' => 'From :when'],
     'event_changed' => ['title' => 'Event changed: :title', 'body' => 'Now :when'],
     'event_cancelled' => ['title' => 'Cancelled: :title', 'body' => ':when is cancelled.'],
+    'hall_closed' => ['title' => 'Hall closed: :hall', 'body' => ':from – :until: The events there are cancelled.'],
     'event_restored' => ['title' => 'Back on: :title', 'body' => ':when'],
     'series_changed' => ['title' => 'Training series changed: :title', 'body' => 'Next date :when'],
     'series_ended' => ['title' => 'Training series ended: :title', 'body' => 'No more dates from :when.'],

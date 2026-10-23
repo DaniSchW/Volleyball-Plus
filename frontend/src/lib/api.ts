@@ -729,6 +729,28 @@ export interface Hall {
   notes: string | null;
   slots: HallSlot[];
   bookings: HallBooking[];
+  /** Current and coming closures. */
+  closures: HallClosure[];
+}
+
+export interface HallClosure {
+  id: string;
+  starts_on: string;
+  ends_on: string;
+  reason: string | null;
+  mode: 'cancel' | 'delete';
+}
+
+/** An event in the hall during a planned closure. */
+export interface HallClosureEvent {
+  id: string;
+  type: EventType;
+  title: string;
+  starts_at: string;
+  status: 'scheduled' | 'cancelled';
+  teams: string[];
+  /** Trainings that still take place – preselected. */
+  suggested: boolean;
 }
 
 export interface TeamHallTime {

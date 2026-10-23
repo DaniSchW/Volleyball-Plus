@@ -24,6 +24,7 @@ use App\Models\EventSeries;
 use App\Models\EventTeam;
 use App\Models\Hall;
 use App\Models\HallBooking;
+use App\Models\HallClosure;
 use App\Models\HallSlot;
 use App\Models\Invitation;
 use App\Models\InvitationUse;
@@ -70,7 +71,7 @@ class ModelIsolationTest extends TestCase
         RefereeLicense::class,
         RsvpRule::class, Document::class, TaskTemplate::class, Task::class, TaskAssignment::class, Poll::class, PollTeam::class, PollOption::class, PollVote::class,
         Chat::class, ChatAttachment::class, ChatMember::class, ChatTopic::class, ChatMessage::class, ChatReadState::class,
-        ActivityLog::class, CashBook::class, CashEntry::class, Hall::class, HallSlot::class, HallBooking::class,
+        ActivityLog::class, CashBook::class, CashEntry::class, Hall::class, HallSlot::class, HallBooking::class, HallClosure::class,
     ];
 
     public function test_every_tenant_model_is_listed_here(): void
@@ -141,6 +142,7 @@ class ModelIsolationTest extends TestCase
             $hall = Hall::create(['name' => 'Halle B']);
             HallSlot::create(['hall_id' => $hall->id, 'weekday' => 2, 'start_time' => '18:00:00', 'end_time' => '22:00:00']);
             HallBooking::create(['hall_id' => $hall->id, 'team_id' => $team->id, 'weekday' => 2, 'start_time' => '19:30:00', 'end_time' => '21:30:00']);
+            HallClosure::create(['hall_id' => $hall->id, 'starts_on' => '2026-12-21', 'ends_on' => '2027-01-06', 'reason' => 'Ferien', 'mode' => 'cancel']);
             NotificationPreference::create(['tenant_member_id' => $member->id, 'category' => 'notice', 'push' => false, 'email' => false]);
             $docFile = StoredFile::create(['storage_key' => 'd', 'mime_type' => 'application/pdf', 'size_bytes' => 1, 'purpose' => 'document']);
             Document::create(['team_id' => $team->id, 'title' => 'Aufbau', 'file_id' => $docFile->id, 'name' => 'aufbau.pdf', 'uploaded_by' => $member->id]);

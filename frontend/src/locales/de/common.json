@@ -872,7 +872,32 @@
     "openUntil": "{{day}} bis",
     "removeTime": "Zeit {{time}} entfernen",
     "addTime": "Zeit am {{day}} hinzufügen",
-    "trainingTimes": "Trainingszeiten"
+    "trainingTimes": "Trainingszeiten",
+    "closure": {
+      "close": "Halle sperren",
+      "from": "Gesperrt ab",
+      "until": "bis einschließlich",
+      "reason": "Grund (optional)",
+      "reasonPlaceholder": "z. B. Herbstferien, Turnier, Renovierung",
+      "mode": "Termine in der Halle in diesem Zeitraum",
+      "modeCancel": "Absagen – bleiben als „abgesagt“ sichtbar, Antworten bleiben erhalten",
+      "modeDelete": "Löschen – verschwinden samt Zu- und Absagen und Aufgaben",
+      "seriesHint": "Trainingsreihen legen in diesem Zeitraum keine Termine an (Löschen) bzw. nur abgesagte (Absagen). Die Eingeladenen bekommen eine Nachricht für die ganze Sperrung.",
+      "affected": "Betroffene Termine",
+      "affectedHint": "Termine, deren Ort diese Halle ist (Name oder Adresse). Trainings sind vorausgewählt, Spieltage und andere Termine nur, wenn du sie anhakst.",
+      "none": "Keine Termine in dieser Halle im Zeitraum.",
+      "submitCancel_one": "Sperren und {{count}} Termin absagen",
+      "submitCancel_other": "Sperren und {{count}} Termine absagen",
+      "submitDelete_one": "Sperren und {{count}} Termin löschen",
+      "submitDelete_other": "Sperren und {{count}} Termine löschen",
+      "submitNone": "Halle sperren",
+      "entry": "Gesperrt {{from}} – {{until}}",
+      "modeShortCancel": "Termine werden abgesagt",
+      "modeShortDelete": "Termine werden gelöscht",
+      "lift": "Aufheben",
+      "liftConfirm": "Sperrung aufheben? Abgesagte Termine bleiben abgesagt; Trainingsreihen legen gelöschte Tage wieder an.",
+      "closed": "gesperrt"
+    }
   },
   "privacy": {
     "title": "Persönliche Daten",

@@ -725,7 +725,7 @@ describe('cash', () => {
 describe('halls', () => {
   it('assigns a team and warns about an overlap', async () => {
     let sent: Record<string, unknown> = {};
-    const hall = { id: 'h1', name: 'Kuhberghalle', address: null, courts: 3, contact: null, notes: null, slots: [], bookings: [] as unknown[] };
+    const hall = { id: 'h1', name: 'Kuhberghalle', address: null, courts: 3, contact: null, notes: null, slots: [], bookings: [] as unknown[], closures: [] };
     const booking = {
       id: 'k1', team: { id: 't2', name: 'Damen 1', color: null, archived: false }, weekday: 2, start_time: '20:00', end_time: '22:00',
       courts: [1, 2], valid_from: null, valid_until: null, notes: null, outside_slots: false,
@@ -1002,6 +1002,7 @@ describe('halls for players', () => {
       contact: { name: 'Herr Maier', phone: '0731 123456', email: null },
       slots: [{ id: 's1', weekday: 2, start_time: '18:00', end_time: '22:00', courts: [1, 2], valid_from: null, valid_until: null }],
       bookings: [],
+      closures: [{ id: 'c1', starts_on: '2026-12-21', ends_on: '2027-01-06', reason: 'Weihnachtsferien', mode: 'cancel' }],
     };
     mockApi({
       'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME() },
@@ -1014,6 +1015,8 @@ describe('halls for players', () => {
     expect(screen.getByText(/Herr Maier/)).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Mannschaft zuordnen' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Bearbeiten' })).not.toBeInTheDocument();
+    expect(screen.getByText('Gesperrt 21.12.2026 – 06.01.2027')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Aufheben' })).not.toBeInTheDocument();
   });
 });
 
@@ -1279,5 +1282,38 @@ describe('tasks when creating an event', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Speichern' }));
 
     await waitFor(() => expect(sent.tasks).toEqual([{ title: 'Schiedsgericht 1. Spiel', slots: 2 }, { title: 'Kuchen', slots: null }]));
+  });
+});
+
+describe('hall closures', () => {
+  it('closes a hall and deletes the chosen events', async () => {
+    let sent: Record<string, unknown> = {};
+    const hall = { id: 'h1', name: 'Kuhberghalle', address: null, courts: 3, contact: null, notes: null, slots: [], bookings: [], closures: [] };
+    mockApi({
+      'GET /t/ssv-ulm': { body: TENANT }, 'GET /me': { body: ACCOUNT }, 'GET /t/ssv-ulm/me': { body: ME(true) },
+      'GET /t/ssv-ulm/halls': { body: { data: [hall], booking: null } },
+      'POST /t/ssv-ulm/halls/h1/closures/preview': {
+        body: { data: [
+          { id: 'e1', type: 'training', title: 'Training', starts_at: '2026-11-03T18:30:00Z', status: 'scheduled', teams: ['Herren 1'], suggested: true },
+          { id: 'e2', type: 'match', title: 'Spieltag', starts_at: '2026-11-07T13:00:00Z', status: 'scheduled', teams: ['Herren 1'], suggested: false },
+        ] },
+      },
+      'POST /t/ssv-ulm/halls/h1/closures': (init) => {
+        sent = JSON.parse(String(init.body));
+        return { status: 201, body: { data: [{ ...hall, closures: [{ id: 'c1', starts_on: '2026-11-01', ends_on: '2026-11-08', reason: 'Herbstferien', mode: 'delete' }] }], booking: null } };
+      },
+    });
+    renderAt('/ssv-ulm/halls');
+
+    fireEvent.click(await screen.findByRole('button', { name: /Halle sperren/ }));
+    fireEvent.change(screen.getByLabelText('Gesperrt ab'), { target: { value: '2026-11-01' } });
+    fireEvent.change(screen.getByLabelText('bis einschließlich'), { target: { value: '2026-11-08' } });
+    fireEvent.change(screen.getByLabelText('Grund (optional)'), { target: { value: 'Herbstferien' } });
+    fireEvent.click(screen.getByLabelText(/Löschen – verschwinden/));
+    expect(await screen.findByRole('button', { name: 'Sperren und 1 Termin löschen' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Sperren und 1 Termin löschen' }));
+    await waitFor(() => expect(sent).toEqual({ starts_on: '2026-11-01', ends_on: '2026-11-08', reason: 'Herbstferien', mode: 'delete', event_ids: ['e1'] }));
+    expect(await screen.findByText('Gesperrt 01.11.2026 – 08.11.2026')).toBeInTheDocument();
   });
 });

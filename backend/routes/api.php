@@ -208,6 +208,9 @@ Route::prefix('t/{tenant}')->middleware('tenant')->group(function () {
         Route::post('halls/{hall}/bookings', [HallController::class, 'storeBooking']);
         Route::patch('hall-bookings/{booking}', [HallController::class, 'updateBooking']);
         Route::delete('hall-bookings/{booking}', [HallController::class, 'destroyBooking']);
+        Route::post('halls/{hall}/closures/preview', [HallController::class, 'previewClosure']);
+        Route::post('halls/{hall}/closures', [HallController::class, 'storeClosure']);
+        Route::delete('hall-closures/{closure}', [HallController::class, 'destroyClosure']);
         Route::get('teams/{team}/hall-times', [HallController::class, 'team']);
 
         Route::get('notices', [NoticeController::class, 'index']);

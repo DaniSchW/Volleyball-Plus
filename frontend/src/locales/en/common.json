@@ -872,7 +872,32 @@
     "openUntil": "{{day}} until",
     "removeTime": "Remove time {{time}}",
     "addTime": "Add a time on {{day}}",
-    "trainingTimes": "Training times"
+    "trainingTimes": "Training times",
+    "closure": {
+      "close": "Close hall",
+      "from": "Closed from",
+      "until": "until (inclusive)",
+      "reason": "Reason (optional)",
+      "reasonPlaceholder": "e.g. autumn holidays, tournament, renovation",
+      "mode": "Events in the hall during this period",
+      "modeCancel": "Cancel – stay visible as “cancelled”, replies are kept",
+      "modeDelete": "Delete – disappear with replies and tasks",
+      "seriesHint": "Training series create no dates in this period (delete) or only cancelled ones (cancel). Invitees get one message for the whole closure.",
+      "affected": "Affected events",
+      "affectedHint": "Events whose place is this hall (name or address). Trainings are preselected, match days and other events only if you tick them.",
+      "none": "No events in this hall during the period.",
+      "submitCancel_one": "Close and cancel {{count}} event",
+      "submitCancel_other": "Close and cancel {{count}} events",
+      "submitDelete_one": "Close and delete {{count}} event",
+      "submitDelete_other": "Close and delete {{count}} events",
+      "submitNone": "Close hall",
+      "entry": "Closed {{from}} – {{until}}",
+      "modeShortCancel": "Events are cancelled",
+      "modeShortDelete": "Events are deleted",
+      "lift": "Lift",
+      "liftConfirm": "Lift the closure? Cancelled events stay cancelled; training series create deleted days again.",
+      "closed": "closed"
+    }
   },
   "privacy": {
     "title": "Personal data",

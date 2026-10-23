@@ -179,14 +179,18 @@ class EventService
      * event is announced as cancelled first; a series date is remembered so
      * the series does not create it again.
      */
-    public function delete(Event $event, ?TenantMember $actor = null): void
+    /**
+     * $remember false: the series may create the date again later (a hall
+     * closure keeps it away only while the closure lasts).
+     */
+    public function delete(Event $event, ?TenantMember $actor = null, bool $notify = true, bool $remember = true): void
     {
-        if (! $event->isCancelled()) {
+        if ($notify && ! $event->isCancelled()) {
             $this->notifications->deleted($event, $actor);
         }
 
-        DB::transaction(function () use ($event) {
-            if ($event->series_id !== null && ($series = $event->series) !== null) {
+        DB::transaction(function () use ($event, $remember) {
+            if ($remember && $event->series_id !== null && ($series = $event->series) !== null) {
                 $day = CarbonImmutable::parse($event->starts_at)->setTimezone($this->tenants->get()->timezone)->toDateString();
                 $series->forceFill(['excluded_dates' => array_values(array_unique([...($series->excluded_dates ?? []), $day]))])->save();
             }
@@ -194,7 +198,8 @@ class EventService
         });
     }
 
-    public function cancel(Event $event, ?TenantMember $actor = null): void
+    /** $notify false: the caller sends one message for several events (e.g. a hall closure). */
+    public function cancel(Event $event, ?TenantMember $actor = null, bool $notify = true): void
     {
         $wasCancelled = $event->isCancelled();
         $event->forceFill([
@@ -202,7 +207,7 @@ class EventService
             'series_exception' => $event->series_id !== null ? true : $event->series_exception,
         ])->save();
 
-        if (! $wasCancelled) {
+        if ($notify && ! $wasCancelled) {
             $this->notifications->cancelled($event, $actor);
         }
     }

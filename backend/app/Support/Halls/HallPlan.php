@@ -4,6 +4,7 @@ namespace App\Support\Halls;
 
 use App\Models\Hall;
 use App\Models\HallBooking;
+use App\Models\HallClosure;
 use App\Models\HallSlot;
 use Illuminate\Support\Collection;
 
@@ -19,7 +20,7 @@ class HallPlan
     /** @return list<array<string, mixed>> */
     public function present(): array
     {
-        $halls = Hall::query()->with(['slots', 'bookings.team'])->orderBy('name')->get();
+        $halls = Hall::query()->with(['slots', 'bookings.team', 'closures'])->orderBy('name')->get();
 
         return $halls->map(fn (Hall $hall) => $this->presentHall($hall))->values()->all();
     }
@@ -51,6 +52,14 @@ class HallPlan
                 'valid_until' => $slot->valid_until?->toDateString(),
             ])->values()->all(),
             'bookings' => $bookings->map(fn (HallBooking $b) => $this->presentBooking($b, $hall, $bookings))->values()->all(),
+            // Current and coming closures; past ones are of no interest any more.
+            'closures' => $hall->closures->filter(fn (HallClosure $c) => $c->ends_on->toDateString() >= now()->toDateString())->map(fn (HallClosure $c) => [
+                'id' => $c->id,
+                'starts_on' => $c->starts_on->toDateString(),
+                'ends_on' => $c->ends_on->toDateString(),
+                'reason' => $c->reason,
+                'mode' => $c->mode,
+            ])->values()->all(),
         ];
     }
 

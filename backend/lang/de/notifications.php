@@ -14,6 +14,7 @@ return [
     'series_new' => ['title' => 'Neue Trainingsreihe: :title', 'body' => 'Ab :when'],
     'event_changed' => ['title' => 'Termin geändert: :title', 'body' => 'Jetzt :when'],
     'event_cancelled' => ['title' => 'Abgesagt: :title', 'body' => ':when fällt aus.'],
+    'hall_closed' => ['title' => 'Halle gesperrt: :hall', 'body' => ':from – :until: Die Termine dort fallen aus.'],
     'event_restored' => ['title' => 'Findet doch statt: :title', 'body' => ':when'],
     'series_changed' => ['title' => 'Trainingsreihe geändert: :title', 'body' => 'Nächster Termin :when'],
     'series_ended' => ['title' => 'Trainingsreihe beendet: :title', 'body' => 'Ab :when entfallen die Termine.'],

@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && tsc -p tsconfig.sw.json && vite build",
     "typecheck": "tsc -b && tsc -p tsconfig.sw.json",
-    "test": "vitest run"
+    "test": "vitest run",
+    "licenses": "node scripts/licenses.mjs"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.104.4",

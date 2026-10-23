@@ -1,6 +1,8 @@
 # Claude Code Anweisung: Team-Organisation-App (Volleyball)
 
-Diese Datei ist eine vollständige fachliche Spezifikation für den Bau einer eigenen Team-Organisation-Web-App (PWA) für eine Volleyball-Abteilung. Sie dient als direkte Arbeitsanweisung für Claude Code. Die App ist eine Alternative zu SpielerPlus und Spond. Sie läuft als Plattform (VolleyOrga, `app.volleyorga.de`) für viele Vereine: Jeder Verein nutzt sie für seine Volleyballabteilung – nicht für einen Verein mit mehreren Sportabteilungen.
+Diese Datei ist eine vollständige fachliche Spezifikation für den Bau einer eigenen Team-Organisation-Web-App (PWA) für eine Volleyball-Abteilung. Sie dient als direkte Arbeitsanweisung für Claude Code. Die App ist eine persönliche Alternative zu SpielerPlus und Spond und wird zunächst für die eigene Abteilung gebaut, ist aber von Anfang an mandantenfähig (siehe Technischer Rahmen).
+
+> Inzwischen läuft sie als Plattform **VolleyOrga** (`app.volleyorga.de`) für viele Vereine: Jeder Verein nutzt sie für seine Volleyballabteilung. Ergänzungen und Entscheidungen seit dem ersten Entwurf stehen am Ende dieser Datei, Details in `umsetzungsplan.md` (Abschnitt 9).
 
 ## Sprachen
 
@@ -18,7 +20,7 @@ Die App wird von Anfang an zweisprachig gebaut: Deutsch und Englisch als Startsp
 
 - Ein Dach-Account bildet die gesamte Abteilung ab. Darunter existieren mehrere Teams.
 - Ein Spielerprofil ist zentral und kann gleichzeitig mehreren Teams zugeordnet werden (Beispiel: ein Spieler ist gleichzeitig in der U16 männlich, der U18 männlich und der niedrigsten Herrenmannschaft aktiv).
-- Viele Vereine teilen sich eine Installation; jeder Verein ist ein eigener Mandant (seine Volleyballabteilung). Vereine registrieren sich selbst, der Betreiber der Plattform gibt sie frei. Die Adresse eines Vereins ist `app.volleyorga.de/<kürzel>`.
+- Die App wird zunächst für die eigene Volleyball-Abteilung gebaut, aber von Anfang an mandantenfähig, sodass später weitere Abteilungen angelegt werden können, die untereinander nichts voneinander sehen.
 
 ## Anmeldung / Login
 
@@ -37,6 +39,8 @@ Die Anmeldung erfolgt ausschließlich per Magic Link: Der Nutzer gibt seine E-Ma
 - Keine untere Tab-Leiste (wie bei SpielerPlus), stattdessen ein Ausklappmenü oben rechts, damit mehr Bildschirmfläche für Inhalte bleibt.
 - Die Startseite zeigt direkt die Zu-/Absage-Liste der anstehenden Termine.
 - Die Liste lädt per echtem Infinite Scroll automatisch weitere Termine nach, sobald man nach unten scrollt (kein "Weiter"-Button).
+
+**Mitlaufender Speichern-Button:** In jeder Maske mit einem Speichern-Button (z. B. bei der Spielerliste) bleibt der Button beim Scrollen immer sichtbar.
 
 ## Termine
 
@@ -61,12 +65,6 @@ Jede Terminart ist optisch unterschieden, z. B. durch Farbe oder ein Icon (Pokal
 - Der Administrator kann zusätzlich ein globales Logo für die gesamte Abteilung hochladen.
 - Es gibt also drei Logo-Ebenen: global (Abteilung), pro Team, und pro Gegner (je Spieltag).
 
-**Spielplan-Import (nachträglich ergänzt):**
-
-- Spieltage können je Mannschaft aus einer Kalenderdatei importiert werden: .ics (iCalendar) und CSV (z. B. Spielplan-Export des Verbands).
-- Vor dem Import zeigt die App eine Vorschau der erkannten Spiele; einzelne Spiele lassen sich abwählen.
-- Gegner werden automatisch zugeordnet oder angelegt; ein erneuter Import der aktualisierten Datei aktualisiert bestehende Spiele, statt sie doppelt anzulegen.
-
 ## Wegbeschreibung (Google Maps)
 
 Für den Terminort reicht ein einfacher Button "Wegbeschreibung starten", der über einen simplen Link auf Google Maps verweist:
@@ -87,31 +85,35 @@ Es ist **kein** Places- oder Geocoding-API-Aufruf nötig (würde einen API-Key u
 
 Eine Aufstellungs- oder Taktikboard-Funktion ist **nicht** gewünscht und wird bewusst nicht gebaut.
 
-Quernominierung für Trainingsgäste: Trainer/Admin können Spieler aus anderen Teams (z. B. aus Herren 2 oder der U18) dauerhaft zu Trainings eines anderen Teams (z. B. Herren 1) einladen. Pro Training kann ein Teilnehmermaximum definiert werden (z. B. 12 Spieler); ist das Limit erreicht, schließt die App die Zusage automatisch, sodass quernominierte Spieler zum Auffüllen zusagen können. Als Ausbaustufe: positionsbasierte Nominierung, bei der der Trainer pro Position ein Soll festlegt (z. B. bei 12 Spielern: 2 Zuspieler, 2 Diagonalangreifer, 4 Mittelblocker, 2 Libero) – die Zusage stoppt automatisch, sobald eine Position voll belegt ist, auch wenn das Gesamtlimit noch nicht erreicht ist.
+## Trainings
 
-Trainingsgruppen: Innerhalb eines Teams können eigene Trainingsgruppen definiert werden (z. B. ein Zuspielertraining), für die eigene Trainings angesetzt werden können.
+- **Trainingsgruppen:** Innerhalb eines Teams können eigene Trainingsgruppen definiert werden (z. B. ein Zuspielertraining), für die eigene Trainings angesetzt werden können.
+- **Fristen:** Wie bei SpielerPlus hat jeder Termin eine Frist, bis zu der Spieler zu- oder absagen können.
+- **Teilnehmermaximum:** Trainer/Admin können pro Training ein Maximum festlegen (z. B. 12 Spieler). Ist es erreicht, schließt die App die Zusage automatisch, sodass quernominierte Spieler zum Auffüllen zusagen können.
+- **Positionsbasierte Nominierung (Ausbaustufe):** Der Trainer legt in den Grundeinstellungen pro Position ein Soll fest (z. B. bei 12 Spielern: 2 Zuspieler, 2 Diagonalangreifer, 4 Mittelblocker, 2 Libero). Die Zusage stoppt automatisch, sobald eine Position voll belegt ist, auch wenn das Gesamtlimit noch nicht erreicht ist.
+- **Mindestteilnehmerzahl:** Pro Team wird global ein Minimum festgelegt, damit ein Training stattfindet. Solange es nicht erreicht ist, wird der Termin farblich hervorgehoben (z. B. gelb).
+- **Training kommt nicht zustande:** Kann das Minimum rechnerisch nicht mehr erreicht werden (auch dann nicht, wenn alle noch offenen Spieler zusagen), gibt das System aus, dass das Training nicht zustande kommt. Ändern Spieler danach ihre Meinung und das Minimum ist wieder erreichbar, wird der Termin wieder grün angezeigt. Der Status wird bei jeder Zu- oder Absage neu berechnet.
 
-Mindestteilnehmerzahl: Für Trainings kann ein Minimum an Spielern definiert werden, damit das Training stattfindet. Das Minimum wird global pro Team festgelegt. Solange das Minimum nicht erreicht ist, wird der Termin farblich hervorgehoben (z. B. gelb).
+## Quernominierung
 
-Schiedsrichter-Lizenz: Im Spielerprofil kann eine Schiedsrichter-Lizenz hinterlegt werden, mit auswählbarem Ablaufdatum. Dem Trainer wird die Lizenz (inkl. Ablaufdatum) eingeblendet.
+- Trainer/Admin können Spieler aus anderen Teams (z. B. aus Herren 2 oder der U18) dauerhaft zu Trainings eines anderen Teams (z. B. Herren 1) einladen.
+- Die Quernominierung ist pro Spieler aktivierbar. Der Trainer hat dafür einen Button, mit dem er Spieler aus unteren Teams einladen kann.
+- **Mannschaftshierarchie:** Teams stehen in einer Hierarchie. Ein Spieler aus einem höheren Team kann nicht in einem niedrigeren Team mitspielen, Quernominierung geht nur von unten nach oben.
+- **Geschlechtsart:** Beim Team wird definiert, ob es ein Herren-, Damen- oder Mixed-Team ist. Herrenteams können nur Herren einladen, Damenteams nur Damen, Mixed-Teams beide Geschlechter.
+- **Liga-Baum:** Für jedes Team wird die Liga aus dem Liga-Baum des Volleyballs ausgewählt (von der Bundesliga abwärts bis zur untersten Spielklasse). Der Liga-Baum ist vom Admin pflegbar, da die Ligastruktur je Landesverband abweicht. Aus der Liga ergibt sich die Rangfolge der Teams für die Hierarchie.
 
-Quernominierung aktivieren: Die Quernominierung ist pro Spieler aktivierbar. Der Trainer hat dafür einen Button, mit dem er Spieler aus unteren Teams zu Trainings seines Teams einladen kann.
+## Hallen und Trainingszeiten
 
-Idealkader und fehlende Positionen: Jedes Team legt fest, wie es sich seinen idealen Kader vorstellt – wie viele Spieler je Position (z. B. Mixed oft ohne Libero und Diagonal, dafür mehr von den anderen Positionen). Pro Training kann der Trainer „Gäste nur für fehlende Positionen“ einschalten: Dann können sich nur Quernominierte eintragen, deren Position laut Positions-Soll des Trainings (sonst laut Idealkader) noch gesucht wird.
+- Es gibt eine Hallenübersicht. Hallen werden in der App mit ihren verfügbaren Zeiten angelegt. Der Bereich ist für Trainer einsehbar und nur für Admins bearbeitbar. *(Entscheidung: einsehbar für alle Mitglieder, siehe unten.)*
+- Ein Team kann einer Halle und einer Zeit zugeordnet werden. Belegen zwei Teams dieselbe Halle zur selben Zeit, warnt die App.
 
-Mannschaftshierarchie: Die Teams einer Abteilung stehen in einer Hierarchie. Ein Spieler aus einem höheren Team kann nicht in einem niedrigeren Team mitspielen; Quernominierung ist nur von unten nach oben möglich.
+## Infobereich
 
-Liga-Baum: Für jedes Team wird die Liga aus dem Liga-Baum des Volleyballs ausgewählt (Ligaebenen von der Bundesliga abwärts bis zur untersten Spielklasse). Der Liga-Baum soll vom Admin pflegbar sein, da die Ligastruktur je Landesverband abweicht. Aus der gewählten Liga ergibt sich die Rangfolge der Teams für die Hierarchie.
+Im oberen Bereich der Spieleransicht gibt es einen Infobereich. Der Trainer kann dort Notizen für einen wählbaren Zeitraum einblenden, der Admin über alle Teams hinweg.
 
-Geschlechtsart des Teams: Beim Team wird definiert, ob es ein Herren-, Damen- oder Mixed-Team ist. Herrenteams können per Quernominierung nur Herren einladen, Damenteams nur Damen. Mixed-Teams können Spieler beider Geschlechter einladen.
+## Helferdienste
 
-Hallen- und Trainingszeitenplan: Es gibt einen Plan für die verfügbaren Hallen und Trainingszeiten der Abteilung. Ein Team kann einer Halle (ganz oder einzelnen Hallenteilen) und einer Zeit zugeordnet werden. Belegen zwei Teams dieselbe Halle zur selben Zeit, warnt die App.
-
-Hallenübersicht: Es gibt eine Übersicht aller Hallen. Hallen werden in der App mit den jeweiligen verfügbaren Zeiten und Hallenteilen angelegt (z. B. nur 2 von 3 Teilen, wenn den dritten Teil eine andere Sportart nutzt), dazu ein Ansprechpartner je Halle. Der Bereich ist für alle Mitglieder einsehbar und nur für Admins bearbeitbar. Die Adresse einer Halle besteht aus Straße, Hausnummer, PLZ und Ort (alle optional). Die verfügbaren Trainingszeiten werden direkt in der Halle wie Öffnungszeiten gepflegt (Montag 18:00–20:00, Dienstag …); sie gelten nur für Trainings, Spieltage und andere Termine sind davon unabhängig.
-
-Infobereich für Spieler: Im oberen Bereich der Spieleransicht gibt es einen Infobereich. Der Trainer kann dort Notizen für einen wählbaren Zeitraum einblenden. Der Admin kann das über alle Teams hinweg.
-
-Fristen für Zu- und Absage: Wie bei SpielerPlus hat jeder Termin eine Frist, bis zu der Spieler zu- oder absagen können.
+Es gibt eine zusätzliche Terminart für Helferdienste/Helfertermine (ähnliche Kategorie wie Zusatztermine). Dort können Aufgaben definiert werden, für die Personen zusagen können. Eine eigene Statistik erfasst, wer sich bei eigenen Veranstaltungen bereit erklärt hat, Aufgaben zu übernehmen.
 
 ## Kasse
 
@@ -128,7 +130,6 @@ Fristen für Zu- und Absage: Wie bei SpielerPlus hat jeder Termin eine Frist, bi
 
 ## Umfragen
 
-- Zusätzliche Terminart für Helferdienste/Helfertermine (ähnliche Kategorie wie Zusatztermine): Hier können Aufgaben definiert werden, für die Personen zusagen können. Eigene Statistik erfasst, wer sich bei eigenen Veranstaltungen/Helferdiensten bereit erklärt hat, Aufgaben zu übernehmen.
 - Umfragen sind pro Team möglich.
 - Der Administrator kann zusätzlich Umfragen teamübergreifend an alle Teams gleichzeitig ausspielen.
 
@@ -151,6 +152,8 @@ Jedes Spielerprofil enthält folgende Angaben:
 - Körpergröße (volleyballtypische Kennzahl, z. B. relevant für die Positionswahl)
 - Reichhöhe / Sprunghöhe (volleyballtypische Vergleichskennzahl unter Spielern)
 
+**Schiedsrichter-Lizenz:** Im Spielerprofil kann zusätzlich eine Schiedsrichter-Lizenz mit auswählbarem Ablaufdatum hinterlegt werden. Dem Trainer wird sie (inkl. Ablaufdatum) eingeblendet.
+
 ## Einordnung gegenüber SpielerPlus und Spond
 
 Die App übernimmt die Funktionen beider Systeme als Grundlage (Termine, Aufgaben, Chat, Zahlungs-/Kassenlogik, Rollenmodell, Statistiken), löst aber bekannte Schwachstellen beider Systeme auf:
@@ -167,18 +170,47 @@ Die App übernimmt die Funktionen beider Systeme als Grundlage (Termine, Aufgabe
 
 ## Status
 
-Dies ist der aktuelle Stand des Brainstormings und kann in weiteren Iterationen ergänzt werden (z. B. Fahrgemeinschaften, Spielberichte im Detail, konkretes Datenmodell). Claude Code soll auf Basis dieser Spezifikation einen technischen Umsetzungsplan sowie die Datenmodellierung vorschlagen, bevor die Implementierung beginnt.
+**Vorgehen für Claude Code:** Lies die gesamte Spezifikation. Schlage zuerst einen technischen Umsetzungsplan und das Datenmodell vor (mit durchgängiger Mandanten-ID), bevor die Implementierung beginnt. Empfohlene Reihenfolge: (1) Login per Magic Link, Mandanten, Teams, Rollen; (2) Termine, Zu-/Absage, Startseite; (3) Trainings-Logik (Limit, Minimum, Quernominierung, Hierarchie, Hallen); (4) Statistik, Helferdienste, Aufgaben; (5) Chat, Umfragen, Kasse.
 
-Positionen in der Rückmeldeliste: Bei den Spielern im Termin steht ihre Position als Kürzel, damit der Trainer schnell sieht, wer auf welcher Position kommt.
+> Stand 10/2026: Plan und Datenmodell sind in `umsetzungsplan.md` und `datenmodell.md` festgehalten; alle Punkte dieser Spezifikation sind umgesetzt.
 
-Konto löschen: Jede Person kann ihr ganzes Konto selbst löschen – abgesichert durch erneutes Eintippen der E-Mail-Adresse. Plattform-Admins können gesperrte Vereine endgültig löschen.
+**Hinweise zum Schutz des Codes:** Repository privat halten, die gesamte Logik (Rechte, Statistik, Mandantentrennung) serverseitig umsetzen und eine Liste der verwendeten Bibliotheken samt Lizenzen führen.
 
-Für mehrere Termine antworten: Ein Spieler kann für eine Terminart oder eine Trainingsreihe auf einmal zu- oder absagen, auch nur für bestimmte Wochentage („mittwochs kann ich immer, freitags nie“). Danach lassen sich einzelne Termine wieder anders beantworten.
+> Rechte, Statistik und Mandantentrennung laufen ausschließlich serverseitig. Die Bibliotheksliste steht in `lizenzen.md` (neu erzeugen mit `npm run licenses` im Ordner `frontend/`). Die Sichtbarkeit des GitHub-Repositorys stellt der Inhaber unter *Settings → General → Danger Zone → Change visibility* ein.
 
-Nicht reagiert und Anwesenheit: Wer zu einem Termin bis zur Frist nicht reagiert hat, wird extra markiert und in der Statistik ausgewertet. Die Statistik zeigt außerdem die Anwesenheit im Training in Prozent; dazu können Trainer und Admins bei vergangenen Terminen Antworten und Anwesenheit nachtragen.
+**Ideen für später** (noch nicht beauftragt, nur nach Rücksprache bauen) – mit Stand der Umsetzung:
 
-Dokumentenablage: Es gibt eine Ablage für Dokumente, übergeordnet für den ganzen Verein (z. B. die Vereinsmeldung als PDF, für alle sichtbar) und je Mannschaft (z. B. die Aufbauanleitung für den Spieltag nur in Herren 1). Dokumente lassen sich in Ordner sortieren.
+- Kalender-Abo (iCal) für alle Termine – ✅ umgesetzt
+- Erinnerung an offene Zusagen kurz vor Fristende – ✅ umgesetzt (24 Stunden vor der Frist)
+- Warteliste mit automatischem Nachrücken – ❌ bewusst nicht (Entscheidung: kein Wartelisten-Mechanismus, frei werdende Plätze sind sofort wieder buchbar)
+- Tatsächliche Anwesenheit im Training abhaken – ✅ umgesetzt
+- Fahrgemeinschaften bei Spieltagen – ◐ über Aufgaben (z. B. „Fahrer“ mit Plätzen), keine eigene Funktion
+- Warnung vor ablaufender Schiedsrichter-Lizenz – ◐ Hinweis im Kader 60 Tage vor Ablauf, keine Nachricht
+- Spieltagseinteilung (Schreiber, Schiedsrichter, Hallenaufsicht) – ✅ über Aufgaben und Aufgaben-Vorlagen
+- Spielergebnisse und kurze Spielberichte – offen
+- Hallensperrung mit automatischer Absage betroffener Trainings – offen
+- Saisonwechsel mit Übernahme von Teams und Spielern – offen
+- Dokumentenablage (z. B. Elterneinverständnis) – ✅ umgesetzt
+- Datenschutz: Export und Löschung der eigenen Daten – ✅ umgesetzt
 
-Superadmin und Kontenpflege: Der Betreiber hat eine Superadmin-Oberfläche mit allen Konten und kann Konten bei Bedarf löschen. Ein Konto, das insgesamt länger als 2 Jahre nicht genutzt wurde, bekommt eine E-Mail, dass es in 14 Tagen gelöscht wird; wer sich vorher anmeldet, behält es.
+Die App-Namensfrage ist noch offen (die Namen "VolleyPlan" und "VolleyTeam" sind bereits belegt). *(Entschieden: VolleyOrga.)*
 
-Rechtliches: Impressum, Datenschutzerklärung und AGB sind von jeder Seite erreichbar; die Betreiberangaben pflegt der Superadmin. Die AGB regeln auch Werbung: Werbe-E-Mails gibt es nur mit ausdrücklicher Einwilligung im Profil.
+## Ergänzungen und Entscheidungen seit dem ersten Entwurf
+
+Kurzfassung; Einzelheiten in `umsetzungsplan.md`, Abschnitt 9.
+
+- **Plattform:** Viele Vereine teilen sich eine Installation; jeder Verein ist ein eigener Mandant (seine Volleyballabteilung). Vereine registrieren sich selbst, der Betreiber gibt sie frei. Adresse eines Vereins: `app.volleyorga.de/<kürzel>`. Ein Superadmin (Betreiber) sieht alle Konten und kann sie löschen; Konten, die über 2 Jahre nicht genutzt wurden, bekommen eine Löschankündigung (14 Tage).
+- **Rechtliches:** Impressum, Datenschutzerklärung und AGB von jeder Seite erreichbar; Betreiberangaben pflegt der Superadmin. Werbe-E-Mails nur mit ausdrücklicher Einwilligung im Profil.
+- **Spielplan-Import:** Spieltage je Mannschaft aus .ics (iCalendar) oder CSV (z. B. SAMS-Export) importieren, mit Vorschau und Auswahl; Gegner werden zugeordnet oder angelegt; erneuter Import aktualisiert statt doppelt anzulegen.
+- **Hallen:** Einsehbar für alle Mitglieder (nicht nur Trainer), bearbeitbar nur für Admins. Hallen mit Hallenteilen (z. B. 2 von 3), Ansprechpartner, Adresse (Straße, Nr., PLZ, Ort) und Trainingszeiten wie Öffnungszeiten; sie gelten nur für Trainings.
+- **Idealkader und fehlende Positionen:** Jedes Team legt seinen Idealkader je Position fest; pro Training lässt sich „Gäste nur für fehlende Positionen“ einschalten. In der Rückmeldeliste steht bei jedem Spieler seine Position als Kürzel.
+- **Training kommt nicht zustande:** Gezählt wird, wer höchstens noch kommen kann (Zusagen, „Vielleicht“ und bis zur Frist Unbeantwortete). Gelb = Minimum noch erreichbar, rot = „Training findet nicht statt“, grün = Minimum erreicht. Nur Anzeige, keine automatische Absage; Gäste werden nicht mitgezählt.
+- **Für mehrere Termine antworten:** Daueranworten für eine Terminart oder Trainingsreihe, optional nur an bestimmten Wochentagen und bis zu einem Enddatum (z. B. Saisonende); einzelne Termine lassen sich danach anders beantworten.
+- **Antworten für Spieler eintragen:** Trainer, Betreuer und Admins setzen Zu-/Absagen direkt in der Rückmeldeliste, z. B. nach einem Gespräch.
+- **Nicht reagiert und Anwesenheit:** Wer bis zur Frist nicht reagiert hat, wird markiert und in der Statistik ausgewertet; Anwesenheit im Training in Prozent; Trainer und Admins können bei vergangenen Terminen Antworten und Anwesenheit nachtragen.
+- **Termine absagen, löschen, Serien kürzen:** Jede Terminart lässt sich absagen (mit Rückfrage) und löschen – auch einzelne Serientermine. Wird eine Serie gekürzt oder beendet, fragt die App, ob die wegfallenden Termine abgesagt oder gelöscht werden.
+- **Aufgaben:** Anzahl Personen optional; Aufgaben-Vorlagen (z. B. „Spieltag Damen 1“) für Termine und Trainingsreihen; Aufgaben lassen sich beim Anlegen eines Spieltags, Turniertags oder Helferdiensts direkt von Hand eintragen.
+- **Umfragen und Infos benachrichtigen:** Push-Nachricht und wahlweise E-Mail; Erinnerung an offene Umfragen. Infos auf der Startseite brauchen ein Verfallsdatum.
+- **Dokumentenablage:** Für den ganzen Verein (z. B. Vereinsmeldung) und je Mannschaft (z. B. Aufbauanleitung nur für Herren 1), mit Ordnern.
+- **Konto löschen:** Jede Person kann ihr Konto selbst löschen (Bestätigung durch Eintippen der E-Mail-Adresse).
+- **Bedienung:** App installieren (Banner mit Anleitung), Dunkelmodus (folgt dem Gerät, im Profil umschaltbar), Menü als Kacheln, Gegner-Logo direkt im Spieltag hochladen.

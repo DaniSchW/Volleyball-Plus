@@ -21,6 +21,7 @@ Fachliche Grundlage: `docs/spezifikation.md`, Entscheidungen in `docs/umsetzungs
 
 - Alle UI-Texte über i18n: Frontend `frontend/src/locales/<lang>/*.json` (Test prüft gleiche Schlüssel in allen Sprachen), Backend `backend/lang/<lang>/`.
 - Rechte immer serverseitig (Policies); Frontend blendet nur aus.
+- Neue oder geänderte Abhängigkeiten (composer/npm): `cd frontend && npm run licenses` aktualisiert `docs/lizenzen.md` (Spezifikation: Bibliotheksliste mit Lizenzen führen).
 - Tests, die DDL ausführen, nutzen `DatabaseMigrations` statt `RefreshDatabase` (MySQL beendet sonst die Test-Transaktion).
 
 ## Prüfen vor dem Commit
